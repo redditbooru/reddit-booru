@@ -1,0 +1,27 @@
+* { margin:0; padding:0; }
+ul { list-style:none; }
+
+h1 { background:#e94e77 url(images/logo.png) no-repeat; font:24px/1 sans-serif; height:0; padding-top:57px; overflow:hidden; }
+
+#searchForm { margin:10px 25px; display:none; }
+
+#searchButton { width:100px; height:0; padding-top:28px; position:absolute; top:15px; right:15px; background:url(images/search_btn.png) no-repeat; overflow:hidden; }
+#searchButton:hover { background-position:0 -28px; cursor:pointer; }
+
+.searchOptions { padding:0 0 10px; }
+.searchOptions li { display:inline; padding:0 10px; font:16px sans-serif; }
+.searchOptions .label { font-weight:bold; text-transform:uppercase; padding-left:20px; }
+.searchOptions li:first-child { padding-left:0; }
+.searchOptions label { padding-left:5px; }
+
+.searchForms { overflow:hidden; }
+.searchForm { position:relative; }
+.searchForm input[type="text"] { width:500px; height:30px; font:16px sans-serif; }
+.searchForm label { position:absolute; font:16px sans-serif; left:10px; top:8px; }
+.searchForm button { height:30px; width:60px; }
+
+#images { padding:15px 0 0 15px; margin:0 auto; overflow:hidden; }
+#images .image { border:10px solid #f4ead5; float:left; margin:0 15px 15px 0; }
+#images .image img { display:block; width:180px; height:180px; background:url(images/ajax.gif) no-repeat center center; }
+#images .more { width:180px; height:0; padding-top:180px; overflow:hidden; background:url(images/more.png); cursor:pointer; }
+#images .more:hover { background-position:0 -180px; }

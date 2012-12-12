@@ -1,0 +1,25 @@
+[
+    {
+        "redirect": true,
+        "rule": "^u/([^/.]+)$",
+        "replace": "/user/$1/"
+    },
+    {
+        "redirect": true,
+        "rule": "^user/([^/.]+)$",
+        "replace": "/user/$1/"
+    },
+    {
+        "redirect": true,
+		"rule": "^u/([^/.]+)/$",
+		"replace": "/user/$1/"
+    },
+    {
+		"rule": "^user/([^/.]+)/$",
+        "replace": "action=user&user=$1"
+    },
+    {
+		"rule": "^r/([^/.]+)/comments/([^/.]+)/(.+)",
+        "replace": "action=post&post=$2"
+    }
+]
