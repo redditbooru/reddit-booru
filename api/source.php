@@ -90,13 +90,17 @@ namespace Api {
 		 */
 		public static function getAllEnabled() {
 			
-			$retVal = null;
-			$result = Lib\Db::Query('SELECT * FROM `sources` WHERE source_enabled = 1');
-			if (null != $result && $result->count > 0) {
-				$retVal = array();
-				while ($row = Lib\Db::Fetch($result)) {
-					$retVal[] = new Source($row);
+			$cacheKey = 'Source_getAllEnabled';
+			$retVal = Lib\Cache::Get($cacheKey);
+			if (false === $retVal) {
+				$result = Lib\Db::Query('SELECT * FROM `sources` WHERE source_enabled = 1');
+				if (null != $result && $result->count > 0) {
+					$retVal = array();
+					while ($row = Lib\Db::Fetch($result)) {
+						$retVal[] = new Source($row);
+					}
 				}
+				Lib\Cache::Set($cacheKey, $retVal);
 			}
 			return $retVal;
 			
