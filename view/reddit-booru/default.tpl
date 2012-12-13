@@ -8,73 +8,79 @@
 		<script type="text/javascript" src="/view/reddit-booru/mustache.min.js"></script>
 	</head>
 	<body>
-		<h1>RedditBooru</h1>
-		<div id="searchButton">Search</div>
-		<div id="searchForm">
-			<ul class="searchOptions">
-				<li class="label">Search By:</li>
-				<li class="searchOption" data-form="keyword">Keyword</li>
-				<li class="searchOption" data-form="url">URL</li>
-				<li class="searchOption" data-form="upload">Upload</li>
-				<li class="label">Subreddits:</li>
-				<li class="searchOption">
-					<input type="checkbox" value="1" id="chkSubreddit1" data-filter="subreddit" /><label for="chkSubreddit1">r/awwnime</label>
-				</li>
-				<li class="searchOption">
-					<input type="checkbox" value="2" id="chkSubreddit2" data-filter="subreddit" /><label for="chkSubreddit2">r/kitsunemimi</label>
-				</li>
-				<li class="searchOption">
-					<input type="checkbox" value="3" id="chkSubreddit3" data-filter="subreddit" /><label for="chkSubreddit3">r/melanime</label>
-				</li>
-				<li class="searchOption">
-					<input type="checkbox" value="4" id="chkSubreddit4" data-filter="subreddit" /><label for="chkSubreddit4">r/pantsu</label>
-				</li>
-				<li class="label">Sizes:</li>
-				<li class="searchOption">
-					<input type="checkbox" value="all" id="chkSizeAll" data-filter="size" /><label for="chkSizeAll">All</label>
-				</li>
-				<li class="searchOption">
-					<input type="checkbox" value="1.333" id="chkSize43" data-filter="size" /><label for="chkSize43">4x3</label>
-				</li>
-				<li class="searchOption">
-					<input type="checkbox" value="1.778" id="chkSize169" data-filter="size" /><label for="chkSize169">16x9</label>
-				</li>
-				<li class="searchOption">
-					<input type="checkbox" value="1.6" id="chkSize1610" data-filter="size" /><label for="chkSize1610">16x10</label>
-				</li>
-			</ul>
-			<div class="searchForms">
-				<div class="searchForm" data-form="keyword">
-					<input type="text" id="txtKeyword" />
-					<label for="txtKeyword">Enter search keywords</label>
-					<button id="btnKeyword">Search</button>
-				</div>
-				<div class="searchForm" data-form="url">
-					<input type="text" id="txtUrl" />
-					<label for="txtUrl">Enter image URL</label>
-					<button id="btnUrl">Search</button>
-				</div>
-				<div class="searchForm" data-form="upload">
-					<input type="file" id="filUpload" />
-					<button id="btnUpload">Search</button>
-				</div>
-			</div>
-		</div>
+		<h1>
+			<a href="/">
+				<img src="/view/reddit-booru/images/logo.png" alt="RedditBooru" />
+			</a>
+		</h1>
+		<div id="searchButton" class="searchButton">Search</div>
 		<div id="images">
 		
+		</div>
+		<div id="overlay">
+			<div id="searchForm">
+				<h2>Search</h2>
+				<div class="field">
+					<div class="subField">
+						<label for="txtKeywords">By Keyword Or URL</label>
+						<input type="text" id="txtKeywords" />
+					</div>
+					<div class="subField">
+						<label for="uplImage">By Upload</label>
+						<input type="file" id="uplImage" />
+					</div>
+				</div>
+				<div class="field">
+					<label>Filter By Subreddit</label>
+					<ul class="checkboxList" id="sources">
+						
+					</ul>
+				</div>
+				<div class="field">
+					<label>Filter By Size</label>
+					<ul class="checkboxList">
+						<li>
+							<input type="checkbox" id="chkAll" name="chkSizes" value="all" checked="checked" />
+							<label for="chkAll">All</label>
+						</li>
+						<li>
+							<input type="checkbox" id="chkSD" name="chkSizes" value="1.33" />
+							<label for="chkSD">4x3</label>
+						</li>
+						<li>
+							<input type="checkbox" id="chkWidescreen" name="chkSizes" value="1.78,1.6" />
+							<label for="chkWidescreen">Widescreen</label>
+						</li>
+						<li>
+							<input type="checkbox" id="chkPhone" name="chkSizes" value="1.5,0.6,0.56" />
+							<label for="chkPhone">Smart Phone</label>
+						</li>
+					</ul>
+				</div>
+				<div id="btnSubmit" class="searchButton">Search</div>
+			</div>
 		</div>
 		<script type="text/javascript">
 			window.startUp = {START_UP};
 			window.nextUrl = '{NEXT_URL}';
+			window.sources = {SOURCES};
 		</script>
 		<script type="text/template" id="tplGalleryThumbs">
 			{{#images}}
-				<div class="image">
+				<div class="image" data-id="{{postId}}" data-source="{{sourceId}}">
 					<a href="{{source.baseUrl}}/comments/{{externalId}}/">
 						<img src="/thumb.php?file={{cdnUrl}}&height=180&width=180" />
 					</a>
 				</div>
 			{{/images}}
+		</script>
+		<script type="text/template" id="tplSubCheckbox">
+			{{#.}}
+				<li>
+					<input type="checkbox" id="chkSource{{id}}" name="chkSources" value="{{id}}" />
+					<label for="chkSource{{id}}">{{name}}</label>
+				</li>
+			{{/.}}
 		</script>
 		<script type="text/template" id="tplMoreButton">
 			<div class="image more">More</a>
