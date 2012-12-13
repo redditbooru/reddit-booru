@@ -1,27 +1,27 @@
 * { margin:0; padding:0; }
 ul { list-style:none; }
+a img { border:0; }
 
-h1 { background:#e94e77 url(images/logo.png) no-repeat; font:24px/1 sans-serif; height:0; padding-top:57px; overflow:hidden; }
+h1 { background:#e94e77; height:57px; overflow:hidden; }
 
-#searchForm { margin:10px 25px; display:none; }
-
-#searchButton { width:100px; height:0; padding-top:28px; position:absolute; top:15px; right:15px; background:url(images/search_btn.png) no-repeat; overflow:hidden; }
-#searchButton:hover { background-position:0 -28px; cursor:pointer; }
-
-.searchOptions { padding:0 0 10px; }
-.searchOptions li { display:inline; padding:0 10px; font:16px sans-serif; }
-.searchOptions .label { font-weight:bold; text-transform:uppercase; padding-left:20px; }
-.searchOptions li:first-child { padding-left:0; }
-.searchOptions label { padding-left:5px; }
-
-.searchForms { overflow:hidden; }
-.searchForm { position:relative; }
-.searchForm input[type="text"] { width:500px; height:30px; font:16px sans-serif; }
-.searchForm label { position:absolute; font:16px sans-serif; left:10px; top:8px; }
-.searchForm button { height:30px; width:60px; }
+.searchButton { width:100px; height:0; padding-top:28px; background:url(images/search_btn.png) no-repeat; overflow:hidden; }
+.searchButton:hover { background-position:0 -28px; cursor:pointer; }
+#searchButton { position:absolute; top:15px; right:15px; }
 
 #images { padding:15px 0 0 15px; margin:0 auto; overflow:hidden; }
 #images .image { border:10px solid #f4ead5; float:left; margin:0 15px 15px 0; }
 #images .image img { display:block; width:180px; height:180px; background:url(images/ajax.gif) no-repeat center center; }
 #images .more { width:180px; height:0; padding-top:180px; overflow:hidden; background:url(images/more.png); cursor:pointer; }
 #images .more:hover { background-position:0 -180px; }
+
+#overlay { position:fixed; top:0; left:0; bottom:0; right:0; background:url(images/overlay_bg.png); display:none; }
+#searchForm { border:10px solid #f4ead5; width:600px; margin:58px auto 0; background:#fff; }
+#searchForm h2 { background:#e94e77; color:#c6e5d9; font:bold 18px/1 sans-serif; text-transform:uppercase; padding:10px; }
+#searchForm .field { padding:10px; overflow:hidden; }
+#searchForm .field > label, #searchForm .subField > label { text-transform:uppercase; font:18px/1 sans-serif; padding-bottom:5px; }
+#searchForm .subField { width:50%; float:left; padding-left:10px; box-sizing:border-box; }
+#searchForm .subField:first-child { padding-left:0; }
+#searchForm input[type="text"] { width:100%; box-sizing:border-box; padding:3px; font:14px sans-serif; }
+#searchForm .checkboxList li { display:inline; padding-right:20px; }
+#searchForm .checkboxList label { font:14px/1 sans-serif; }
+#btnSubmit { margin:10px auto; }
