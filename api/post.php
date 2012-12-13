@@ -183,6 +183,9 @@ namespace Api {
 				$count = Lib\Url::GetInt('count', POST_SEARCH_COUNT, $vars);
 				$afterDate = Lib\Url::GetInt('afterDate', null, $vars);
 				$externalId = Lib\Url::Get('externalId', null, $vars);
+				$keywords = Lib\Url::Get('keywords', null, $vars);
+				$ratios = Lib\Url::Get('ratios', null, $vars);
+				$sources = Lib\Url::Get('sources', null, $vars);
 				
 				$params = [];
 				
@@ -204,6 +207,35 @@ namespace Api {
 					$query .= 'post_external_id = :externalId AND ';
 				}
 				
+				if ($keywords) {
+					$params[':keywords'] = '%' . str_replace(' ', '%', $keywords) . '%';
+					$query .= 'post_keywords LIKE :keywords AND ';
+				}
+				
+				if ($sources) {
+					$sources = !is_array($sources) ? explode(',', $sources) : $sources;
+					$tmpList = [];
+					$i = 0;
+					foreach ($sources as $source) {
+						$params[':source' . $i] = $source;
+						$tmpList[] = ':source' . $i;
+						$i++;
+					}
+					$query .= 'source_id IN (' . implode(',', $tmpList) . ') AND ';
+				}
+				
+				if ($ratios) {
+					$ratios = !is_array($ratios) ? explode(',', $ratios) : $ratios;
+					$tmpList = [];
+					$i = 0;
+					foreach ($ratios as $ratio) {
+						$params[':ratio' . $i] = $ratio;
+						$tmpList[] = ':ratio' . $i;
+						$i++;
+					}
+					$query .= '(SELECT COUNT(1) FROM images WHERE post_id = p.post_id AND ROUND(image_width / image_height, 2) IN (' . implode(',', $tmpList) . ')) > 0 AND ';
+				}
+				
 				$sort = $sort == 'asc' ? 'ASC' : 'DESC';
 				$query .= '1 ORDER BY post_date ' . $sort . ' LIMIT ' . $count;
 				
@@ -212,16 +244,38 @@ namespace Api {
 					$retVal = [];
 					while ($row = Lib\Db::Fetch($result)) {
 						$obj = new Post($row);
-						
-						if ($getImages) {
-							$obj->images = Image::getImagesByPostId([ 'postId' => $obj->id ]);
-						}
-						
 						if ($getSource) {
 							$obj->source = Source::getById([ 'sourceId' => $obj->sourceId ]);
 						}
 						
-						$retVal[] = $obj;
+						if ($getImages) {
+							$obj->images = Image::getImagesByPostId([ 'postId' => $obj->id ]);
+							if ($ratios) {
+								
+								$images = [];
+								if (is_array($obj->images) && count($obj->images) > 0) {							
+									foreach ($obj->images as $image) {
+										foreach ($ratios as $ratio) {
+											if ($image->width > 0 && $image->height > 0 && round($image->width / $image->height, 2) == $ratio) {
+												$images[] = $image;
+											}
+										}
+									}
+									
+								}
+								
+								$obj->images = $images;
+								if (count($images) == 0) {
+									$obj = null;
+								}
+								
+							}							
+						}
+						
+						if (null != $obj) {
+							$retVal[] = $obj;
+						}
+						
 					}
 				}
 				
