@@ -32,10 +32,12 @@ namespace Controller {
 					$jsonOut = Api\Post::searchPosts([ 'externalId' => $_GET['post'], 'getImages' => true, 'getSource' => true ]);
 					break;
 				default:
-					$jsonOut = Api\Post::searchPosts([ 'getImages' => true, 'getSource' => true ]);
+					$sources = Lib\Url::Get('sources', 1, $_COOKIE);
+					$jsonOut = Api\Post::searchPosts([ 'getImages' => true, 'getSource' => true, 'sources' => $sources ]);
 					break;
 			}
 			
+			Lib\Display::setVariable('sources', json_encode(Api\Source::getAllEnabled()));
 			Lib\Display::setVariable('start_up', json_encode($jsonOut));
 			Lib\Display::setVariable('next_url', $urlOut);
 			
