@@ -83,12 +83,46 @@
 	templates = {
 		images:$('#tplGalleryThumbs').html(),
 		more:$('#tplMoreButton').html(),
-		subChecks:$('#tplSubCheckbox').html()
+		subChecks:$('#tplSubCheckbox').html(),
+		imageSearchOriginal:$('#tplImageSearchOriginal').html(),
+		imageSearchList:$('#tplImageSearchList').html()
 	},
 	
 	$images = $('#images'),
 	$searchForm = $('#searchForm'),
 	$overlay = $('#overlay'),
+	
+	makeRelativeTime = function(seconds) {
+	
+		var
+			value = seconds,
+			label = 'second';
+			
+		// Years
+		if (seconds > 31536000) { 
+			value = Math.round(seconds / 31536000);
+			label = 'year';
+		// Months (30-days)
+		} else if (seconds > 2592000) { 
+			value = Math.round(seconds  / 2592000);
+			label = 'month';
+		// Days
+		} else if (seconds > 86400) {
+			value = Math.round(seconds / 86400);
+			label = 'day';
+		// Hours
+		} else if (seconds > 3600) {
+			value = Math.round(seconds / 3600);
+			label = 'hour';
+		// Minutes
+		} else {
+			value = Math.round(seconds / 60);
+			label = 'minute';
+		}
+	
+		return value + ' ' + label + (value != 1 ? 's' : '');
+	
+	},
 	
 	windowResize = function(e) {
 		var
@@ -146,29 +180,30 @@
 				upload = $('#uplImage').val(),
 				temp = [];
 			
+			// We'll tack on the sources here because they're used in multiple search types
+			if (sources.length) {
+				temp = [];
+				sources.each(function() {
+					temp.push($(this).val());
+				});
+				
+				if (temp[0] !== 'all') {
+					query += '&sources=' + temp.join(',');
+				} else {
+					// If all was checked, adjust the cookie to view all by default
+					temp = [];
+					$('[name="chkSources"][value!="all"]').each(function() {
+						temp.push($(this).val());
+					});
+				}
+				$.cookie('sources', temp.join(','), { expires:365 });
+			}
+			
 			// If keywords isn't a url and no upload, do a standard search
 			if (keywords.indexOf('http://') === -1 && upload.length === 0) {
 			
 				if (keywords) {
-					query += '&keywords=' + escape(keywords);
-				}
-				
-				if (sources.length) {
-					temp = [];
-					sources.each(function() {
-						temp.push($(this).val());
-					});
-					
-					if (temp[0] !== 'all') {
-						query += '&sources=' + temp.join(',');
-					} else {
-						// If all was checked, adjust the cookie to view all by default
-						temp = [];
-						$('[name="chkSources"][value!="all"]').each(function() {
-							temp.push($(this).val());
-						});
-					}
-					$.cookie('sources', temp.join(','), { expires:365 });
+					query += '&keywords=' + encodeURIComponent(keywords);
 				}
 				
 				if (sizes.length) {
@@ -192,6 +227,23 @@
 				
 				window.nextUrl = query;
 				
+			} else {
+			
+				if (upload.length === 0) {
+				
+					query = query.replace('searchPosts', 'reverseImageSearch');
+					query += '&imageUri=' + encodeURIComponent(keywords) + '&count=6';
+					$.ajax({
+						url:query,
+						dataType:'json',
+						success:imageSearchCallback
+					});
+				
+				} else {
+					$('#hdnSources').val(temp.join(','));
+					$('#uploadForm').submit();
+				}
+			
 			}
 			
 		},
@@ -210,6 +262,25 @@
 		}
 		
 	}
+	
+	imageSearchCallback = window.imageSearchCallback = function(data) {
+	
+		var out = '';
+		
+		$overlay.fadeOut();
+		
+		if (typeof data === 'object' && data.hasOwnProperty('body') && data.body.hasOwnProperty('results') && data.body.results.length > 0) {
+			out = Mustache.to_html(templates.imageSearchOriginal, data.body);
+			
+			for (var i = 0, count = data.body.results.length; i < count; i++) {
+				data.body.results[i].age = makeRelativeTime(data.body.results[i].age);
+			}
+			
+			out += Mustache.to_html(templates.imageSearchList, data.body.results);
+			$images.html(out);
+		}
+	
+	},
 	
 	ajaxCallback = function(data) {
 		if (typeof data == 'object' && data.hasOwnProperty('body') && data.body) {
