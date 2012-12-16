@@ -1,5 +1,7 @@
 <?php
 
+date_default_timezone_set('America/Chicago');
+
 require('api/awwnime.php');
 
 $file = isset($_GET['file']) ? $_GET['file'] : false;
@@ -55,9 +57,21 @@ if ($file && ($outWidth || $outHeight)) {
 						if ($imgWidth > $imgHeight) {
 							$scaleHeight = $outHeight;
 							$scaleWidth = floor($imgWidth / $imgHeight * $outHeight);
+							
+							if ($scaleWidth < $outWidth) {
+								$scaleWidth = $outWidth;
+								$scaleHeight = floor($imgHeight / $imgWidth * $outWidth);
+							}
+							
 						} else {
 							$scaleWidth = $outWidth;
 							$scaleHeight = floor($imgHeight / $imgWidth * $outWidth);
+							
+							if ($scaleHeight < $outHeight) {
+								$scaleHeight = $outHeight;
+								$scaleWidth = floor($imgWidth / $imgHeight * $outHeight);
+							}
+							
 						}
 						break;
 				}
@@ -68,7 +82,8 @@ if ($file && ($outWidth || $outHeight)) {
 			$out = imagecreatetruecolor ($outWidth, $outHeight);
 			imagecopyresampled ($out, $img, $x, $y, 0, 0, $scaleWidth, $scaleHeight, $imgWidth, $imgHeight);
 			
-			//unlink($tmpFile);
+			// Clean up the temporary shit
+			unlink($tmpFile);
 			
 			// Save out the file and do a redirect
 			imagepng ($out, './cache/' . $outFile . '.png');
