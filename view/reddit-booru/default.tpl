@@ -74,7 +74,7 @@
 			{{#images}}
 				<div class="image" data-id="{{postId}}" data-source="{{sourceId}}">
 					<a href="{{source.baseUrl}}/comments/{{externalId}}/" target="_blank">
-						<img src="/thumb.php?file={{cdnUrl}}&height=180&width=180" />
+						<img src="/thumb.php?file={{cdnUrl}}&height=180&width=180" alt="{{title}} [Score: {{score}}]" title="{{title}} [Score: {{score}}]" />
 					</a>
 				</div>
 			{{/images}}
@@ -99,7 +99,7 @@
 				{{#.}}
 					<div class="imageSearchResult" data-id="{{postId}}" data-source="{{sourceId}}">
 						<a href="{{source.baseUrl}}/comments/{{externalId}}" target="_blank">
-							<img src="/thumb.php?file={{image.cdnUrl}}&height=180&&width=360" />
+							<img src="/thumb.php?file={{image.cdnUrl}}&height=180&&width=360" alt="{{title}} [Score: {{score}}]" title="{{title}} [Score: {{score}}]" />
 						</a>
 						<span class="source">{{source.name}}</span>
 						<span class="age">{{age}} ago</span>
