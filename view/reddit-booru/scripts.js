@@ -170,6 +170,13 @@
 			$overlay.find('input[name="' + name + '"][value!="all"]').attr('checked', false);
 		},
 		
+		keyPress:function(e) {
+			var key = e.keyCode || e.charCode;
+			if (key === 13) {
+				searchForm.submit(e);
+			}
+		},
+		
 		submit:function(e) {
 			
 			var
@@ -253,6 +260,7 @@
 			$('#btnSubmit').on('click', searchForm.submit);
 			$('#searchButton').on('click', searchForm.display);
 			$('#sources').html(sourceChecks);
+			$('#txtKeywords').on('keypress', searchForm.keyPress);
 			$overlay.on('click', searchForm.hide);
 			var prefSources = ($.cookie('sources') || '1').split(',');
 			for (var i = 0, count = prefSources.length; i < count; i++) {
