@@ -173,7 +173,7 @@ namespace Api {
 		/**
 		 * Downloads and syncs an image to the database
 		 */
-		public static function createFromImage($url, $postId, $sourceId) {
+		public static function createFromImage($url, $postId = null, $sourceId = null) {
 		
 			$localFile = __INCLUDE__ . 'cache/' . $postId . '_' . md5(microtime(true));
 			$retVal = null;
@@ -202,7 +202,7 @@ namespace Api {
 					$retVal->generateHistogram();
 					$retVal->getImageDimensions();
 					
-					if ($retVal->sync()) {
+					if (null != $postId && $retVal->sync()) {
 					
 						// Rename and upload to Amazon
 						if ($retVal->id) {
@@ -216,11 +216,13 @@ namespace Api {
 									$retVal->cdnUrl = CDN_URL_BASE . $newFile;
 									$retVal->sync();
 								}
+								unlink($newFile);
 							}
 						}
 						
 					}
 					
+					unlink($retVal->localFile);
 					imagedestroy($retVal->gdImage->image);
 					
 				}
@@ -374,7 +376,15 @@ namespace Api {
 			
 			$url = self::parseUrl($url);
 			if ($url) {
-				$file = self::curl_get_contents($url);
+				$file = null;
+				
+				// Account for local files or URLs
+				if ($url{0} === '/' && is_readable($url)) {
+					$file = file_get_contents($url);
+				} else {
+					$file = self::curl_get_contents($url);
+				}
+				
 				if (null != self::_getImageType($file)) {
 					$handle = fopen($fileName, 'wb');
 					if ($handle) {
@@ -414,6 +424,11 @@ namespace Api {
 			
 			$retVal = null;
 			if (null == $this->gdImage) {
+				if (null == $this->localFile) {
+					$tmpFile = tempnam(null, null);
+					$this->localFile = $tmpFile;
+					self::downloadImage($this->url, $tmpFile);
+				}
 				$this->gdImage = self::loadImage($this->localFile);
 			}
 			
@@ -456,6 +471,14 @@ namespace Api {
 					}
 				}
 				
+			}
+			
+			// Clean up
+			if (isset($tmpFile)) {
+				imagedestroy($this->gdImage->image);
+				unlink($tmpFile);
+				$this->localFile = null;
+				$this->gdImage = null;
 			}
 			
 			return $retVal;
@@ -619,7 +642,8 @@ namespace Api {
 			
 			$urlInfo = parse_url($url);
 			
-			if ($urlInfo !== false) {
+			// Check for the host part as we don't need to do anything for local files
+			if ($urlInfo !== false && isset($urlInfo['host'])) {
 				// Handle deviantArt submissions
 				if (strpos($url, 'deviantart.com') !== false) {
 					$info = json_decode(self::curl_get_contents('http://backend.deviantart.com/oembed?url=' . urlencode($url)));
