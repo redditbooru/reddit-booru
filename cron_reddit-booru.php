@@ -39,6 +39,10 @@ foreach ($sources as $source) {
 						echo 'New post: ', $post->title, PHP_EOL;
 					} else {
 						$post->dateUpdated = time();
+						if ($post->meta->flair != $child->data->link_flair_text) {
+							$post->meta->flair = $child->data->link_flair_text;
+							$post->keywords = Api\Post::generateKeywords($post->title . ' ' . $post->meta->flair);
+						}
 						$post->score = $child->data->score;
 						echo 'Updated post: ', $post->title, PHP_EOL;
 					}
