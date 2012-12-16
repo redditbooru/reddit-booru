@@ -3,7 +3,7 @@
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf8" />
 		<title>redditbooru - a place where cute girls come to meet</title>
-		<link rel="stylesheet" type="text/css" href="/view/reddit-booru/styles.css" />
+		<link rel="stylesheet" type="text/css" href="/view/reddit-booru/styles.css?20121215" />
 		<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
 		<script type="text/javascript" src="/view/reddit-booru/mustache.min.js"></script>
 	</head>
@@ -27,7 +27,11 @@
 					</div>
 					<div class="subField">
 						<label for="uplImage">By Upload</label>
-						<input type="file" id="uplImage" />
+						<form action="/match.php?flushCache" method="post" target="ifUpload" enctype="multipart/form-data" id="uploadForm">
+							<input type="file" id="uplImage" name="uplImage" />
+							<input type="hidden" id="hdnSources" />
+						</form>
+						<iframe id="ifUpload" name="ifUpload"></iframe>
 					</div>
 				</div>
 				<div class="field">
@@ -58,6 +62,7 @@
 					</ul>
 				</div>
 				<div id="btnSubmit" class="searchButton">Search</div>
+				<p class="tip"><strong>PRO TIP</strong> - Leave the keywords box blank to see the latest images from the selected subreddits. Your selections will be remembered!</p>
 			</div>
 		</div>
 		<script type="text/javascript">
@@ -68,7 +73,7 @@
 		<script type="text/template" id="tplGalleryThumbs">
 			{{#images}}
 				<div class="image" data-id="{{postId}}" data-source="{{sourceId}}">
-					<a href="{{source.baseUrl}}/comments/{{externalId}}/">
+					<a href="{{source.baseUrl}}/comments/{{externalId}}/" target="_blank">
 						<img src="/thumb.php?file={{cdnUrl}}&height=180&width=180" />
 					</a>
 				</div>
@@ -82,9 +87,32 @@
 				</li>
 			{{/.}}
 		</script>
-		<script type="text/template" id="tplMoreButton">
-			<div class="image more">More</a>
+		<script type="text/template" id="tplImageSearchOriginal">
+			<div class="imageSearchOriginal">
+				<h2>Original Image</h2>
+				<img src="{{original}}" />
+			</div>
 		</script>
-		<script type="text/javascript" src="/view/reddit-booru/scripts.js"></script>
+		<script type="text/template" id="tplImageSearchList">
+			<div class="imageSearchList">
+				<h2>Similar Images</h2>
+				{{#.}}
+					<div class="imageSearchResult" data-id="{{postId}}" data-source="{{sourceId}}">
+						<a href="{{source.baseUrl}}/comments/{{externalId}}" target="_blank">
+							<img src="/thumb.php?file={{image.cdnUrl}}&height=180&&width=360" />
+						</a>
+						<span class="source">{{source.name}}</span>
+						<span class="age">{{age}} ago</span>
+					</div>
+				{{/.}}
+			</div>
+		</script>
+		<script type="text/template" id="tplMoreButton">
+			<div class="image more">More</div>
+		</script>
+		<script type="text/javascript" src="/view/reddit-booru/scripts.js?20121215"></script>
+		<script type="text/javascript">
+			var _gaq=_gaq||[];_gaq.push(["_setAccount","UA-280226-8"]);_gaq.push(["_trackPageview"]);(function(){var a=document.createElement("script");a.type="text/javascript";a.async=!0;a.src=("https:"==document.location.protocol?"https://ssl":"http://www")+".google-analytics.com/ga.js";var b=document.getElementsByTagName("script")[0];b.parentNode.insertBefore(a,b)})();
+		</script>
 	</body>
 </html>
