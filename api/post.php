@@ -24,6 +24,7 @@ namespace Api {
 			'keywords' => 'post_keywords',
 			'score' => 'post_score',
 			'processed' => 'post_processed',
+			'visible' => 'post_visible',
 			'meta' => 'post_meta'
 		);
 		
@@ -91,6 +92,11 @@ namespace Api {
 		 * Whether this post has been processed
 		 */
 		public $processed;
+		
+		/**
+		 * Whether this post is visible to the public or not
+		 */
+		public $visible = true;
 		
 		/**
 		 * Object for storing non-schema data
@@ -237,7 +243,7 @@ namespace Api {
 				}
 				
 				$sort = $sort == 'asc' ? 'ASC' : 'DESC';
-				$query .= '1 ORDER BY post_date ' . $sort . ' LIMIT ' . $count;
+				$query .= 'post_visible = 1 ORDER BY post_date ' . $sort . ' LIMIT ' . $count;
 				
 				$result = Lib\Db::Query($query, $params);
 				if (null != $result && $result->count > 0) {
