@@ -33,6 +33,11 @@ namespace Controller {
 					break;
 				default:
 					$sources = Lib\Url::Get('sources', 1, $_COOKIE);
+					if (is_array($sources)) {
+						$urlOut .= '&sources=' . implode(',', $sources);
+					} else {
+						$urlOut .= '&sources=' . $sources;
+					}
 					$jsonOut = Api\Post::searchPosts([ 'getImages' => true, 'getSource' => true, 'sources' => $sources ]);
 					break;
 			}
