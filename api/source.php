@@ -123,7 +123,7 @@ namespace Api {
 						$row = Lib\Db::Fetch($result);
 						$retVal = new Source($row);
 					}
-					Lib\Cache::Set($cacheKey, $retVal);
+					Lib\Cache::Set($cacheKey, $retVal, 86400);
 				}
 			}
 			return $retVal;
