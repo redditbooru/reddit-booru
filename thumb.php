@@ -40,6 +40,7 @@ if ($file && ($outWidth || $outHeight)) {
 			$scaleWidth = $outWidth;
 			$scaleHeight = $outHeight;
 			$x = $y = 0;
+			$srcX = $srcY = 0;
 
 			// Scale depending on what dimensions were passed
 			if (!$outWidth && $outHeight) {
@@ -73,6 +74,11 @@ if ($file && ($outWidth || $outHeight)) {
 							}
 							
 						}
+						
+						// Center the image
+						$x = ($outWidth - $scaleWidth) / 2;
+						$y = ($outHeight - $scaleHeight) / 2;
+						
 						break;
 				}
 				
@@ -80,7 +86,7 @@ if ($file && ($outWidth || $outHeight)) {
 			
 			// Create the new image and copy the resized one over
 			$out = imagecreatetruecolor ($outWidth, $outHeight);
-			imagecopyresampled ($out, $img, $x, $y, 0, 0, $scaleWidth, $scaleHeight, $imgWidth, $imgHeight);
+			imagecopyresampled ($out, $img, $x, $y, $srcX, $srcY, $scaleWidth, $scaleHeight, $imgWidth, $imgHeight);
 			
 			// Clean up the temporary shit
 			unlink($tmpFile);
