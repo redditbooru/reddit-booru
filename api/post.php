@@ -171,7 +171,7 @@ namespace Api {
 			
 			$retVal = null;
 			
-			$cacheKey = implode('_', $vars);
+			$cacheKey = 'Post_searchPosts_' . implode('_', $vars);
 			$retVal = Lib\Cache::Get($cacheKey);
 			
 			if (false === $retVal) {
@@ -269,7 +269,7 @@ namespace Api {
 									$obj = null;
 								}
 								
-							}							
+							}
 						}
 						
 						if (null != $obj) {
@@ -281,6 +281,81 @@ namespace Api {
 				
 				Lib\Cache::Set($cacheKey, $retVal);
 			
+			}
+			
+			return $retVal;
+		
+		}
+		
+		/**
+		 * Searches for posts by image
+		 */
+		public static function reverseImageSearch($vars) {
+		
+			$file = Lib\Url::Get('imageUri', null, $vars);
+			$count = Lib\Url::GetInt('count', 5, $vars);
+			$getSource = Lib\Url::GetBool('getSource', $vars);
+			$sources = Lib\Url::Get('sources', null, $vars);
+			
+			$cacheKey = 'Post_reverseImageSearch_' . implode('_', $vars);
+			$retVal = Lib\Cache::Get($cacheKey);
+			
+			if (null != $file && false === $retVal) {
+				$image = Image::createFromImage($file);
+				if (null !== $image) {
+					
+					$query = 'SELECT i.image_id, i.image_url, i.image_cdn_url, i.image_width, i.image_height, i.source_id';
+					$query .= ', p.post_id, p.post_external_id, p.post_title, p.post_date, ';
+					$params = array();
+					for ($i = 1; $i <= HISTOGRAM_BUCKETS; $i++) {
+						$prop = 'histR' . $i;
+						$params[':red' . $i] = $image->$prop;
+						$prop = 'histG' . $i;
+						$params[':green' . $i] = $image->$prop;
+						$prop = 'histB' . $i;
+						$params[':blue' . $i] = $image->$prop;
+						$query .= 'ABS(i.image_hist_r' . $i . ' - :red' . $i . ') + ABS(i.image_hist_g' . $i . ' - :green' . $i . ') + ABS(i.image_hist_b' . $i . ' - :blue' . $i . ') + ';
+					}
+					
+					$where = '';
+					if ($sources) {
+						$sources = !is_array($sources) ? explode(',', $sources) : $sources;
+						$tmpList = [];
+						$i = 0;
+						foreach ($sources as $source) {
+							$params[':source' . $i] = $source;
+							$tmpList[] = ':source' . $i;
+							$i++;
+						}
+						$where .= 'i.source_id IN (' . implode(',', $tmpList) . ') AND ';
+					}
+					
+					// Find the top five most similar images in the database
+					$query .= '0 AS distance FROM images i INNER JOIN posts p ON p.post_id = i.post_id WHERE ' . $where . '1 ORDER BY distance, p.post_date LIMIT ' . $count;
+					$result = Lib\Db::Query($query, $params);
+					$time = time();
+					if ($result) {
+					
+						$retVal = new stdClass;
+						$retVal->original = $file;
+						while($row = Lib\Db::Fetch($result)) {
+							$obj = new Post($row);
+							$obj->image = new Image($row);
+							$obj->distance = $row->distance;
+							$obj->similarity = abs(100 - (100 * ($row->distance / HISTOGRAM_BUCKETS * 3)));
+							$obj->age = $time - $obj->dateCreated;
+							
+							if ($getSource) {
+								$obj->source = Source::getById([ 'sourceId' => $obj->sourceId ]);
+							}
+							
+							$retVal->results[] = $obj;
+						}
+						
+					}
+				
+				}
+				
 			}
 			
 			return $retVal;
