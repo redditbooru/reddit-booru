@@ -18,6 +18,26 @@ namespace Controller {
 		 */
 		public static function render() {
 			
+			$sources = Lib\Url::Get('sources', 1, $_COOKIE);
+			
+			// Check to see if we got a specific subdomain
+			$domain = explode('.', parse_url($_SERVER['HTTP_HOST'])['host'])[0];
+			$domain = 'pantsu';
+			if ($domain != 'redditbooru' && $domain != 'www' && $domain != 'beta') {
+				$domain = Api\Source::getBySubdomain([ 'domain' => $domain ]);
+				// If no sub was found, redirect to the main page
+				if (!$domain) {
+					header('Location: http://redditbooru.com/');
+					exit;
+				} else {
+					$sources = $domain->id;
+					Lib\Display::setVariable('SOURCE_NAME', $domain->subdomain);
+					Lib\Display::setVariable('SOURCE_ID', $domain->id);
+					Lib\Display::setTemplate('source');
+				}
+				
+			}
+			
 			$jsonOut = null;
 			$urlOut = '/api/?type=json&method=post.searchPosts&getSource=true&getImages=true';
 			$action = Lib\Url::Get('action', false);
@@ -32,7 +52,6 @@ namespace Controller {
 					$jsonOut = Api\Post::searchPosts([ 'externalId' => $_GET['post'], 'getImages' => true, 'getSource' => true ]);
 					break;
 				default:
-					$sources = Lib\Url::Get('sources', 1, $_COOKIE);
 					if (is_array($sources)) {
 						$urlOut .= '&sources=' . implode(',', $sources);
 					} else {

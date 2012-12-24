@@ -204,6 +204,8 @@
 					});
 				}
 				$.cookie('sources', temp.join(','), { expires:365 });
+			} else if ($('[name="sourceId"]').length > 0) {
+				query += '&sources=' + $('[name="sourceId"]').val();
 			}
 			
 			// If keywords isn't a url and no upload, do a standard search
@@ -256,15 +258,18 @@
 		},
 		
 		init:function() {
-			var sourceChecks = Mustache.to_html(templates.subChecks, [{ id:'all', name:'All' }]) +  Mustache.to_html(templates.subChecks, sources);
 			$('#btnSubmit').on('click', searchForm.submit);
 			$('#searchButton').on('click', searchForm.display);
-			$('#sources').html(sourceChecks);
 			$('#txtKeywords').on('keypress', searchForm.keyPress);
 			$overlay.on('click', searchForm.hide);
-			var prefSources = ($.cookie('sources') || '1').split(',');
-			for (var i = 0, count = prefSources.length; i < count; i++) {
-				$('#chkSource' + prefSources[i]).attr('checked', true);
+			if ($('#sources').length > 0) {
+				var
+					prefSources = ($.cookie('sources') || '1').split(','),
+					sourceChecks = Mustache.to_html(templates.subChecks, [{ id:'all', name:'All' }]) +  Mustache.to_html(templates.subChecks, sources);
+				$('#sources').html(sourceChecks);
+				for (var i = 0, count = prefSources.length; i < count; i++) {
+					$('#chkSource' + prefSources[i]).attr('checked', true);
+				}
 			}
 			$overlay.find('input[value="all"]').on('click', searchForm.allCheck);
 		}
@@ -307,7 +312,7 @@
 			displayImages(startUp);
 		} else {
 			$.ajax({
-				url:'http://beta.redditbooru.com/api/?type=json&method=image.getImagesBySource&sources=8&deep=true',
+				url:'http://beta.redditbooru.com/api/?type=json&method=image.getImagesBySource&sources=' + window.sources + '&deep=true',
 				dataType:'jsonp',
 				success:ajaxCallback
 			});

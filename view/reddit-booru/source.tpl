@@ -3,7 +3,7 @@
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf8" />
 		<title>redditbooru - a place where cute girls come to meet</title>
-		<link rel="stylesheet" type="text/css" href="/view/reddit-booru/styles.css?20121215" />
+		<link rel="stylesheet" type="text/css" href="/view/reddit-booru/sources/{SOURCE_NAME}/styles.css" />
 		<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
 		<script type="text/javascript" src="/view/reddit-booru/mustache.min.js"></script>
 	</head>
@@ -11,7 +11,7 @@
 		<header>
 			<h1>
 				<a href="/">
-					<img src="/view/reddit-booru/images/logo.png" alt="RedditBooru" />
+					<img src="/view/reddit-booru/sources/{SOURCE_NAME}/images/logo.png" alt="RedditBooru" />
 				</a>
 			</h1>
 			<div id="searchButton" class="searchButton">Search</div>
@@ -37,12 +37,6 @@
 					</div>
 				</div>
 				<div class="field">
-					<label>Filter By Subreddit</label>
-					<ul class="checkboxList" id="sources">
-						
-					</ul>
-				</div>
-				<div class="field">
 					<label>Filter By Size</label>
 					<ul class="checkboxList">
 						<li>
@@ -65,12 +59,12 @@
 				</div>
 				<div id="btnSubmit" class="searchButton">Search</div>
 				<p class="tip"><strong>PRO TIP</strong> - Leave the keywords box blank to see the latest images from the selected subreddits. Your selections will be remembered!</p>
+				<input type="hidden" value="{SOURCE_ID}" name="sourceId" />
 			</div>
 		</div>
 		<script type="text/javascript">
 			window.startUp = {START_UP};
 			window.nextUrl = '{NEXT_URL}';
-			window.sources = {SOURCES};
 		</script>
 		<script type="text/template" id="tplGalleryThumbs">
 			{{#images}}

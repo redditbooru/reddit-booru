@@ -15,7 +15,8 @@ namespace Api {
 			'name' => 'source_name',
 			'baseUrl' => 'source_baseurl',
 			'type' => 'source_type',
-			'enabled' => 'source_enabled'
+			'enabled' => 'source_enabled',
+			'subdomain' => 'source_subdomain'
 		);
 		
 		/**
@@ -52,6 +53,11 @@ namespace Api {
 		 * Source type
 		 */
 		public $enabled;
+		
+		/**
+		 * Associated subdomain
+		 */
+		public $subdomain;
 	
 		/**
 		 * Constructor
@@ -102,6 +108,27 @@ namespace Api {
 				}
 				Lib\Cache::Set($cacheKey, $retVal);
 			}
+			return $retVal;
+			
+		}
+		
+		/**
+		 * Returns a source by subdomain
+		 */
+		public static function getBySubdomain($vars) {
+			
+			$domain = Lib\Url::Get('domain', null, $vars);
+			$cacheKey = 'Source::getBySubdomain_' . $domain;
+			$retVal = Lib\Cache::Get($cacheKey);
+			if (false === $retVal) {
+				$result = Lib\Db::Query('SELECT * FROM `sources` WHERE source_subdomain = :domain', [ 'domain' => $domain ]);
+				$retVal = null;
+				if (null != $result && $result->count > 0) {
+					$retVal = new Source(Lib\Db::Fetch($result));
+				}
+				Lib\Cache::Set($cacheKey, $retVal, 3600);
+			}
+			
 			return $retVal;
 			
 		}

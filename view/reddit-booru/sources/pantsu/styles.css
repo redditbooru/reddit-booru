@@ -3,21 +3,21 @@ ul { list-style:none; }
 a img { border:0; }
 
 header { position:fixed; top:0; left:0; right:0; }
-h1 { background:#e94e77; height:57px; overflow:hidden; }
+h1 { background:url(images/header_bg.png); height:57px; overflow:hidden; }
 
 .searchButton { width:100px; height:0; padding-top:28px; background:url(images/search_btn.png) no-repeat; overflow:hidden; }
 .searchButton:hover { background-position:0 -28px; cursor:pointer; }
 #searchButton { position:absolute; top:15px; right:15px; }
 
 #images { padding:15px 0 0 15px; margin:0 auto; overflow:hidden; margin-top:58px; }
-#images .image { border:10px solid #f4ead5; float:left; margin:0 15px 15px 0; }
+#images .image { border:10px solid #ecf6f7; float:left; margin:0 15px 15px 0; }
 #images .image img { display:block; width:180px; height:180px; background:url(images/ajax.gif) no-repeat center center; }
 #images .more { width:180px; height:0; padding-top:180px; overflow:hidden; background:url(images/more.png); cursor:pointer; }
 #images .more:hover { background-position:0 -180px; }
 
 #overlay { position:fixed; top:0; left:0; bottom:0; right:0; background:url(images/overlay_bg.png); display:none; }
-#searchForm { border:10px solid #f4ead5; width:600px; margin:58px auto 0; background:#fff; }
-#searchForm h2 { background:#e94e77; color:#c6e5d9; font:bold 18px/1 sans-serif; text-transform:uppercase; padding:10px; }
+#searchForm { border:10px solid #ecf6f7; width:600px; margin:58px auto 0; background:#fff; }
+#searchForm h2 { background:#6ad2e7; color:#ecf6f7; font:bold 18px/1 sans-serif; text-transform:uppercase; padding:10px; }
 #searchForm .field { padding:10px; overflow:hidden; }
 #searchForm .field > label, #searchForm .subField > label { text-transform:uppercase; font:18px/1 sans-serif; padding-bottom:5px; }
 #searchForm .subField { width:50%; float:left; padding-left:10px; box-sizing:border-box; }
