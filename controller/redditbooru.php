@@ -21,21 +21,23 @@ namespace Controller {
 			$sources = Lib\Url::Get('sources', 1, $_COOKIE);
 			
 			// Check to see if we got a specific subdomain
-			$domain = explode('.', parse_url($_SERVER['HTTP_HOST'])['host'])[0];
-			$domain = 'pantsu';
-			if ($domain != 'redditbooru' && $domain != 'www' && $domain != 'beta') {
-				$domain = Api\Source::getBySubdomain([ 'domain' => $domain ]);
-				// If no sub was found, redirect to the main page
-				if (!$domain) {
-					header('Location: http://redditbooru.com/');
-					exit;
-				} else {
-					$sources = $domain->id;
-					Lib\Display::setVariable('SOURCE_NAME', $domain->subdomain);
-					Lib\Display::setVariable('SOURCE_ID', $domain->id);
-					Lib\Display::setTemplate('source');
+			if (preg_match('/([\w]+)\.redditbooru\.com/is', $_SERVER['HTTP_HOST'], $matches)) {			
+				$domain = $matches[1];
+				$domain = 'awwnime';
+				if ($domain != 'www' && $domain != 'beta') {
+					$domain = Api\Source::getBySubdomain([ 'domain' => $domain ]);
+					// If no sub was found, redirect to the main page
+					if (!$domain) {
+						header('Location: http://redditbooru.com/');
+						exit;
+					} else {
+						$sources = $domain->id;
+						Lib\Display::setVariable('SOURCE_NAME', $domain->subdomain);
+						Lib\Display::setVariable('SOURCE_ID', $domain->id);
+						Lib\Display::setTemplate('source');
+					}
+					
 				}
-				
 			}
 			
 			$jsonOut = null;
@@ -45,7 +47,7 @@ namespace Controller {
 			switch ($action) {
 				case 'user':
 					$user = Lib\Url::Get('user');
-					$jsonOut = Api\Post::searchPosts([ 'user' => $user, 'getImages' => true, 'getSource' => true ]);
+					$jsonOut = Api\Post::searchPosts([ 'user' => $user, 'getImages' => true, 'getSource' => true, 'sources' => $sources ]);
 					$urlOut .= '&user=' . $user;
 					break;
 				case 'post':
