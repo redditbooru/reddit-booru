@@ -14,7 +14,8 @@
 					<img src="/view/reddit-booru/sources/{SOURCE_NAME}/images/logo.png" alt="RedditBooru" />
 				</a>
 			</h1>
-			<div id="searchButton" class="searchButton">Search</div>
+			<button id="uploadButton" class="uploadButton">Upload</button>
+			<button id="searchButton" class="searchButton">Search</button>
 		</header>
 		<div id="images">
 		
@@ -61,10 +62,49 @@
 				<p class="tip"><strong>PRO TIP</strong> - Leave the keywords box blank to see the latest images from the selected subreddits. Your selections will be remembered!</p>
 				<input type="hidden" value="{SOURCE_ID}" name="sourceId" />
 			</div>
+           <div id="uploadImagesForm" class="form">
+                <h2>Upload</h2>
+                <div class="field title">
+                    <label for="txtTitle">Title</label>
+                    <input type="text" name="txtTitle" id="txtTitle" />
+                </div>
+                <div class="field">
+                    <div class="subField">
+                        <label for="txtUrl">Upload from URL</label>
+                        <input type="text" name="txtUrl" id="txtUrl" />
+                    </div>
+                    <div class="subField">
+                        <label for="uplPicture">Upload from Computer</label>
+                        <form action="/upload.php" method="post" target="ifUpload" enctype="multipart/form-data" id="uploadPictureForm">
+                            <input type="file" name="uplPicture" id="uplPicture" />
+                            <input type="hidden" name="hdnUploadId" id="hdnUploadId" />
+                        </form>
+                    </div>
+                </div>
+                <ul></ul>
+                <div class="buttons">
+                    <button id="btnAddImage">Add Image</button>
+                    <button id="btnCreate">Done</button>
+                </div>
+            </div>
+            
 		</div>
+        
 		<script type="text/javascript">
-			window.startUp = {START_UP};
+			window.display = '{DISPLAY}';
+			window.postTitle = '{POST_TITLE}';
+            window.startUp = {START_UP};
 			window.nextUrl = '{NEXT_URL}';
+			window.sources = {SOURCES};
+		</script>
+		<script type="text/template" id="tplGalleryImages">
+			{{#images}}
+				<div class="image" data-id="{{postId}}" data-source="{{sourceId}}" data-full="{{cdnUrl}}">
+					<a href="{{cdnUrl}}" target="_blank">
+						<img src="{{cdnUrl}}" alt="{{title}} [Score: {{score}}]" title="{{title}} [Score: {{score}}]" />
+					</a>
+				</div>
+			{{/images}}
 		</script>
 		<script type="text/template" id="tplGalleryThumbs">
 			{{#images}}
@@ -103,12 +143,18 @@
 				{{/.}}
 			</div>
 		</script>
+        <script type="text/template" id="tplPostTitle">
+            <h2>{{.}}</h2>
+        </script>
+        <script type="text/template" id="tplUploadImageItem">
+            <li class="imageUpload uploading" data-id="{{uploadId}}"></li>
+        </script>
 		<script type="text/template" id="tplMoreButton">
 			<div class="image more">More</div>
 		</script>
-		<script type="text/javascript" src="/view/reddit-booru/scripts.js?20121215"></script>
+		<script type="text/javascript" src="/view/reddit-booru/scripts.js?20130208"></script>
 		<script type="text/javascript">
 			var _gaq=_gaq||[];_gaq.push(["_setAccount","UA-280226-8"]);_gaq.push(["_trackPageview"]);(function(){var a=document.createElement("script");a.type="text/javascript";a.async=!0;a.src=("https:"==document.location.protocol?"https://ssl":"http://www")+".google-analytics.com/ga.js";var b=document.getElementsByTagName("script")[0];b.parentNode.insertBefore(a,b)})();
 		</script>
-	</body>
+    </body>
 </html>
