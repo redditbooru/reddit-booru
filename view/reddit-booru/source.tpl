@@ -21,7 +21,7 @@
 		
 		</div>
 		<div id="overlay">
-			<div id="searchForm">
+			<div id="searchForm" class="form">
 				<h2>Search</h2>
 				<div class="field">
 					<div class="subField">
@@ -58,9 +58,11 @@
 						</li>
 					</ul>
 				</div>
-				<div id="btnSubmit" class="searchButton">Search</div>
-				<p class="tip"><strong>PRO TIP</strong> - Leave the keywords box blank to see the latest images from the selected subreddits. Your selections will be remembered!</p>
-				<input type="hidden" value="{SOURCE_ID}" name="sourceId" />
+                <div class="buttons">
+                    <button id="btnSubmit" class="searchButton">Search</button>
+                    <p class="tip"><strong>PRO TIP</strong> - Leave the keywords box blank to see the latest images from the selected subreddits. Your selections will be remembered!</p>
+                    <input type="hidden" value="{SOURCE_ID}" name="sourceId" />
+                </div>
 			</div>
            <div id="uploadImagesForm" class="form">
                 <h2>Upload</h2>
