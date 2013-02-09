@@ -21,9 +21,8 @@ namespace Controller {
 			$sources = Lib\Url::Get('sources', 1, $_COOKIE);
 			
 			// Check to see if we got a specific subdomain
-			if (preg_match('/([\w]+)\.redditbooru\.com/is', $_SERVER['HTTP_HOST'], $matches)) {			
+			if (preg_match('/([\w]+)\.redditbooru\.com/is', $_SERVER['HTTP_HOST'], $matches)) {
 				$domain = $matches[1];
-				$domain = 'awwnime';
 				if ($domain != 'www' && $domain != 'beta') {
 					$domain = Api\Source::getBySubdomain([ 'domain' => $domain ]);
 					// If no sub was found, redirect to the main page
@@ -40,7 +39,10 @@ namespace Controller {
 				}
 			}
 			
-			$jsonOut = null;
+            $display = 'thumbs';
+			$thumb = null;
+            $jsonOut = null;
+            $postTitle = null;
 			$urlOut = '/api/?type=json&method=post.searchPosts&getSource=true&getImages=true';
 			$action = Lib\Url::Get('action', false);
 			
@@ -49,9 +51,25 @@ namespace Controller {
 					$user = Lib\Url::Get('user');
 					$jsonOut = Api\Post::searchPosts([ 'user' => $user, 'getImages' => true, 'getSource' => true, 'sources' => $sources ]);
 					$urlOut .= '&user=' . $user;
+                    
+                    if (count($jsonOut) > 0) {
+                        $postTitle = 'Posts by ' . $user;
+                    }
+                    
 					break;
+                case 'gallery':
+                    $jsonOut = Api\Post::searchPosts([ 'id' => $_GET['post'], 'getImages' => true, 'getSource' => true ]);
+                    if (count($jsonOut) > 0) {
+                        $postTitle = $jsonOut[0]->title;
+                    }
+                    $display = 'images';
+                    break;
 				case 'post':
 					$jsonOut = Api\Post::searchPosts([ 'externalId' => $_GET['post'], 'getImages' => true, 'getSource' => true ]);
+                    if (count($jsonOut) > 0) {
+                        $postTitle = $jsonOut[0]->title;
+                    }
+                    $display = 'images';
 					break;
 				default:
 					if (is_array($sources)) {
@@ -63,6 +81,13 @@ namespace Controller {
 					break;
 			}
 			
+            if (count($jsonOut) > 0) {
+                $thumb = $jsonOut[0]->images[0]->cdnUrl;
+            }
+            
+            Lib\Display::setVariable('display', $display);
+            Lib\Display::setVariable('thumb', addslashes($thumb));
+            Lib\Display::setVariable('post_title', addslashes($postTitle));
 			Lib\Display::setVariable('sources', json_encode(Api\Source::getAllEnabled()));
 			Lib\Display::setVariable('start_up', json_encode($jsonOut));
 			Lib\Display::setVariable('next_url', $urlOut);
