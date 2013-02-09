@@ -21,5 +21,14 @@
     {
 		"rule": "^r/([^/.]+)/comments/([^/.]+)/(.+)",
         "replace": "action=post&post=$2"
+    },
+    {
+		"redirect": true,
+        "rule": "^gallery/([\\d]+)$",
+        "replace": "/gallery/$1/"
+    },
+    {
+		"rule": "^gallery/([\\d]+)/$",
+        "replace": "action=gallery&post=$1"
     }
 ]
