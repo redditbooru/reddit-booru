@@ -7,10 +7,11 @@ namespace Api {
 	
 	define('HISTOGRAM_BUCKETS', 4);
 	define('HISTORGAM_GRANULARITY', 256 / HISTOGRAM_BUCKETS);
-	define('CDN_URL_BASE', 'http://cdn.awwni.me/');
+	define('CDN_FOLDER', 'test/');
+    define('CDN_URL_BASE', 'http://cdn.awwni.me/');
 	
 	if (!defined('__INCLUDE__')) {
-		define('__INCLUDE__', './');
+		define('__INCLUDE__', $_SERVER['DOCUMENT_ROOT'] . '/');
 	}
 	
 	class Image extends Lib\Dal {
@@ -178,8 +179,6 @@ namespace Api {
 			$localFile = __INCLUDE__ . 'cache/' . $postId . '_' . md5(microtime(true));
 			$retVal = null;
 			
-			require_once(__INCLUDE__ . 'lib/S3.php');
-			
 			if (self::downloadImage($url, $localFile)) {
 				
 				$retVal = new Image();
@@ -202,21 +201,30 @@ namespace Api {
 					$retVal->generateHistogram();
 					$retVal->getImageDimensions();
 					
-					if (null != $postId && $retVal->sync()) {
+					if ($retVal->sync()) {
 					
 						// Rename and upload to Amazon
 						if ($retVal->id) {
 							$newFile = base_convert($retVal->id, 10, 36) . '.' . $ext;
 							rename($retVal->localFile, __INCLUDE__ . 'cache/' . $newFile);
 							$retVal->localFile = __INCLUDE__ . 'cache/' . $newFile;
-							if (AWS_ENABLED) {
-								$s3 = new \S3(AWS_KEY, AWS_SECRET);
-								$data = $s3->inputFile(__INCLUDE__ . 'cache/' . base_convert($retVal->id, 10, 36) . '.' . $ext);
-								if ($s3->putObject($data, 'cdn.awwni.me', $newFile, \S3::ACL_PUBLIC_READ)) {
-									$retVal->cdnUrl = CDN_URL_BASE . $newFile;
-									$retVal->sync();
-								}
-								unlink($newFile);
+							
+                            // Upload to the S3 store if it's not there already
+                            if (AWS_ENABLED) {
+                                if (strpos(strtolower($url), 'cdn.awwni.me') === false) {
+                                    require_once(__INCLUDE__ . 'lib/S3.php');
+                                    $s3 = new \S3(AWS_KEY, AWS_SECRET);
+                                    $data = $s3->inputFile(__INCLUDE__ . 'cache/' . base_convert($retVal->id, 10, 36) . '.' . $ext);
+                                    if ($s3->putObject($data, 'cdn.awwni.me', CDN_FOLDER . $newFile, \S3::ACL_PUBLIC_READ)) {
+                                        $retVal->cdnUrl = CDN_URL_BASE . CDN_FOLDER . $newFile;
+                                    }
+                                } else {
+                                    $retVal->cdnUrl = $url;
+                                }
+                                
+                                if ($retVal->cdnUrl) {
+                                    $retVal->sync();
+                                }
 							}
 						}
 						
