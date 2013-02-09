@@ -182,7 +182,8 @@ namespace Api {
 			
 			if (false === $retVal) {
 			
-				$user = Lib\Url::Get('user', false, $vars);
+				$id = Lib\Url::GetInt('id', null, $vars);
+                $user = Lib\Url::Get('user', false, $vars);
 				$getImages = Lib\Url::GetBool('getImages', $vars);
 				$getSource = Lib\Url::GetBool('getSource', $vars);
 				$sort = Lib\Url::Get('sort', 'desc', $vars);
@@ -197,6 +198,11 @@ namespace Api {
 				
 				$query = 'SELECT * FROM `posts` p WHERE ';
 				
+                if ($id) {
+                    $params[':id'] = $id;
+                    $query .= 'post_id = :id AND ';
+                }
+                
 				if ($user) {
 					$params[':user'] = $user;
 					$query .= 'post_poster = :user AND ';
