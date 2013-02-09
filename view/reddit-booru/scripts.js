@@ -77,15 +77,19 @@
 	
 	config = {
 		panelWidth:215,
-		afterDate:null
+		afterDate:null,
+        itemsPerPage:25
 	},
 	
 	templates = {
-		images:$('#tplGalleryThumbs').html(),
+		thumbs:$('#tplGalleryThumbs').html(),
+		images:$('#tplGalleryImages').html(),
 		more:$('#tplMoreButton').html(),
 		subChecks:$('#tplSubCheckbox').html(),
 		imageSearchOriginal:$('#tplImageSearchOriginal').html(),
-		imageSearchList:$('#tplImageSearchList').html()
+		imageSearchList:$('#tplImageSearchList').html(),
+        uploadImageItem:$('#tplUploadImageItem').html(),
+        postTitle:$('#tplPostTitle').html()
 	},
 	
 	$images = $('#images'),
@@ -141,13 +145,19 @@
 	},
 	
 	displayImages = function(data) {
-		var out = [];
+        
+        var
+            out = [],
+            template = templates[display];
 		
 		$images.find('.more').remove();
 		for (var i = 0, count = data.length; i < count; i++) {
-			out.push(Mustache.to_html(templates.images, data[i]));
+			out.push(Mustache.to_html(template, data[i]));
 		}
-		out.push(Mustache.to_html(templates.more));
+        
+        if (data.length >= config.itemsPerPage) {
+            out.push(Mustache.to_html(templates.more));
+        }
 		config.afterId = data[data.length - 1].dateCreated;
 		
 		$images.append(out.join(''));
@@ -156,7 +166,9 @@
 	searchForm = {
 	
 		display:function(e) {
-			$overlay.fadeIn();
+			$overlay.find('.form').hide();
+            $overlay.find('#searchForm').show();
+            $overlay.fadeIn();
 		},
 		
 		hide:function(e) {
@@ -177,13 +189,13 @@
 			}
 		},
 		
-		submit:function(e) {
+		submit:function(e, forcedKeywords) {
 			
 			var
 				query = '/api/?type=json&method=post.searchPosts&getImages=true&getSource=true',
 				sources = $('[name="chkSources"]:checked'),
 				sizes = $('[name="chkSizes"]:checked'),
-				keywords = $('#txtKeywords').val(),
+				keywords = forcedKeywords || $('#txtKeywords').val(),
 				upload = $('#uplImage').val(),
 				temp = [];
 			
@@ -254,6 +266,8 @@
 				}
 			
 			}
+            
+            window.location.hash = '!#?q=' + keywords;
 			
 		},
 		
@@ -274,7 +288,109 @@
 			$overlay.find('input[value="all"]').on('click', searchForm.allCheck);
 		}
 		
-	}
+	},
+    
+    uploadForm = {
+        
+        $:{
+            form:$overlay.find('#uploadImagesForm'),
+            list:$overlay.find('#uploadImagesForm ul'),
+            txtTitle:$overlay.find('#txtTitle'),
+            txtUrl:$overlay.find('#txtUrl'),
+            uploadForm:$overlay.find('#uploadPictureForm'),
+            hdnUploadId:$overlay.find('#hdnUploadId')
+        },
+        
+        imageFirst:null,
+        images:[],
+        
+        display:function() {
+			$overlay.find('.form').hide();
+            uploadForm.$.form.show();
+            $overlay.fadeIn();
+        },
+        
+        albumCreateCallback:function(data) {
+            
+            if (data.success) {
+                window.location.href = '/gallery/' + data.post.id;
+            }
+            
+        },
+        
+        addImageClick:function(e) {
+            var uploadId = (new Date()).getTime();
+            if (uploadForm.$.txtUrl.val().indexOf('http://') !== 0) {
+                uploadForm.$.hdnUploadId.val(uploadId);
+                $('#uploadPictureForm').submit();
+            } else {
+                $.ajax({
+                    url:'upload.php',
+                    type:'POST',
+                    dataType:'json',
+                    data:{ url:uploadForm.$.txtUrl.val(), hdnUploadId:uploadId },
+                    success:uploadForm.uploadImageCallback
+                });
+                uploadForm.$.txtUrl.val('').focus();
+            }
+            uploadForm.$.list.append(Mustache.to_html(templates.uploadImageItem, { uploadId:uploadId }));
+            
+        },
+        
+        doneClick:function(e) {
+            
+            if (uploadForm.images.length > 0) {
+                
+                if (uploadForm.images.length === 1) {
+                    window.location.href = uploadForm.imageFirst;
+                }
+                
+                var data = { title:$.trim(uploadForm.$.txtTitle.val()), images:uploadForm.images.join(',') };
+                
+                // Single images don't require a title
+                if (data.title.length > 0) {
+                    $.ajax({
+                        url:'create.php',
+                        type:'POST',
+                        dataType:'json',
+                        data:data,
+                        success:uploadForm.albumCreateCallback
+                    });
+                }
+                
+            }
+            
+        },
+        
+        uploadImageCallback:function(data) {
+            
+            if (data.success) {
+                var $item = uploadForm.$.form.find('[data-id="' + data.uploadId + '"]');
+                $item
+                    .removeClass('uploading')
+                    .css({ background:'url(/thumb.php?file=' + escape(data.image.cdnUrl) + '&width=180&height=180)' })
+                    .append('<img src="/view/reddit-booru/images/upload_okay.png" alt="upload complete" />');
+                uploadForm.images.push(data.image.id);
+                switch (uploadForm.images.length) {
+                    case 1:
+                        uploadForm.images.imageFirst = data.image.cdnUrl;
+                        break;
+                    case 2:
+                        uploadForm.$.form.find('.title').fadeIn();
+                        break;
+                }
+            }
+            
+        },
+        
+        init:function() {
+            $('#uploadButton').on('click', uploadForm.display);
+            $('#btnAddImage').on('click', uploadForm.addImageClick);
+            $('#btnCreate').on('click', uploadForm.doneClick);
+            window.uploadImageCallback = uploadForm.uploadImageCallback;
+        }
+    
+    },
 	
 	imageSearchCallback = window.imageSearchCallback = function(data) {
 	
@@ -308,18 +424,30 @@
 			windowResize();
 		});
 		
-		if (startUp) {
-			displayImages(startUp);
-		} else {
-			$.ajax({
-				url:'http://beta.redditbooru.com/api/?type=json&method=image.getImagesBySource&sources=' + window.sources + '&deep=true',
-				dataType:'jsonp',
-				success:ajaxCallback
-			});
-		}
-		
-		$images.on('click', '.more', moreClick);
+		$images
+            .on('click', '.more', moreClick)
+            .addClass(display);
 		searchForm.init();
+        uploadForm.init();
+        
+        // Check for a search on the query string
+        var queryString = window.location.href.split('#!?q=');
+        if (queryString.length === 1) {        
+            if (startUp) {
+                if (postTitle) {
+                    $images.html(Mustache.to_html(templates.postTitle, postTitle));
+                }
+                displayImages(startUp); 
+            } else {
+                $.ajax({
+                    url:'http://beta.redditbooru.com/api/?type=json&method=image.getImagesBySource&sources=' + window.sources + '&deep=true',
+                    dataType:'jsonp',
+                    success:ajaxCallback
+                });
+            }
+        } else {
+            searchForm.submit(null, queryString[1]);
+        }
 	
 	}());
 
