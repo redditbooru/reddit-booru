@@ -64,8 +64,10 @@
 						</li>
 					</ul>
 				</div>
-				<div id="btnSubmit" class="searchButton">Search</div>
-				<p class="tip"><strong>PRO TIP</strong> - Leave the keywords box blank to see the latest images from the selected subreddits. Your selections will be remembered!</p>
+                <div class="buttons">
+                    <button id="btnSubmit" class="searchButton">Search</button>
+                    <p class="tip"><strong>PRO TIP</strong> - Leave the keywords box blank to see the latest images from the selected subreddits. Your selections will be remembered!</p>
+                </div>
 			</div>
             
             <div id="uploadImagesForm" class="form">
