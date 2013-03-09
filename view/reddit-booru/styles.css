@@ -19,7 +19,7 @@ button:hover { background:#9fcebc; color:#000; cursor:pointer; }
 #images .more:hover { background-position:0 -180px; }
 
 #images.images .image { float:none; margin:0 0 25px; text-align:center; }
-#images.images .image img { max-width:100%; width:auto; display:inline-block; height:auto; box-sizing:border-box; }
+#images.images .image img { max-width:100%; width:auto; display:inline-block; height:auto; box-sizing:border-box; -moz-box-sizing:border-box; }
 #images.images .more { display:none; }
 
 #overlay { position:fixed; top:0; left:0; bottom:0; right:0; background:url(images/overlay_bg.png); display:none; }
@@ -27,9 +27,9 @@ button:hover { background:#9fcebc; color:#000; cursor:pointer; }
 .form h2 { background:#e94e77; color:#c6e5d9; font:bold 18px/1 sans-serif; text-transform:uppercase; padding:10px; }
 .form .field { padding:10px; overflow:hidden; }
 .form .field > label, .form .subField > label { text-transform:uppercase; font:18px/1 sans-serif; padding-bottom:5px; }
-.form .subField { width:50%; float:left; padding-left:10px; box-sizing:border-box; }
+.form .subField { width:50%; float:left; padding-left:10px; box-sizing:border-box; -moz-box-sizing:border-box; }
 .form .subField:first-child { padding-left:0; }
-.form input[type="text"] { width:100%; box-sizing:border-box; padding:3px; font:14px sans-serif; }
+.form input[type="text"] { width:100%; box-sizing:border-box; -moz-box-sizing:border-box; padding:3px; font:14px sans-serif; }
 .form .checkboxList li { display:inline; padding-right:20px; }
 .form .checkboxList label { font:14px/1 sans-serif; }
 #btnSubmit { margin:10px auto; }
@@ -51,5 +51,6 @@ button:hover { background:#9fcebc; color:#000; cursor:pointer; }
 .imageSearchResult span { position:absolute; bottom:10px; padding:5px; background:url(images/overlay_bg.png); color:#fff; font:12px sans-serif; }
 .imageSearchResult .source { left:10px; }
 .imageSearchResult .age { right:10px; }
+.imageSearchResult .count { left:10px; top:10px; bottom:auto; }
 
 #ifUpload { display:none; }
