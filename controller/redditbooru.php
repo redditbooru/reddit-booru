@@ -88,7 +88,12 @@ namespace Controller {
             Lib\Display::setVariable('display', $display);
             Lib\Display::setVariable('thumb', addslashes($thumb));
             Lib\Display::setVariable('post_title', addslashes($postTitle));
-			Lib\Display::setVariable('sources', json_encode(Api\Source::getAllEnabled()));
+			
+            // Filter out only subreddit sources
+            $sources = Api\Source::getAllEnabled();
+            $sources = array_values(array_filter($sources, function($item) { return $item->type === 'subreddit'; }));
+            
+            Lib\Display::setVariable('sources', json_encode($sources));
 			Lib\Display::setVariable('start_up', json_encode($jsonOut));
 			Lib\Display::setVariable('next_url', $urlOut);
 			
