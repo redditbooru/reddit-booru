@@ -3,9 +3,7 @@
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf8" />
 		<title>redditbooru - a place where cute girls come to meet</title>
-		<link rel="stylesheet" type="text/css" href="/view/reddit-booru/styles.css?20121215" />
-		<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
-		<script type="text/javascript" src="/view/reddit-booru/mustache.min.js"></script>
+		<link rel="stylesheet" type="text/css" href="/view/reddit-booru/styles.css?2013-03-08" />
 	</head>
 	<body>
 		<header>
@@ -105,62 +103,12 @@
 			window.nextUrl = '{NEXT_URL}';
 			window.sources = {SOURCES};
 		</script>
-		<script type="text/template" id="tplGalleryImages">
-			{{#images}}
-				<div class="image" data-id="{{postId}}" data-source="{{sourceId}}" data-full="{{cdnUrl}}">
-					<a href="{{cdnUrl}}" target="_blank">
-						<img src="{{cdnUrl}}" alt="{{title}} [Score: {{score}}]" title="{{title}} [Score: {{score}}]" />
-					</a>
-				</div>
-			{{/images}}
-		</script>
-		<script type="text/template" id="tplGalleryThumbs">
-			{{#images}}
-				<div class="image" data-id="{{postId}}" data-source="{{sourceId}}" data-full="{{cdnUrl}}">
-					<a href="{{source.baseUrl}}/comments/{{externalId}}/" target="_blank">
-						<img src="/thumb.php?file={{cdnUrl}}&height=180&width=180" alt="{{title}} [Score: {{score}}]" title="{{title}} [Score: {{score}}]" />
-					</a>
-				</div>
-			{{/images}}
-		</script>
-		<script type="text/template" id="tplSubCheckbox">
-			{{#.}}
-				<li>
-					<input type="checkbox" id="chkSource{{id}}" name="chkSources" value="{{id}}" />
-					<label for="chkSource{{id}}">{{name}}</label>
-				</li>
-			{{/.}}
-		</script>
-		<script type="text/template" id="tplImageSearchOriginal">
-			<div class="imageSearchOriginal">
-				<h2>Original Image</h2>
-				<img src="{{original}}" />
-			</div>
-		</script>
-		<script type="text/template" id="tplImageSearchList">
-			<div class="imageSearchList">
-				<h2>Similar Images</h2>
-				{{#.}}
-					<div class="imageSearchResult" data-id="{{postId}}" data-source="{{sourceId}}">
-						<a href="{{source.baseUrl}}/comments/{{externalId}}" target="_blank">
-							<img src="/thumb.php?file={{image.cdnUrl}}&height=180&&width=360" alt="{{title}} [Score: {{score}}]" title="{{title}} [Score: {{score}}]" />
-						</a>
-						<span class="source">{{source.name}}</span>
-						<span class="age">{{age}} ago</span>
-					</div>
-				{{/.}}
-			</div>
-		</script>
-        <script type="text/template" id="tplPostTitle">
-            <h2>{{.}}</h2>
-        </script>
-        <script type="text/template" id="tplUploadImageItem">
-            <li class="imageUpload uploading" data-id="{{uploadId}}"></li>
-        </script>
-		<script type="text/template" id="tplMoreButton">
-			<div class="image more">More</div>
-		</script>
-		<script type="text/javascript" src="/view/reddit-booru/scripts.js?20130208"></script>
+        
+		<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+		<script type="text/javascript" src="/view/reddit-booru/handlebars.runtime.js"></script>
+		<script type="text/javascript" src="/view/reddit-booru/templates.js"></script>
+		<script type="text/javascript" src="/view/reddit-booru/scripts.js?2013-03-08"></script>
+        
 		<script type="text/javascript">
 			var _gaq=_gaq||[];_gaq.push(["_setAccount","UA-280226-8"]);_gaq.push(["_trackPageview"]);(function(){var a=document.createElement("script");a.type="text/javascript";a.async=!0;a.src=("https:"==document.location.protocol?"https://ssl":"http://www")+".google-analytics.com/ga.js";var b=document.getElementsByTagName("script")[0];b.parentNode.insertBefore(a,b)})();
 		</script>
