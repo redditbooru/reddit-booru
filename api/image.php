@@ -11,7 +11,7 @@ namespace Api {
     define('CDN_URL_BASE', 'http://cdn.awwni.me/');
 	
 	if (!defined('__INCLUDE__')) {
-		define('__INCLUDE__', $_SERVER['DOCUMENT_ROOT'] . '/');
+		define('__INCLUDE__', (strlen($_SERVER['DOCUMENT_ROOT']) > 0 ? $_SERVER['DOCUMENT_ROOT'] : getcwd()) . '/');
 	}
 	
 	class Image extends Lib\Dal {
@@ -201,7 +201,7 @@ namespace Api {
 					$retVal->generateHistogram();
 					$retVal->getImageDimensions();
 					
-					if ($retVal->sync()) {
+					if (false !== $postId && $retVal->sync()) {
 					
 						// Rename and upload to Amazon
 						if ($retVal->id) {
