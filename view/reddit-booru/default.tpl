@@ -35,14 +35,9 @@
 						<iframe id="ifUpload" name="ifUpload"></iframe>
 					</div>
 				</div>
-				<div class="field">
-					<label>Filter By Subreddit</label>
-					<ul class="checkboxList" id="sources">
-						
-					</ul>
-				</div>
-				<div class="field">
-					<label>Filter By Size</label>
+				<fieldset class="field" id="sources"></fieldset>
+				<fieldset class="field">
+					<legend>Filter By Size</legend>
 					<ul class="checkboxList">
 						<li>
 							<input type="checkbox" id="chkAll" name="chkSizes" value="all" checked="checked" />
@@ -61,7 +56,7 @@
 							<label for="chkPhone">Smart Phone</label>
 						</li>
 					</ul>
-				</div>
+				</fieldset>
                 <div class="buttons">
                     <button id="btnSubmit" class="searchButton">Search</button>
                     <p class="tip"><strong>PRO TIP</strong> - Leave the keywords box blank to see the latest images from the selected subreddits. Your selections will be remembered!</p>
