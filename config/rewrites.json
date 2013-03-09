@@ -19,7 +19,7 @@
         "replace": "action=user&user=$1"
     },
     {
-		"rule": "^r/([^/.]+)/comments/([^/.]+)/(.+)",
+		"rule": "^r/([^/.]+)/comments/([^/.]+)/(.+)?$",
         "replace": "action=post&post=$2"
     },
     {
