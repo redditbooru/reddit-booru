@@ -82,14 +82,14 @@
 	},
 	
 	templates = {
-		thumbs:$('#tplGalleryThumbs').html(),
-		images:$('#tplGalleryImages').html(),
-		more:$('#tplMoreButton').html(),
-		subChecks:$('#tplSubCheckbox').html(),
-		imageSearchOriginal:$('#tplImageSearchOriginal').html(),
-		imageSearchList:$('#tplImageSearchList').html(),
-        uploadImageItem:$('#tplUploadImageItem').html(),
-        postTitle:$('#tplPostTitle').html()
+		thumbs:Handlebars.templates.galleryThumbs,
+		images:Handlebars.templates.galleryImages,
+		more:Handlebars.templates.moreButton,
+		subChecks:Handlebars.templates.subCheckbox,
+		imageSearchOriginal:Handlebars.templates.imageSearchOriginal,
+		imageSearchList:Handlebars.templates.imageSearchList,
+        uploadImageItem:Handlebars.templates.uploadImageItem,
+        postTitle:Handlebars.templates.postTitle
 	},
 	
 	$images = $('#images'),
@@ -152,11 +152,11 @@
 		
 		$images.find('.more').remove();
 		for (var i = 0, count = data.length; i < count; i++) {
-			out.push(Mustache.to_html(template, data[i]));
+            out.push(template(data[i]));
 		}
         
         if (data.length >= config.itemsPerPage) {
-            out.push(Mustache.to_html(templates.more));
+            out.push(templates.more({}));
         }
 		config.afterId = data[data.length - 1].dateCreated;
 		
@@ -253,7 +253,7 @@
 				if (upload.length === 0) {
 				
 					query = query.replace('searchPosts', 'reverseImageSearch');
-					query += '&imageUri=' + encodeURIComponent(keywords) + '&count=6';
+					query += '&imageUri=' + encodeURIComponent(keywords) + '&count=6&getCount=true';
 					$.ajax({
 						url:query,
 						dataType:'json',
@@ -267,7 +267,7 @@
 			
 			}
             
-            window.location.hash = '!#?q=' + keywords;
+            window.location.hash = '#!q=' + keywords;
 			
 		},
 		
@@ -279,7 +279,7 @@
 			if ($('#sources').length > 0) {
 				var
 					prefSources = ($.cookie('sources') || '1').split(','),
-					sourceChecks = Mustache.to_html(templates.subChecks, [{ id:'all', name:'All' }]) +  Mustache.to_html(templates.subChecks, sources);
+					sourceChecks = templates.subChecks([{ id:'all', name:'All' }]) +  templates.subChecks(sources);
 				$('#sources').html(sourceChecks);
 				for (var i = 0, count = prefSources.length; i < count; i++) {
 					$('#chkSource' + prefSources[i]).attr('checked', true);
@@ -311,11 +311,9 @@
         },
         
         albumCreateCallback:function(data) {
-            
             if (data.success) {
                 window.location.href = '/gallery/' + data.post.id;
             }
-            
         },
         
         addImageClick:function(e) {
@@ -333,7 +331,7 @@
                 });
                 uploadForm.$.txtUrl.val('').focus();
             }
-            uploadForm.$.list.append(Mustache.to_html(templates.uploadImageItem, { uploadId:uploadId }));
+            uploadForm.$.list.append(templates.uploadImageItem({ uploadId:uploadId }));
             
         },
         
@@ -373,7 +371,7 @@
                 uploadForm.images.push(data.image.id);
                 switch (uploadForm.images.length) {
                     case 1:
-                        uploadForm.images.imageFirst = data.image.cdnUrl;
+                        uploadForm.imageFirst = data.image.cdnUrl;
                         break;
                     case 2:
                         uploadForm.$.form.find('.title').fadeIn();
@@ -399,13 +397,14 @@
 		$overlay.fadeOut();
 		
 		if (typeof data === 'object' && data.hasOwnProperty('body') && data.body.hasOwnProperty('results') && data.body.results.length > 0) {
-			out = Mustache.to_html(templates.imageSearchOriginal, data.body);
+			out = templates.imageSearchOriginal(data.body);
 			
 			for (var i = 0, count = data.body.results.length; i < count; i++) {
 				data.body.results[i].age = makeRelativeTime(data.body.results[i].age);
+                data.body.results[i].showCount = data.body.results[i].count > 1;
 			}
 			
-			out += Mustache.to_html(templates.imageSearchList, data.body.results);
+			out += templates.imageSearchList(data.body.results);
 			$images.html(out);
 		}
 	
@@ -431,22 +430,23 @@
         uploadForm.init();
         
         // Check for a search on the query string
-        var queryString = window.location.href.split('#!?q=');
+        var queryString = window.location.href.split('#!q=');
         if (queryString.length === 1) {        
             if (startUp) {
                 if (postTitle) {
-                    $images.html(Mustache.to_html(templates.postTitle, postTitle));
+                    $images.html(templates.postTitle(postTitle));
                 }
                 displayImages(startUp); 
             } else {
                 $.ajax({
-                    url:'http://beta.redditbooru.com/api/?type=json&method=image.getImagesBySource&sources=' + window.sources + '&deep=true',
+                    url:'/api/?type=json&method=image.getImagesBySource&sources=' + window.sources + '&deep=true',
                     dataType:'jsonp',
                     success:ajaxCallback
                 });
             }
-        } else {
-            searchForm.submit(null, queryString[1]);
+        } else {   
+            $('#txtKeywords').val(queryString[1]);
+            searchForm.submit(null, decodeURIComponent(queryString[1]));
         }
 	
 	}());
