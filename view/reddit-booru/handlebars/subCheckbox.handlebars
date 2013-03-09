@@ -3,4 +3,13 @@
         <input type="checkbox" id="chkSource{{id}}" name="chkSources" value="{{id}}" />
         <label for="chkSource{{id}}">{{name}}</label>
     </li>
-{{/.}}
+    {{#.}}
+        <li>
+            <input type="checkbox" id="chkSource{{id}}" name="chkSources" value="{{id}}" />
+            <label for="chkSource{{id}}">{{name}}</label>
+        </li>
+    {{/.}}
+    <li class="singleLine">
+        <input type="radio" name="rdoType" id="rdoSource" value="source" /><label for="rdoSource">Source</label>
+    </li>
+</ul>
