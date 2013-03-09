@@ -308,16 +308,22 @@ namespace Api {
 			$count = Lib\Url::GetInt('count', 5, $vars);
 			$getSource = Lib\Url::GetBool('getSource', $vars);
 			$sources = Lib\Url::Get('sources', null, $vars);
+            $getCount = Lib\Url::GetBool('getCount', $vars);
 			
 			$cacheKey = 'Post_reverseImageSearch_' . implode('_', $vars);
 			$retVal = Lib\Cache::Get($cacheKey);
 			
 			if (null != $file && false === $retVal) {
-				$image = Image::createFromImage($file);
+				$image = Image::createFromImage($file, false);
 				if (null !== $image) {
 					
 					$query = 'SELECT i.image_id, i.image_url, i.image_cdn_url, i.image_width, i.image_height, i.source_id';
 					$query .= ', p.post_id, p.post_external_id, p.post_title, p.post_date, ';
+                    
+                    if ($getCount) {
+                        $query .= ' (SELECT COUNT(1) FROM images WHERE post_id = p.post_id) AS count, ';
+                    }
+                    
 					$params = array();
 					for ($i = 1; $i <= HISTOGRAM_BUCKETS; $i++) {
 						$prop = 'histR' . $i;
@@ -361,6 +367,10 @@ namespace Api {
 								$obj->source = Source::getById([ 'sourceId' => $obj->sourceId ]);
 							}
 							
+                            if ($getCount) {
+                                $obj->count = (int) $row->count;
+                            }
+                            
 							$retVal->results[] = $obj;
 						}
 						
