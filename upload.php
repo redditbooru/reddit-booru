@@ -6,7 +6,7 @@ $url = Lib\Url::Get('url', null, $_POST);
 
 $retVal = new stdClass;
 $retVal->success = false;
-$retVal->uploadId = Lib\Url::GetInt('hdnUploadId', null, $_POST);
+$retVal->uploadId = Lib\Url::Get('hdnUploadId', null, $_POST);
 
 if (isset($_FILES['uplPicture']) && is_uploaded_file($_FILES['uplPicture']['tmp_name'])) {
         
