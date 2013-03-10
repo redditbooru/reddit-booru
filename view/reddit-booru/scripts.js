@@ -89,9 +89,34 @@
 		imageSearchOriginal:Handlebars.templates.imageSearchOriginal,
 		imageSearchList:Handlebars.templates.imageSearchList,
         uploadImageItem:Handlebars.templates.uploadImageItem,
-        postTitle:Handlebars.templates.postTitle
+        postTitle:Handlebars.templates.postTitle,
+        sourceMatch:Handlebars.templates.sourceMatch
 	},
 	
+    parseQueryString = function(qs) {
+    
+        var
+            retVal = {},
+            i = null,
+            count = 0,
+            kvp = null;
+
+        if (!qs) {
+            qs = location.href.indexOf('?') !== -1 ? location.href.split('?')[1] : null;
+        }
+        
+        if (qs) {
+            qs = qs.split('&');
+            for (i = 0, count = qs.length; i < count; i++) {
+                kvp = qs[i].split('=');
+                retVal[kvp[0]] = kvp.length === 1 ? true : kvp[1];
+            }
+        }
+        
+        return retVal;
+    
+    },
+    
 	$images = $('#images'),
 	$searchForm = $('#searchForm'),
 	$overlay = $('#overlay'),
@@ -177,9 +202,18 @@
 			}
 		},
 		
-		allCheck:function(e) {
-			var name = e.currentTarget.getAttribute('name');
-			$overlay.find('input[name="' + name + '"][value!="all"]').attr('checked', false);
+		typeCheck:function(e) {
+			var name = e.currentTarget.getAttribute('value');
+            switch (name) {
+                case 'all':
+                    $overlay.find('#sources input[type="checkbox"]').prop('checked', true);
+                    break;
+                case 'source':
+                    break;
+                default:
+                    $overlay.find('#sources input[name="rdoType"]').prop('checked', false);
+                    break;
+            }
 		},
 		
 		keyPress:function(e) {
@@ -197,31 +231,38 @@
 				sizes = $('[name="chkSizes"]:checked'),
 				keywords = forcedKeywords || $('#txtKeywords').val(),
 				upload = $('#uplImage').val(),
-				temp = [];
+				temp = [],
+                sourceSearch = $('#rdoSource:checked').length > 0;
 			
 			// We'll tack on the sources here because they're used in multiple search types
-			if (sources.length) {
-				temp = [];
-				sources.each(function() {
-					temp.push($(this).val());
-				});
-				
-				if (temp[0] !== 'all') {
-					query += '&sources=' + temp.join(',');
-				} else {
-					// If all was checked, adjust the cookie to view all by default
-					temp = [];
-					$('[name="chkSources"][value!="all"]').each(function() {
-						temp.push($(this).val());
-					});
-				}
-				$.cookie('sources', temp.join(','), { expires:365 });
-			} else if ($('[name="sourceId"]').length > 0) {
-				query += '&sources=' + $('[name="sourceId"]').val();
-			}
+            if (sourceSearch) {
+                query += '&sources=source';
+            } else {
+                if (sources.length) {
+                    temp = [];
+                    sources.each(function() {
+                        temp.push($(this).val());
+                    });
+                    
+                    if (temp[0] !== 'all') {
+                        query += '&sources=' + temp.join(',');
+                    } else {
+                        // If all was checked, adjust the cookie to view all by default
+                        temp = [];
+                        $('[name="chkSources"][value!="all"]').each(function() {
+                            temp.push($(this).val());
+                        });
+                    }
+                    sources = temp.join(',');
+                    $.cookie('sources', sources, { expires:365 });
+                } else if ($('[name="sourceId"]').length > 0) {
+                    sources = $('[name="sourceId"]').val();
+                    query += '&sources=' + sources;
+                }
+            }
 			
 			// If keywords isn't a url and no upload, do a standard search
-			if (keywords.indexOf('http://') === -1 && upload.length === 0) {
+			if (keywords.indexOf('http://') === -1 && upload.length === 0 && !sourceSearch) {
 			
 				if (keywords) {
 					query += '&keywords=' + encodeURIComponent(keywords);
@@ -267,7 +308,7 @@
 			
 			}
             
-            window.location.hash = '#!q=' + keywords;
+            window.location.hash = '#!q=' + keywords + '&source=' + sources;
 			
 		},
 		
@@ -279,13 +320,13 @@
 			if ($('#sources').length > 0) {
 				var
 					prefSources = ($.cookie('sources') || '1').split(','),
-					sourceChecks = templates.subChecks([{ id:'all', name:'All' }]) +  templates.subChecks(sources);
+					sourceChecks = templates.subChecks(sources);
 				$('#sources').html(sourceChecks);
 				for (var i = 0, count = prefSources.length; i < count; i++) {
 					$('#chkSource' + prefSources[i]).attr('checked', true);
 				}
 			}
-			$overlay.find('input[value="all"]').on('click', searchForm.allCheck);
+			$overlay.find('#sources input').on('change', searchForm.typeCheck);
 		}
 		
 	},
@@ -392,20 +433,29 @@
 	
 	imageSearchCallback = window.imageSearchCallback = function(data) {
 	
-		var out = '';
+		var out = '', match = {};
 		
 		$overlay.fadeOut();
 		
 		if (typeof data === 'object' && data.hasOwnProperty('body') && data.body.hasOwnProperty('results') && data.body.results.length > 0) {
-			out = templates.imageSearchOriginal(data.body);
-			
-			for (var i = 0, count = data.body.results.length; i < count; i++) {
-				data.body.results[i].age = makeRelativeTime(data.body.results[i].age);
-                data.body.results[i].showCount = data.body.results[i].count > 1;
-			}
-			
-			out += templates.imageSearchList(data.body.results);
-			$images.html(out);
+            if (data.body.sourceSearch) {
+                match.sourceUrl = data.body.results[0].link;
+                match.tags = data.body.results[0].meta.tags;
+                match.imageUrl = encodeURIComponent(data.body.results[0].image.url);
+                match.confidence = data.body.results[0].similarity;
+                out = templates.sourceMatch(match);
+            } else {
+                data.body.original = encodeURIComponent(data.body.original);
+                out = templates.imageSearchOriginal(data.body);
+                
+                for (var i = 0, count = data.body.results.length; i < count; i++) {
+                    data.body.results[i].age = makeRelativeTime(data.body.results[i].age);
+                    data.body.results[i].showCount = data.body.results[i].count > 1;
+                }
+                
+                out += templates.imageSearchList(data.body.results);
+            }
+            $images.html(out);
 		}
 	
 	},
@@ -430,7 +480,7 @@
         uploadForm.init();
         
         // Check for a search on the query string
-        var queryString = window.location.href.split('#!q=');
+        var queryString = window.location.href.split('#!');
         if (queryString.length === 1) {        
             if (startUp) {
                 if (postTitle) {
@@ -445,8 +495,31 @@
                 });
             }
         } else {   
-            $('#txtKeywords').val(queryString[1]);
-            searchForm.submit(null, decodeURIComponent(queryString[1]));
+            queryString = parseQueryString(queryString[1]);
+            
+            if (queryString.hasOwnProperty('q')) {
+                $('#txtKeywords').val(queryString.q);
+                if (queryString.hasOwnProperty('source')) {
+                    switch (queryString.source) {
+                        case 'all':
+                            $('#rdoAll').prop('checked', true);
+                            break;
+                        case 'source':
+                            $('#rdoSource').prop('checked', true);
+                            break;
+                        default:
+                            var sources = queryString.source.split(',');
+                            $('input[name="chkSources"]').prop('checked', false);
+                            for (var i = 0, count = sources.length; i < count; i++) {
+                                $('#chkSource' + sources[i]).prop('checked', true);
+                            }
+                            break;
+                    }
+                }
+                
+                searchForm.submit(null, decodeURIComponent(queryString.q));
+            }
+            
         }
 	
 	}());
