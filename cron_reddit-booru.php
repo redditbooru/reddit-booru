@@ -16,29 +16,35 @@ function downloadImage($url, $postId, $sourceId) {
 	}
 }
 
-$sources = Api\Source::getAllEnabled();
+function processSubreddit($source) {
 
-$reddit = new Api\Reddit(REDDIT_USER);
+	$reddit = new Api\Reddit(REDDIT_USER);
 
-foreach ($sources as $source) {
-	
-	echo '---- Processing ', $source->name, ' ---', PHP_EOL;
-	
 	$time = time();
 	$earliest = null;
 	
 	$afterId = '';
-		
-	$posts = $reddit->GetPageListing($source->name . '/new/', $i, $afterId, POST_COUNT);
+
+	$posts = $reddit->GetPageListing($source->name . '/new/', 0, $afterId, POST_COUNT);
 	if (null != $posts) {
 		$afterId = isset($posts->after) ? $posts->after : null;
 
 		foreach ($posts->children as $child) {
 			
 			if (strpos($child->data->domain, 'self.') === false && strpos($child->data->domain, 'youtu') === false) {
-				$post = Api\Post::getByExternalId($child->data->id, $source->id);
+				
+                // Check for reddit booru
+                
+                $post = Api\Post::getByExternalId($child->data->id, $source->id);
 				if (null == $post) {
 					$post = Api\Post::createFromRedditObject($child);
+                    
+                    // Check to see if this is a reddit booru gallery
+                    if (preg_match('/redditbooru\.com\/gallery\/([\d]+)/', $post->link, $match)) {
+                        $post->id = (int) $match[1];
+                        echo 'Redditbooru gallery: ' . $post->link, PHP_EOL;
+                    }
+                    
 					$post->sourceId = $source->id;
 					echo 'New post: ', $post->title, PHP_EOL;
 				} else {
@@ -80,10 +86,37 @@ foreach ($sources as $source) {
 	
 	// Process images
 	$posts = Api\Post::getUnprocessed($source->id);
+    echo count($posts) . ' unprocessed posts', PHP_EOL;
 	if (null != $posts) {
 		foreach ($posts as $post) {
-			
-			if (preg_match('/imgur\.com\/a\/([\w]+)/i', $post->link, $matches)) {
+            
+            // Check for redditbooru hosted images
+            if (strpos($post->link, 'http://cdn.awwni.me') === 0) {
+                // Check for a gallery
+                if (preg_match('/gallery\/([\d]+)\/', $post->link, $match)) {
+                    
+                    // Hide the reddit post we just created
+                    $post->visible = false;
+                    $post->sync();
+                    
+                    // Now make the reddit post the gallery post by doing an ID swap
+                    $post->visible = true;
+                    $post->id = (int) $match[1];
+                
+                } else {
+                
+                    // Find the image entry in the database for this
+                    $query = 'SELECT * FROM images WHERE post_id IS NULL AND image_cdn_url = :cdnUrl';
+                    $result = Lib\Db::Query($query, [ ':cdnUrl' => $post->link ]);
+                    if ($result && $result->count > 0) {
+                        $image = new Api\Image(Lib\Db::Fetch($result));
+                        $image->postId = $post->id;
+                        $image->sourceId = $source->id;
+                        $image->sync();
+                    }
+                
+                }
+            } else if (preg_match('/imgur\.com\/a\/([\w]+)/i', $post->link, $matches)) {
 				echo 'Imgur album "', $matches[1], '"', PHP_EOL;
 				$images = Api\Image::getImgurAlbum($matches[1]);
 				if (null != $images) {
@@ -99,6 +132,47 @@ foreach ($sources as $source) {
 			$post->sync();
 			
 		}
+	}
+
+}
+
+function processMumble($source) {
+
+	$reddit = new Api\Reddit(REDDIT_USER);
+	$posts = $reddit->GetPageListing('r/awwnime/new/', 0, '', POST_COUNT);
+	if (null != $posts) {
+	
+		foreach ($posts->children as $child) {
+			
+			if ($child->data->author == 'NearNihil' && $child->data->domain == 'self.awwnime' && false !== strpos($child->data->title, 'Multiplayer Moe')) {
+				$post = Api\Post::getByExternalId($child->data->id, $source->id);
+				if (null === $post) {
+					$post = Api\Post::createFromRedditObject($child);
+				}
+				$post->sourceId = $source->id;
+				$post->dateUpdated = time();
+				$post->sync();
+				break;
+			}
+		}
+	
+	}
+
+}
+
+$sources = Api\Source::getAllEnabled();
+
+foreach ($sources as $source) {
+	
+	echo '---- Processing ', $source->name, ' ---', PHP_EOL;
+	
+	switch ($source->type) {
+		case 'subreddit':
+			processSubreddit($source);
+			break;
+		case 'mumble':
+			processMumble($source);
+			break;
 	}
 
 }
