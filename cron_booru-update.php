@@ -38,7 +38,7 @@ while ($row = Lib\Db::fetch($result)) {
                 
                     if ($dbPost) {
                         echo 'ALREADY ADDED';
-                        $check = true;
+                        $check = false;
                     } else {
                         // Download and scan the image
                         $image = Api\Image::createFromImage((string) $attr->sample_url, false, $row->source_id);
