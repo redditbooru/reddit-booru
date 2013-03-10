@@ -4,12 +4,13 @@
 		<meta http-equiv="Content-Type" content="text/html; charset=utf8" />
 		<title>redditbooru - a place where cute girls come to meet</title>
 		<link rel="stylesheet" type="text/css" href="/view/reddit-booru/styles.css?2013-03-08" />
+        <link rel="stylesheet" type="text/css" href="/view/reddit-booru/sources/{SOURCE_NAME}/styles.css?2013-03-08" />
 	</head>
 	<body>
 		<header>
 			<h1>
 				<a href="/">
-					<img src="/view/reddit-booru/images/logo.png" alt="RedditBooru" />
+					<img src="/view/reddit-booru/sources/{SOURCE_NAME}/images/logo.png" alt="RedditBooru" />
 				</a>
 			</h1>
 			<button id="uploadButton" class="uploadButton">Upload</button>

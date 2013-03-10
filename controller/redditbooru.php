@@ -19,7 +19,8 @@ namespace Controller {
 		public static function render() {
 			
 			$sources = Lib\Url::Get('sources', 1, $_COOKIE);
-			
+			Lib\Display::setVariable('SOURCE_NAME', 'default');
+            
 			// Check to see if we got a specific subdomain
 			if (preg_match('/([\w]+)\.redditbooru\.com/is', $_SERVER['HTTP_HOST'], $matches)) {
 				$domain = $matches[1];
@@ -33,7 +34,6 @@ namespace Controller {
 						$sources = $domain->id;
 						Lib\Display::setVariable('SOURCE_NAME', $domain->subdomain);
 						Lib\Display::setVariable('SOURCE_ID', $domain->id);
-						Lib\Display::setTemplate('source');
 					}
 					
 				}

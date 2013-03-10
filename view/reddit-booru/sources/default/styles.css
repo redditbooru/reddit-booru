@@ -1,0 +1,16 @@
+/* redditbooru default theme specific styles */
+h1 { background:#e94e77; }
+button { background:#c6e5d9; }
+button:hover { background:#9fcebc; color:#000; }
+
+#images .image img { border:10px solid #f4ead5; }
+#images .more { background:url(images/more.png); border:10px solid #f4ead5; }
+
+.form { border:10px solid #f4ead5; background:#fff; }
+.form h2 { background:#e94e77; color:#c6e5d9; }
+
+.imageSearchOriginal img { border:10px solid #f4ead5; }
+.imageSearchResult img { border:10px solid #f4ead5; }
+.imageSearchResult span { color:#fff; }
+
+.sourceMatch img { border:10px solid #f4ead5; }
