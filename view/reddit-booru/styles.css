@@ -4,18 +4,18 @@ a img { border:0; }
 
 .redditThumb { display:none; }
 
-header { position:fixed; top:0; left:0; right:0; }
-h1 { background:#e94e77; height:57px; overflow:hidden; }
-button { background:#c6e5d9; border:0; color:#333; font:bold 18px/1 sans-serif; padding:7px 20px; text-transform:uppercase; }
-button:hover { background:#9fcebc; color:#000; cursor:pointer; }
+header { top:0; left:0; right:0; }
+h1 { height:57px; overflow:hidden; }
+button { border:0; font:bold 18px/1 sans-serif; padding:7px 20px; text-transform:uppercase; }
+button:hover { cursor:pointer; }
 
 #searchButton { position:absolute; top:12px; right:15px; }
 #uploadButton { position:absolute; top:12px; right:145px; }
 
 #images { padding:15px 0 0 15px; margin:0 auto; overflow:hidden; margin-top:58px; }
 #images .image { float:left; margin:0 15px 15px 0; }
-#images .image img { display:block; width:180px; height:180px; background:url(images/ajax.gif) no-repeat center center; border:10px solid #f4ead5; }
-#images .more { width:180px; height:0; padding-top:180px; overflow:hidden; background:url(images/more.png); cursor:pointer; border:10px solid #f4ead5; }
+#images .image img { display:block; width:180px; height:180px; background:url(images/ajax.gif) no-repeat center center; }
+#images .more { width:180px; height:0; padding-top:180px; overflow:hidden; cursor:pointer; }
 #images .more:hover { background-position:0 -180px; }
 
 #images.images .image { float:none; margin:0 0 25px; text-align:center; }
@@ -23,15 +23,19 @@ button:hover { background:#9fcebc; color:#000; cursor:pointer; }
 #images.images .more { display:none; }
 
 #overlay { position:fixed; top:0; left:0; bottom:0; right:0; background:url(images/overlay_bg.png); display:none; }
-.form { border:10px solid #f4ead5; width:600px; margin:58px auto 0; background:#fff; }
-.form h2 { background:#e94e77; color:#c6e5d9; font:bold 18px/1 sans-serif; text-transform:uppercase; padding:10px; }
+.form { width:600px; margin:58px auto 0; }
+.form h2 { font:bold 18px/1 sans-serif; text-transform:uppercase; padding:10px; }
+.form fieldset { margin:0 10px 20px; }
+.form legend { margin:0 10px; text-transform:uppercase; font:18px/1 sans-serif; }
 .form .field { padding:10px; overflow:hidden; }
 .form .field > label, .form .subField > label { text-transform:uppercase; font:18px/1 sans-serif; padding-bottom:5px; }
 .form .subField { width:50%; float:left; padding-left:10px; box-sizing:border-box; -moz-box-sizing:border-box; }
 .form .subField:first-child { padding-left:0; }
 .form input[type="text"] { width:100%; box-sizing:border-box; -moz-box-sizing:border-box; padding:3px; font:14px sans-serif; }
-.form .checkboxList li { display:inline; padding-right:20px; }
+.form .checkboxList { overflow:hidden; }
+.form .checkboxList li { display:block; float:left; padding-right:20px; width:110px; }
 .form .checkboxList label { font:14px/1 sans-serif; }
+.form .checkboxList li.singleLine { display:block; float:none; padding:10px 0; clear:both; }
 #btnSubmit { margin:10px auto; }
 .form .tip { font:14px sans-serif; padding:10px; }
 .buttons button { width:75%; display:block; margin:0 auto 15px; }
@@ -44,13 +48,20 @@ button:hover { background:#9fcebc; color:#000; cursor:pointer; }
 
 #images h2 { font:bold 24px/1 sans-serif; margin-bottom:10px; text-transform:uppercase; }
 .imageSearchOriginal { float:left; margin-right:20px; }
-.imageSearchOriginal img { max-width:580px; border:10px solid #f4ead5; display:block; }
+.imageSearchOriginal img { max-width:580px; display:block; }
 .imageSearchList { float:left; overflow:hidden; max-width:780px; }
 .imageSearchResult { float:left; margin:0 10px 10px 0; position:relative; }
-.imageSearchResult img { display:block; border:10px solid #f4ead5; width:360px; height:180px; background:url(images/ajax.gif) no-repeat center center; }
-.imageSearchResult span { position:absolute; bottom:10px; padding:5px; background:url(images/overlay_bg.png); color:#fff; font:12px sans-serif; }
+.imageSearchResult img { display:block; width:360px; height:180px; background:url(images/ajax.gif) no-repeat center center; }
+.imageSearchResult span { position:absolute; bottom:10px; padding:5px; background:url(images/overlay_bg.png); font:12px sans-serif; }
 .imageSearchResult .source { left:10px; }
 .imageSearchResult .age { right:10px; }
 .imageSearchResult .count { left:10px; top:10px; bottom:auto; }
+
+.sourceMatch { overflow:hidden; }
+.sourceMatch img { float:left; margin-right:20px; max-width:580px; display:block; }
+.sourceInfo { float:left; }
+.sourceInfo dt { font:bold 16px sans-serif; }
+.sourceInfo dd { font:14px sans-serif; margin-bottom:5px; }
+.sourceInfo ul { list-style:disc; padding-left:16px; }
 
 #ifUpload { display:none; }
