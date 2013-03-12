@@ -318,14 +318,15 @@ namespace Api {
 				$image = Image::createFromImage($file, false);
 				if (null !== $image) {
 					
-					$query = 'SELECT i.image_id, i.image_url, i.image_cdn_url, i.image_width, i.image_height, i.source_id';
-					$query .= ', p.post_id, p.post_external_id, p.post_title, p.post_date, ';
+					$query = 'SELECT i.image_id, i.image_url, i.image_cdn_url, i.image_width, i.image_height, i.source_id, i.distance';
+					$query .= ', p.post_id, p.post_external_id, p.post_title, p.post_date';
                     
                     if ($getCount) {
-                        $query .= ' (SELECT COUNT(1) FROM images WHERE post_id = p.post_id) AS count, ';
+                        $query .= ', (SELECT COUNT(1) FROM images WHERE post_id = p.post_id) AS count ';
                     }
                     
 					$params = array();
+                    $innerQuery = 'SELECT image_id, image_url, image_cdn_url, image_width, image_height, source_id, post_id, ';
 					for ($i = 1; $i <= HISTOGRAM_BUCKETS; $i++) {
 						$prop = 'histR' . $i;
 						$params[':red' . $i] = $image->$prop;
@@ -333,12 +334,10 @@ namespace Api {
 						$params[':green' . $i] = $image->$prop;
 						$prop = 'histB' . $i;
 						$params[':blue' . $i] = $image->$prop;
-						$query .= 'ABS(i.image_hist_r' . $i . ' - :red' . $i . ') + ABS(i.image_hist_g' . $i . ' - :green' . $i . ') + ABS(i.image_hist_b' . $i . ' - :blue' . $i . ') + ';
+						$innerQuery .= 'ABS(image_hist_r' . $i . ' - :red' . $i . ') + ABS(image_hist_g' . $i . ' - :green' . $i . ') + ABS(image_hist_b' . $i . ' - :blue' . $i . ') + ';
 					}
 					
-                    $query .= '0 AS distance ';
-					$where = '';
-                    
+                    $innerQuery .= '0 AS distance FROM images WHERE ';
 					if ($sources) {
                         if ($sources === 'source') {
                             $sources = 12; // To be replaced with a query that get's all booru sources
@@ -354,12 +353,12 @@ namespace Api {
                             $tmpList[] = ':source' . $i;
                             $i++;
                         }
-                        $where .= 'i.source_id IN (' . implode(',', $tmpList) . ') AND ';
-                            
+                        $innerQuery .= 'source_id IN (' . implode(',', $tmpList) . ')';
 					}
-					
+                    $innerQuery .= ' ORDER BY distance LIMIT ' . $count;
+                    
 					// Find the top five most similar images in the database
-					$query .= 'FROM images i INNER JOIN posts p ON p.post_id = i.post_id WHERE ' . $where . '1 ORDER BY distance, p.post_date LIMIT ' . $count;
+					$query .= ' FROM (' . $innerQuery . ') AS i INNER JOIN posts p ON p.post_id = i.post_id ORDER BY i.distance, p.post_date LIMIT ' . $count;
 					$result = Lib\Db::Query($query, $params);
 					$time = time();
 					if ($result) {
