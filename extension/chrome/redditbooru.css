@@ -1,0 +1,13 @@
+.rb-gallery { display:none; }
+.rb-gallery.visible { display:block; }
+.rb-gallery.loading { background:url(http://cdn.awwni.me/rbe-loader.gif) no-repeat 5px 7px; }
+.rb-controls { padding-left:32px; }
+.rb-control { cursor:pointer; display:inline-block; background-image:url(http://e.thumbs.redditmedia.com/r22WT2K4sio9Bvev.png); width:16px; height:0; overflow:hidden; padding-top:16px; margin:5px; }
+.rb-prev { background-position:0 -352px; }
+.rb-next { background-position:16px -352px; }
+.rb-prev:hover { background-position:0 -320px; }
+.rb-next:hover { background-position:16px -320px; }
+.rb-next.replay { background-position:16px -336px; }
+.rb-next.replay:hover { background-position:16px -304px; }
+.rb-label { position:relative; top:-9px; }
+.rb-image { max-width:80%; }

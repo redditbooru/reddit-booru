@@ -1,0 +1,9 @@
+{
+  "name": "redditbooru",
+  "fullName": "RedditBooru",
+  "id": "jid1-ud8I7tLgCJzpTg",
+  "description": "Browser extension for RedditBooru",
+  "author": "Matt Hackmann",
+  "license": "GPL 3.0",
+  "version": "0.1"
+}
