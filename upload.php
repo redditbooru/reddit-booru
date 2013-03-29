@@ -3,6 +3,7 @@
 require('lib/aal.php');
 
 $url = Lib\Url::Get('url', null, $_POST);
+$redirect = Lib\Url::GetBool('redirect', $_POST);
 
 $retVal = new stdClass;
 $retVal->success = false;
@@ -25,6 +26,11 @@ if (isset($_FILES['uplPicture']) && is_uploaded_file($_FILES['uplPicture']['tmp_
         $retVal->message = 'Unable to move uploaded file';
     }
     
+    if ($redirect && $retVal->success) {
+        header('Location: ' . $retVal->image->cdnUrl);
+        exit;
+    }
+    
 } else if ($url && strpos($url, 'http://') === 0) {
     
     $image = Api\Image::createFromImage($url);
@@ -33,6 +39,11 @@ if (isset($_FILES['uplPicture']) && is_uploaded_file($_FILES['uplPicture']['tmp_
         $retVal->image = $image;
     } else {
         $retVal->message = 'Invalid image';
+    }
+    
+    if ($redirect && $retVal->success) {
+        header('Location: ' . $retVal->image->cdnUrl);
+        exit;
     }
     
     // Echo what we've got and bail
