@@ -14,13 +14,21 @@ if ($file && ($outWidth || $outHeight)) {
 	$outFile = md5($file . '_' . $outWidth . '_' . $outHeight) . '.jpg';
 
 	// Check to see if there's a cached thumbnail already
-	if (file_exists ('cache/' . $outFile) && filemtime('cache/' . $outFile) > filemtime($file) && filesize('cache/' . $outFile) > 1024) {
+	if (file_exists ('cache/' . $outFile) && filemtime('cache/' . $outFile) > strtotime('-7 days') && filesize('cache/' . $outFile) > 1024) {
 		header ('Location: cache/' . $outFile);
 		exit;
 	}
 	
     $image = new Imagick($file);
     if ($image) {
+
+        if ($image->getNumberImages() > 0) {
+            foreach ($image as $frame) {
+                $image = $frame;
+                break;
+            }
+        }
+    
         $image->cropThumbnailImage($outWidth, $outHeight);
         $image->setFormat('JPEG');
         $handle = fopen('cache/' . $outFile, 'wb');
