@@ -4,17 +4,18 @@
 		<meta http-equiv="Content-Type" content="text/html; charset=utf8" />
 		<title>redditbooru - a place where cute girls come to meet</title>
 		<link rel="stylesheet" type="text/css" href="/view/reddit-booru/styles.css?2013-03-08" />
-        <link rel="stylesheet" type="text/css" href="/view/reddit-booru/sources/{SOURCE_NAME}/styles.css?2013-03-08" />
+        <link rel="stylesheet" type="text/css" href="/view/reddit-booru/sources/{SOURCE_NAME}/styles.css?2013-04-28" />
 	</head>
 	<body>
-		<header>
+		<header class="rb-header">
 			<h1>
 				<a href="/">
 					<img src="/view/reddit-booru/sources/{SOURCE_NAME}/images/logo.png" alt="RedditBooru" />
 				</a>
 			</h1>
-			<button id="uploadButton" class="uploadButton">Upload</button>
-			<button id="searchButton" class="searchButton">Search</button>
+			<button id="screenButton" class="rb-button button screenButton" title="Screen Saver Mode">Screen Saver</button>
+			<button id="uploadButton" class="rb-button uploadButton" title="Upload Images">Upload</button>
+			<button id="searchButton" class="rb-button searchButton" title="Search">Search</button>
 		</header>
 		<div id="images">
             <img src="{THUMB}" class="redditThumb" />
@@ -31,7 +32,7 @@
 						<label for="uplImage">By Upload</label>
 						<form action="/match.php?flushCache" method="post" target="ifUpload" enctype="multipart/form-data" id="uploadForm">
 							<input type="file" id="uplImage" name="uplImage" />
-							<input type="hidden" id="hdnSources" />
+							<input type="hidden" id="hdnSources" name="sources" />
 						</form>
 						<iframe id="ifUpload" name="ifUpload"></iframe>
 					</div>
@@ -90,6 +91,13 @@
                 </div>
             </div>
             
+            <div id="screenSaverArea">
+                <div class="ss-image"></div>
+                <div class="ss-controls">
+                    <button class="ss-control pause">Play/Pause</button>
+                </div>
+            </div>
+            
 		</div>
         
 		<script type="text/javascript">
@@ -102,8 +110,8 @@
         
 		<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
 		<script type="text/javascript" src="/view/reddit-booru/handlebars.runtime.js"></script>
-		<script type="text/javascript" src="/view/reddit-booru/templates.js"></script>
-		<script type="text/javascript" src="/view/reddit-booru/scripts.js?2013-03-08"></script>
+		<script type="text/javascript" src="/view/reddit-booru/templates.js?2013-03-11"></script>
+		<script type="text/javascript" src="/view/reddit-booru/scripts.js?2013-04-28"></script>
         
 		<script type="text/javascript">
 			var _gaq=_gaq||[];_gaq.push(["_setAccount","UA-280226-8"]);_gaq.push(["_trackPageview"]);(function(){var a=document.createElement("script");a.type="text/javascript";a.async=!0;a.src=("https:"==document.location.protocol?"https://ssl":"http://www")+".google-analytics.com/ga.js";var b=document.getElementsByTagName("script")[0];b.parentNode.insertBefore(a,b)})();
