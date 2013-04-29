@@ -4,15 +4,16 @@ a img { border:0; }
 
 .redditThumb { display:none; }
 
-header { top:0; left:0; right:0; }
 h1 { height:57px; overflow:hidden; }
 button { border:0; font:bold 18px/1 sans-serif; padding:7px 20px; text-transform:uppercase; }
 button:hover { cursor:pointer; }
 
-#searchButton { position:absolute; top:12px; right:15px; }
-#uploadButton { position:absolute; top:12px; right:145px; }
+.rb-header .rb-button, .ss-controls button { position:absolute; top:12px; background-image:url(/view/reddit-booru/images/icons-sprite.png); background-repeat:no-repeat; width:32px; height:0; padding:32px 0 0; border:4px solid #000; overflow:hidden; box-sizing:content-box; -moz-box-sizing:content-box; }
+#searchButton { right:15px; background-position:0 -32px; }
+#uploadButton { right:62px; }
+#screenButton { right:109px; background-position:0 -128px; }
 
-#images { padding:15px 0 0 15px; margin:0 auto; overflow:hidden; margin-top:58px; }
+#images { padding:15px 0 0 15px; margin:0 auto; overflow:hidden; }
 #images .image { float:left; margin:0 15px 15px 0; }
 #images .image img { display:block; width:180px; height:180px; background:url(images/ajax.gif) no-repeat center center; }
 #images .more { width:180px; height:0; padding-top:180px; overflow:hidden; cursor:pointer; }
@@ -23,7 +24,10 @@ button:hover { cursor:pointer; }
 #images.images .more { display:none; }
 
 #overlay { position:fixed; top:0; left:0; bottom:0; right:0; background:url(images/overlay_bg.png); display:none; }
-.form { width:600px; margin:58px auto 0; }
+#overlay.screenSaver { background:#000; }
+#overlay.screenSaver .ss-controls { display:block; }
+
+.form { width:600px; margin:58px auto 0; background:#fff; }
 .form h2 { font:bold 18px/1 sans-serif; text-transform:uppercase; padding:10px; }
 .form fieldset { margin:0 10px 20px; }
 .form legend { margin:0 10px; text-transform:uppercase; font:18px/1 sans-serif; }
@@ -33,9 +37,9 @@ button:hover { cursor:pointer; }
 .form .subField:first-child { padding-left:0; }
 .form input[type="text"] { width:100%; box-sizing:border-box; -moz-box-sizing:border-box; padding:3px; font:14px sans-serif; }
 .form .checkboxList { overflow:hidden; }
-.form .checkboxList li { display:block; float:left; padding-right:20px; width:110px; }
-.form .checkboxList label { font:14px/1 sans-serif; }
-.form .checkboxList li.singleLine { display:block; float:none; padding:10px 0; clear:both; }
+.form .checkboxList li { display:block; float:left; padding-right:20px; width:115px; }
+.form .checkboxList label { font:14px/1 sans-serif; padding-left:5px; }
+.form .checkboxList li.singleLine { display:block; float:none; padding:10px 0; clear:both; width:auto; }
 #btnSubmit { margin:10px auto; }
 .form .tip { font:14px sans-serif; padding:10px; }
 .buttons button { width:75%; display:block; margin:0 auto 15px; }
@@ -65,3 +69,11 @@ button:hover { cursor:pointer; }
 .sourceInfo ul { list-style:disc; padding-left:16px; }
 
 #ifUpload { display:none; }
+
+.ss-image img { position:absolute; max-height:100%; padding:10px 0; box-sizing:border-box; -moz-box-sizing:border-box; }
+.ss-image img.new { display:none; }
+.ss-controls { display:none; }
+.ss-controls button { right:15px; top:15px; background-color:#000; }
+.ss-controls button:hover { background-color:#000; border-color:#000; }
+.ss-controls .play { background-position:0 -64px; }
+.ss-controls .pause { background-position:0 -96px; }
