@@ -120,6 +120,7 @@
 	$images = $('#images'),
 	$searchForm = $('#searchForm'),
 	$overlay = $('#overlay'),
+    $window = $(window),
 	
 	makeRelativeTime = function(seconds) {
 	
@@ -155,7 +156,7 @@
 	
 	windowResize = function(e) {
 		var
-			width = $(window).width(),
+			width = $window.width(),
 			cols = Math.floor(width / config.panelWidth);
 		
 		$images.width(cols * config.panelWidth);
@@ -236,6 +237,7 @@
 			
 			// We'll tack on the sources here because they're used in multiple search types
             if (sourceSearch) {
+                sources = 'source';
                 query += '&sources=source';
             } else {
                 if (sources.length) {
@@ -431,6 +433,109 @@
     
     },
 	
+    screensaver = (function() {
+        
+        var
+            
+            delay = 7000,
+            $imgContainer = $overlay.find('.ss-image'),
+            $controls = $overlay.find('.ss-controls'),
+            $pause = $controls.find('button'),
+            images = [],
+            imageTimer = null,
+            controlsTimer = null,
+            controlsVisible = true,
+            currentImage = 0,
+            img = null,
+            
+            loadNext = function() {
+                img = new Image();
+                img.onload = imageLoaded;
+                img.onerror = loadNext;
+                img.src = images[currentImage];
+                currentImage = currentImage >= images.length ? 0 : currentImage + 1;
+            },
+            
+            imageLoaded = function() {
+                $imgContainer.find('img').fadeOut('slow', function() { $(this).remove(); });
+                this.className = 'new';
+                $imgContainer.append(this);
+                var $new = $imgContainer.find('.new');
+                
+                $new
+                    .css({ 
+                        left:(($window.width() - $new.width()) / 2) + 'px',
+                        top:(($window.height() - $new.outerHeight()) / 2) + 'px'
+                    })
+                    .fadeIn('slow', function() { $(this).removeClass('new'); });
+                    
+                imageTimer = setTimeout(loadNext, delay);
+            },
+            
+            playPauseClick = function(e) {
+            
+                if (null !== imageTimer) {
+                    clearTimeout(imageTimer);
+                    imageTimer = null;
+                } else {
+                    imageTimer = setTimeout(loadNext, delay);
+                }
+                $pause.toggleClass('pause').toggleClass('play');
+                e.stopPropagation();
+            
+            },
+            
+            mouseMove = function(e) {
+                if (!controlsVisible) {
+                    clearTimeout(controlsTimer);
+                    controlsVisible = true;
+                    $controls.stop().fadeTo('slow', 1, function() {
+                        controlsTimer = setTimeout(controlsTimeout, 4000);
+                    });
+                }
+            },
+            
+            controlsTimeout = function() {
+                controlsVisible = false;
+                $controls.fadeOut();
+            },
+            
+            launch = function() {
+                $overlay.addClass('screenSaver').fadeIn();
+                $overlay.find('.form').hide();
+                $overlay.find('#screenSaverArea').fadeIn();
+                
+                // Get the images on the page to use as the source of the screen saver
+                images = [];
+                currentImage = 0;
+                $('.image').each(function() {
+                    images.push(this.getAttribute('data-full'));
+                });
+                
+                loadNext();
+                $overlay.on('mousemove', mouseMove);
+                controlsTimer = setTimeout(controlsTimeout, 4000);
+            },
+            
+            close = function() {
+                img = null;
+                $imgContainer.empty();
+                clearTimeout(imageTimer);
+                clearTimeout(controlsTimer);
+                $overlay.removeClass('screenSaver');
+                $overlay.off('mousemove', mouseMove);
+            },
+            
+            init = function() {
+                $('#screenButton').on('click', launch);
+                $overlay.on('click', close);
+                $pause.on('click', playPauseClick);
+            };
+            
+            return { init:init };
+    
+    }()),
+    
 	imageSearchCallback = window.imageSearchCallback = function(data) {
 	
 		var out = '', match = {};
@@ -460,6 +565,21 @@
 	
 	},
 	
+    displayDefault = function() {
+        if (startUp) {
+            if (postTitle) {
+                $images.html(templates.postTitle(postTitle));
+            }
+            displayImages(startUp); 
+        } else {
+            $.ajax({
+                url:'/api/?type=json&method=image.getImagesBySource&sources=' + window.sources + '&deep=true',
+                dataType:'jsonp',
+                success:ajaxCallback
+            });
+        }
+    },
+    
 	ajaxCallback = function(data) {
 		if (typeof data == 'object' && data.hasOwnProperty('body') && data.body) {
 			displayImages(data.body);
@@ -476,25 +596,19 @@
 		$images
             .on('click', '.more', moreClick)
             .addClass(display);
-		searchForm.init();
+		
+        // Initialize sub modules
+        searchForm.init();
         uploadForm.init();
+        screensaver.init();
         
-        // Check for a search on the query string
-        var queryString = window.location.href.split('#!');
+        // Check for a search on the query string (genuine query string or hashbang)
+        var queryString = window.location.href.split('?');
+        queryString = queryString.length === 1 ? window.location.hash.split('#!') : queryString;
+        
         if (queryString.length === 1) {        
-            if (startUp) {
-                if (postTitle) {
-                    $images.html(templates.postTitle(postTitle));
-                }
-                displayImages(startUp); 
-            } else {
-                $.ajax({
-                    url:'/api/?type=json&method=image.getImagesBySource&sources=' + window.sources + '&deep=true',
-                    dataType:'jsonp',
-                    success:ajaxCallback
-                });
-            }
-        } else {   
+            displayDefault();
+        } else {
             queryString = parseQueryString(queryString[1]);
             
             if (queryString.hasOwnProperty('q')) {
@@ -518,6 +632,18 @@
                 }
                 
                 searchForm.submit(null, decodeURIComponent(queryString.q));
+            }
+            
+            if (queryString.hasOwnProperty('dialog')) {
+                
+                switch (queryString.dialog) {
+                    case 'search':
+                        searchForm.display();
+                        break;
+                }
+                
+                displayDefault();
+                
             }
             
         }
