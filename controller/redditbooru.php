@@ -21,6 +21,8 @@ namespace Controller {
 			$sources = Lib\Url::Get('sources', 1, $_COOKIE);
 			Lib\Display::setVariable('SOURCE_NAME', 'default');
             
+            $action = Lib\Url::Get('action', false);
+            
 			// Check to see if we got a specific subdomain
 			if (preg_match('/([\w]+)\.redditbooru\.com/is', $_SERVER['HTTP_HOST'], $matches)) {
 				$domain = $matches[1];
@@ -44,7 +46,6 @@ namespace Controller {
             $jsonOut = null;
             $postTitle = null;
 			$urlOut = '/api/?type=json&method=post.searchPosts&getSource=true&getImages=true';
-			$action = Lib\Url::Get('action', false);
 			
 			switch ($action) {
 				case 'user':
