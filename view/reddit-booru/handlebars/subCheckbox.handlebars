@@ -1,7 +1,7 @@
-{{#.}}
-    <li>
-        <input type="checkbox" id="chkSource{{id}}" name="chkSources" value="{{id}}" />
-        <label for="chkSource{{id}}">{{name}}</label>
+<legend>Search in...</legend>
+<ul class="checkboxList" id="sources">
+    <li class="singleLine">
+        <input type="radio" name="rdoType" id="rdoAll" value="all" /><label for="rdoAll">All</label>
     </li>
     {{#.}}
         <li>
@@ -10,6 +10,6 @@
         </li>
     {{/.}}
     <li class="singleLine">
-        <input type="radio" name="rdoType" id="rdoSource" value="source" /><label for="rdoSource">Source</label>
+        <input type="radio" name="rdoType" id="rdoSource" value="source" /><label for="rdoSource">Source (sauce import incomplete, results may be NSFW)</label>
     </li>
 </ul>
