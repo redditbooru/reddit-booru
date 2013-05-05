@@ -14,3 +14,7 @@ button:hover, .rb-header .rb-button:hover { background-color:#9fcebc; border-col
 .imageSearchResult span { color:#fff; }
 
 .sourceMatch img { border:10px solid #ccf7ec; }
+
+footer { background:#9fcebc; }
+footer a { color:#494a4c; }
+footer a:hover { text-decoration:none; }
