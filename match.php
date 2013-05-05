@@ -9,8 +9,9 @@ if (isset($_FILES['uplImage']) && is_uploaded_file($_FILES['uplImage']['tmp_name
 
 	$tmpFile = 'cache/' . uniqid();
 	if (move_uploaded_file($_FILES['uplImage']['tmp_name'], $_SERVER['DOCUMENT_ROOT'] . '/' . $tmpFile)) {
-        $sources = Lib\Url::Get('sources', '1');
-        $sources = Lib\Url::Post('sources', $sources);
+        $getSources = Lib\Url::Get('sources', '1');
+        $postSources = Lib\Url::Post('sources');
+        $sources = $postSources !== null ? $postSources : $getSources;
 		$results = Api\Post::reverseImageSearch([ 'imageUri' => $_SERVER['DOCUMENT_ROOT'] . '/' . $tmpFile, 'count' => 6, 'getSource' => true, 'sources' => $sources ]);
         if ($results) {
 			$out = new stdClass;
