@@ -2,13 +2,16 @@
 
     var
         
+        lastPage = 1,
+        
         gallery = $.fn.fbGallery = function(options) {
             
             return this.each(function() {
             
                 var
                     
-                    $parent = $(this).parents('.entry:first'),
+                    $this = $(this),
+                    $parent = $this.parents('.entry:first'),
                     $gallery = null,
                 
                     galleryImages = null,
@@ -30,6 +33,7 @@
                     },
                     
                     galleryDisplayClick = function(e) {
+                        $parent.find('.rb-expand').toggleClass('expanded');
                         $gallery.toggleClass('visible');
                     },
                     
@@ -64,8 +68,8 @@
                         }                        
                     };
                 
-                $('<a class="toggleImage expando-button collapsed image gallery linkImg rb-display">&nbsp;</a>').insertBefore($parent.find('p.tagline'))
-                $parent.find('.rb-display').on('click', galleryDisplayClick);
+                $('<a class="rb-expand">&nbsp;</a>').insertBefore($parent.find('p.tagline'))
+                $parent.find('.rb-expand').on('click', galleryDisplayClick);
                 
                 $parent.append(galleryHtml);
                 $gallery = $parent.find('.rb-gallery');
@@ -81,19 +85,63 @@
             
         },
         
-        init = (function() {
+        initExpando = function() {
+        
             $('a.title[href*="redditbooru.com/gallery/"]').each(function() {
-                
-                var
-                    href = this.getAttribute('href'),
-                    galleryId = /\/gallery\/([\d]+)/.exec(href),
-                    $entry = $(this).parents('.entry');
-                
-                if (galleryId) {
-                    $(this).fbGallery({ postId:galleryId[1] });
+                if (this.className.indexOf('rb-enabled') === -1) {
+                    var
+                        href = this.getAttribute('href'),
+                        galleryId = /\/gallery\/([\d]+)/.exec(href),
+                        $entry = $(this).parents('.entry');
+                    
+                    if (galleryId) {
+                        $(this).fbGallery({ postId:galleryId[1] }).addClass('rb-enabled');
+                    }
                 }
                 
             });
+            
+        },
+        
+        initMirrorLinks = function() {
+            
+            $('.buttons a.comments[href*="r/awwnime"]').each(function() {
+                if (!$(this).hasClass('rb-mirror')) {
+                    var newHref = this.href.replace('reddit.com', 'redditbooru.com');
+                    $(this).parents('.buttons:first').append('<li><a href="' + newHref + '" target="_blank">mirror</a></li>');
+                }
+            });
+            
+        },
+        
+        checkPage = function() {
+        
+            var 
+                $pageMarker = $('.NERPageMarker:last'),
+                currentPage = null;
+            
+            if ($pageMarker.length > 0) {
+                currentPage = $.trim($pageMarker.text().replace('Page ', ''));
+                if (currentPage !== lastPage) {
+                    initExpando();
+                    initMirrorLinks();
+                }
+                lastPage = currentPage;
+            }
+            
+            setTimeout(checkPage, 500);
+        
+        },
+        
+        init = (function() {
+
+            initExpando();
+            initMirrorLinks();
+            
+            // If never ending reddit is enabled, we need to check for links periodically
+            if ($('.neverEndingReddit').length > 0) {
+                setTimeout(checkPage, 500);
+            }
             
         }());
 
