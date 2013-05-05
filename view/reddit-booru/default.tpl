@@ -3,8 +3,8 @@
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf8" />
 		<title>redditbooru - a place where cute girls come to meet</title>
-		<link rel="stylesheet" type="text/css" href="/view/reddit-booru/styles.css?2013-03-08" />
-        <link rel="stylesheet" type="text/css" href="/view/reddit-booru/sources/{SOURCE_NAME}/styles.css?2013-04-28" />
+		<link rel="stylesheet" type="text/css" href="/view/reddit-booru/styles.css?2013-04-28" />
+        <link rel="stylesheet" type="text/css" href="/view/reddit-booru/sources/{SOURCE_NAME}/styles.css?2013-04-28v2" />
 	</head>
 	<body>
 		<header class="rb-header">
@@ -99,6 +99,11 @@
             </div>
             
 		</div>
+        
+        <footer>
+            <p class="disclaimer">Site by <a href="http://dxprog.com/" target="_blank">dxprog</a>. I claim no responsibility nor ownership of image content.</p>
+            <p class="tools">Download the plugin for <a href="https://chrome.google.com/webstore/detail/redditbooru-repost-finder/mmmnkbbceakbidnnajbnbcfdmalcfcal" target="_blank">Chrome</a> or <a href="https://addons.mozilla.org/en-US/firefox/addon/redditbooru/" target="_blank">Firefox</a>.</p>
+        </footer>
         
 		<script type="text/javascript">
 			window.display = '{DISPLAY}';
