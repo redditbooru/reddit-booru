@@ -14,8 +14,15 @@ button:hover { cursor:pointer; }
 #screenButton { right:109px; background-position:0 -128px; }
 
 #images { padding:15px 0 0 15px; margin:0 auto; overflow:hidden; }
-#images .image { float:left; margin:0 15px 15px 0; }
+#images .image { float:left; margin:0 15px 15px 0; position:relative; overflow:hidden; width:180px; height:180px; }
 #images .image img { display:block; width:180px; height:180px; background:url(images/ajax.gif) no-repeat center center; }
+#images .image .source { right:0; bottom:0; }
+#images .image.nsfw,
+#images .imageSearchResult.nsfw { background:url(images/nsfw.jpg) no-repeat center bottom; border-color:#e94e77 !important; }
+#images .image.nsfw img, 
+#images .imageSearchResult.nsfw img { position:absolute; top:-9999px; }
+#images .image.nsfw:hover img,
+#images .imageSearchResult.nsfw:hover img { position:static; }
 #images .more { width:180px; height:0; padding-top:180px; overflow:hidden; cursor:pointer; }
 #images .more:hover { background-position:0 -180px; }
 
@@ -54,12 +61,12 @@ button:hover { cursor:pointer; }
 .imageSearchOriginal { float:left; margin-right:20px; }
 .imageSearchOriginal img { max-width:580px; display:block; }
 .imageSearchList { float:left; overflow:hidden; max-width:780px; }
-.imageSearchResult { float:left; margin:0 10px 10px 0; position:relative; }
+.imageSearchResult { float:left; margin:0 10px 10px 0; position:relative; width:360px; height:180px; }
 .imageSearchResult img { display:block; width:360px; height:180px; background:url(images/ajax.gif) no-repeat center center; }
-.imageSearchResult span { position:absolute; bottom:10px; padding:5px; background:url(images/overlay_bg.png); font:12px sans-serif; }
-.imageSearchResult .source { left:10px; }
-.imageSearchResult .age { right:10px; }
-.imageSearchResult .count { left:10px; top:10px; bottom:auto; }
+.imageSearchResult span, #images span { position:absolute; bottom:0; padding:5px; background:url(images/overlay_bg.png); font:12px sans-serif; color:#fff; }
+.imageSearchResult .source { left:0; }
+.imageSearchResult .age { right:0; }
+#images .imageSearchResult span.count { left:0; top:0; bottom:auto; }
 
 .sourceMatch { overflow:hidden; }
 .sourceMatch img { float:left; margin-right:20px; max-width:580px; display:block; }
@@ -77,3 +84,8 @@ button:hover { cursor:pointer; }
 .ss-controls button:hover { background-color:#000; border-color:#000; }
 .ss-controls .play { background-position:0 -64px; }
 .ss-controls .pause { background-position:0 -96px; }
+
+footer { padding:15px; overflow:hidden; }
+footer p { font:16px sans-serif; }
+footer .disclaimer { float:left; }
+footer .tools { float:right; }
