@@ -7,8 +7,9 @@ namespace Api {
 	
 	define('HISTOGRAM_BUCKETS', 4);
 	define('HISTORGAM_GRANULARITY', 256 / HISTOGRAM_BUCKETS);
-	define('CDN_FOLDER', 'test/');
+	define('CDN_FOLDER', '');
     define('CDN_URL_BASE', 'http://cdn.awwni.me/');
+    define('LOCAL_STORAGE', '/var/www/redditbooru-images');
 	
 	if (!defined('__INCLUDE__')) {
 		define('__INCLUDE__', (strlen($_SERVER['DOCUMENT_ROOT']) > 0 ? $_SERVER['DOCUMENT_ROOT'] : getcwd()) . '/');
@@ -39,7 +40,8 @@ namespace Api {
 			'histB2' => 'image_hist_b2',
 			'histB3' => 'image_hist_b3',
 			'histB4' => 'image_hist_b4',
-			'isGood' => 'image_good'
+			'isGood' => 'image_good',
+            'contentRating' => 'image_rating'
 		);
 		
 		/**
@@ -161,15 +163,11 @@ namespace Api {
 		 * Blue component 4
 		 */
 		public $isGood = false;
-		
-		/**
-		 * Constructor
-		 */
-		public function __construct($obj = null) {
-			if (is_object($obj)) {
-				$this->copyFromDbRow($obj);
-			}
-		}
+        
+        /**
+         * Content rating
+         */
+        public $contentRating;
 		
 		/**
 		 * Downloads and syncs an image to the database
@@ -208,24 +206,21 @@ namespace Api {
 							$newFile = base_convert($retVal->id, 10, 36) . '.' . $ext;
 							rename($retVal->localFile, __INCLUDE__ . 'cache/' . $newFile);
 							$retVal->localFile = __INCLUDE__ . 'cache/' . $newFile;
+							if (LOCAL_STORAGE) {
+								copy($retVal->localFile, LOCAL_STORAGE . '/' . $newFile);
+							}
 							
                             // Upload to the S3 store if it's not there already
-                            if (AWS_ENABLED) {
-                                if (strpos(strtolower($url), 'cdn.awwni.me') === false) {
-                                    require_once(__INCLUDE__ . 'lib/S3.php');
-                                    $s3 = new \S3(AWS_KEY, AWS_SECRET);
-                                    $data = $s3->inputFile(__INCLUDE__ . 'cache/' . base_convert($retVal->id, 10, 36) . '.' . $ext);
-                                    if ($s3->putObject($data, 'cdn.awwni.me', CDN_FOLDER . $newFile, \S3::ACL_PUBLIC_READ)) {
-                                        $retVal->cdnUrl = CDN_URL_BASE . CDN_FOLDER . $newFile;
-                                    }
-                                } else {
-                                    $retVal->cdnUrl = $url;
+                            $retVal->cdnUrl = CDN_URL_BASE . CDN_FOLDER . $newFile;
+                            if (strpos(strtolower($url), 'cdn.awwni.me') === false && AWS_ENABLED) {
+                                require_once(__INCLUDE__ . 'lib/S3.php');
+                                $s3 = new \S3(AWS_KEY, AWS_SECRET);
+                                $data = $s3->inputFile(__INCLUDE__ . 'cache/' . base_convert($retVal->id, 10, 36) . '.' . $ext);
+                                if (!$s3->putObject($data, 'cdn.awwni.me', CDN_FOLDER . $newFile, \S3::ACL_PUBLIC_READ)) {
+                                    $retVal->cdnUrl = null;
                                 }
-                                
-                                if ($retVal->cdnUrl) {
-                                    $retVal->sync();
-                                }
-							}
+                            }
+                            $retVal->sync();
 						}
 						
 					}
@@ -245,66 +240,7 @@ namespace Api {
 		 * Gets images by a source or sources
 		 */
 		public static function getImagesBySource($vars) {
-			
-			$retVal = null;
-			$sources = isset($vars['sources']) ? $vars['sources'] : null;
-			$limit = isset($vars['limit']) && is_numeric($vars['limit']) ? (int)$vars['limit'] : 30;
-			$deep = isset($vars['deep']) && strtolower($vars['deep']) == 'true' ? true : false;
-			
-			if (is_numeric($sources) || is_array($sources)) {
-			
-				$sourceKey = is_array($sources) ? implode('-', $sources) : $sources;
-				$cacheKey = 'GetImagesBySource_' . $sourceKey . '_' . $limit;
-				$retVal = Lib\Cache::Get($cacheKey);
-				if (false === $retVal) {
-					
-					$params = array();
-					$columns = 'i.image_id, i.post_id, i.image_url, i.image_width, i.image_height, i.image_cdn_url, i.source_id';
-					$joins = '';
-					if ($deep) {
-						$columns .= ', p.post_title, p.post_date, p.post_score, p.post_poster, p.post_external_id, p.post_keywords';
-						$columns .= ', s.source_name, s.source_baseurl';
-						$joins = 'INNER JOIN posts p ON p.post_id = i.post_id INNER JOIN sources s ON s.source_id = i.source_id ';
-					}
-					
-					$query = 'SELECT ' . $columns . ' FROM `images` i ' . $joins . 'WHERE i.source_id ';
-					
-					if (is_numeric($sources)) {
-						$params[':sourceId'] = $sources;
-						$query .= '= :sourceId';
-					} else {
-						$query .= 'IN (';
-						for ($i = 0, $count = count($sources); $i < $count; $i++) {
-							$params[':sourceId' . $i] = $sources[$i];
-						}
-						$query .= implode(',', array_keys($params)) . ')';
-					}
-					
-					$query .= ' ORDER BY i.image_id DESC LIMIT ' . $limit;
-					
-					$result = Lib\Db::Query($query, $params);
-					if (null != $result && $result->count > 0) {
-						$retVal = array();
-						while ($row = Lib\Db::Fetch($result)) {
-							$obj = new Image($row);
-							if ($deep) {
-								$obj->post = new Post($row);
-								$obj->source = new Source($row);
-							}
-							$retVal[] = $obj;
-						}
-					} else {
-						$retVal = null;
-					}
-					
-					Lib\Cache::Set($cacheKey, $retVal);
-					
-				}
-			
-			}
-			
-			return $retVal;
-			
+
 		}
 		
 		/**
@@ -540,13 +476,13 @@ namespace Api {
 				$retVal->mimeType = $type;
 				switch ($type) {
 					case 'image/jpeg':
-						$retVal->image = imagecreatefromjpeg($file);
+						$retVal->image = @imagecreatefromjpeg($file);
 						break;
 					case 'image/png':
-						$retVal->image = imagecreatefrompng($file);
+						$retVal->image = @imagecreatefrompng($file);
 						break;
 					case 'image/gif':
-						$retVal->image = imagecreatefromgif($file);
+						$retVal->image = @imagecreatefromgif($file);
 						break;
 					default:
 						$retVal = null;
@@ -678,6 +614,12 @@ namespace Api {
 			$c = curl_init($url);
 			curl_setopt($c, CURLOPT_USERAGENT, 'moe downloader by /u/dxprog');
 			curl_setopt($c, CURLOPT_FOLLOWLOCATION, true);
+            
+            // Not the most ethical thing, but fake a referer for pixiv to get around the 403
+            if (strpos($url, 'pixiv.net')) {
+                curl_setopt($c, CURLOPT_REFERER, 'http://pixiv.net');
+            }
+            
 			curl_setopt($c, CURLOPT_RETURNTRANSFER, true);
 			curl_setopt($c, CURLOPT_TIMEOUT, 5);
 			return curl_exec($c);
