@@ -30,5 +30,13 @@
     {
 		"rule": "^gallery/([\\d]+)/$",
         "replace": "action=gallery&post=$1"
+    },
+    {
+        "rule": "^images/$",
+        "replace": "page=images"
+    },
+    {
+        "rule": "^cache/([^/.]+)",
+        "replace": "page=thumb&file=$1"
     }
 ]
