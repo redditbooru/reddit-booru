@@ -44,15 +44,15 @@ namespace Lib {
 			if (!$retVal) {
 			
 				// Seperate out any actual GET parameters that may have been passed along and store appropriately
-				if (strpos($uri, '?') !== false) {
-					$uri = explode('?', $uri);
+				if (strpos($_SERVER['REQUEST_URI'], '?') !== false) {
+					$uri = explode('?', $_SERVER['REQUEST_URI']);
 					$get = $uri[1];
 					$_SERVER['QUERY_STRING'] = $get;
 					$uri = $uri[0];
 					$get = explode('&', $get);
 					foreach ($get as $param) {
 						$p = explode('=', $param);
-						$_GET[$p[0]] = $p[1];
+						$_GET[$p[0]] = count($p) === 2 ? urldecode($p[1]) : true;
 					}
 				}
 				
@@ -93,7 +93,7 @@ namespace Lib {
 					}
 					
 				} else {
-					throw new Exception('URL_REQRITE: Congig file empty or malformed');
+					throw new Exception('URL_REWRITE: Congig file empty or malformed');
 				}
 				
 			}
