@@ -12,12 +12,7 @@ if (isset($_FILES['uplImage']) && is_uploaded_file($_FILES['uplImage']['tmp_name
         $getSources = Lib\Url::Get('sources', '1');
         $postSources = Lib\Url::Post('sources');
         $sources = $postSources !== null ? $postSources : $getSources;
-		$results = Api\Post::reverseImageSearch([ 'imageUri' => $_SERVER['DOCUMENT_ROOT'] . '/' . $tmpFile, 'count' => 6, 'getSource' => true, 'sources' => $sources ]);
-        if ($results) {
-			$out = new stdClass;
-			$out->body = $results;
-			$out->body->original = $tmpFile;
-		}
+		$out = Controller\Images::getByImage([ 'imageUri' => $_SERVER['DOCUMENT_ROOT'] . '/' . $tmpFile, 'count' => 6, 'getSource' => true, 'sources' => $sources ]);
 	}
 
 }
