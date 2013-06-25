@@ -20,7 +20,7 @@ namespace Api {
 			'dateUpdated' => 'post_updated',
 			'title' => 'post_title',
 			'link' => 'post_link',
-			'poster' => 'post_poster',
+			'userId' => 'user_id',
 			'keywords' => 'post_keywords',
 			'score' => 'post_score',
 			'processed' => 'post_processed',
@@ -76,7 +76,7 @@ namespace Api {
 		/**
 		 * Poster
 		 */
-		public $poster;
+		public $userId;
 		
 		/**
 		 * Date the post was created (unix timestamp)
@@ -102,22 +102,6 @@ namespace Api {
 		 * Object for storing non-schema data
 		 */
 		public $meta;
-	
-		/**
-		 * Constructor
-		 * @param $obj mixed Data to construct object around
-		 */
-		public function __construct($obj = null) {
-			if ($obj instanceOf Post) {
-				__copy($obj);
-			} else if (is_numeric($obj)) {
-				$this->getById($obj);
-			} else if (is_object($obj)) {
-				$this->copyFromDbRow($obj);
-				$this->processed = (bool)$this->processed;
-				$this->meta = json_decode($this->meta);
-			}
-		}
 		
 		private function __copy($obj) {
 			if ($obj instanceOf Post) {
@@ -128,7 +112,7 @@ namespace Api {
 				$this->dateUpdated = $obj->dateUpdated;
 				$this->title = $obj->title;
 				$this->link = $obj->link;
-				$this->poster = $obj->poster;
+				$this->userId = $obj->userId;
 				$this->keywords = $obj->keywords;
 				$this->score = $obj->score;
 				$this->processed = $obj->processed;
@@ -147,6 +131,7 @@ namespace Api {
 			if (null != $result && $result->count > 0) {
 				$row = Lib\Db::Fetch($result);
 				$retVal = new Post($row);
+				$retVal->meta = json_decode($retVal->meta);
 			}
 			return $retVal;
 			
@@ -304,25 +289,44 @@ namespace Api {
 		 */
 		public static function reverseImageSearch($vars) {
 		
+			$image = Lib\Url::Get('image', null, $vars);
 			$file = Lib\Url::Get('imageUri', null, $vars);
 			$count = Lib\Url::GetInt('count', 5, $vars);
 			$getSource = Lib\Url::GetBool('getSource', $vars);
+			$getUser = Lib\Url::GetBool('getUser', $vars);
 			$sources = Lib\Url::Get('sources', null, $vars);
             $getCount = Lib\Url::GetBool('getCount', $vars);
+            $maxRating = Lib\Url::Get('maxRating', 0, $vars);
             $sourceSearch = false;
-			
+
+            // If an image object was passed in, serialize and hash it for the cache key
+            if ($image instanceof Image) {
+            	$vars['image'] = md5(json_encode($image));
+            }
+
 			$cacheKey = 'Post_reverseImageSearch_' . implode('_', $vars);
 			$retVal = Lib\Cache::Get($cacheKey);
 			
-			if (null != $file && false === $retVal) {
-				$image = Image::createFromImage($file, false);
+			if ((null != $file || $image instanceof Image) && false === $retVal) {
+            
+				if (!($image instanceof Image)) {
+					$image = Image::createFromImage($file, false);
+				}
+
 				if (null !== $image) {
-					
+
 					$query = 'SELECT i.image_id, i.image_url, i.image_cdn_url, i.image_width, i.image_height, i.source_id, i.distance';
-					$query .= ', p.post_id, p.post_external_id, p.post_title, p.post_date';
+					$query .= ', p.post_id, p.post_external_id, p.post_title, p.post_date, p.post_score, p.user_id';
+					if ($getSource) {
+						$query .= ', s.source_name, s.source_baseurl, s.source_content_rating';
+					}
                     
                     if ($getCount) {
                         $query .= ', (SELECT COUNT(1) FROM images WHERE post_id = p.post_id) AS count ';
+                    }
+
+                    if ($getUser) {
+                    	$query .= ', u.user_name';
                     }
                     
 					$params = array();
@@ -337,8 +341,9 @@ namespace Api {
 						$innerQuery .= 'ABS(image_hist_r' . $i . ' - :red' . $i . ') + ABS(image_hist_g' . $i . ' - :green' . $i . ') + ABS(image_hist_b' . $i . ' - :blue' . $i . ') + ';
 					}
 					
-                    $innerQuery .= '0 AS distance FROM images WHERE ';
+                    $innerQuery .= '0 AS distance FROM images ';
 					if ($sources) {
+                        $innerQuery .= 'WHERE ';
                         if ($sources === 'source') {
                             $sources = 12; // To be replaced with a query that get's all booru sources
                             $getSource = false;
@@ -353,13 +358,23 @@ namespace Api {
                             $tmpList[] = ':source' . $i;
                             $i++;
                         }
-                        $innerQuery .= 'source_id IN (' . implode(',', $tmpList) . ')';
+                        $innerQuery .= ' source_id IN (' . implode(',', $tmpList) . ')';
 					}
                     $innerQuery .= ' ORDER BY distance LIMIT ' . $count;
                     
 					// Find the top five most similar images in the database
-					$query .= ' FROM (' . $innerQuery . ') AS i INNER JOIN posts p ON p.post_id = i.post_id ORDER BY i.distance, p.post_date LIMIT ' . $count;
+					$query .= ' FROM (' . $innerQuery . ') AS i INNER JOIN posts p ON p.post_id = i.post_id ';
+					if ($getSource) {
+						$query .= 'INNER JOIN sources s ON s.source_id = i.source_id ';
+					}
+
+					if ($getUser) {
+						$query .= 'INNER JOIN users u ON u.user_id = p.user_id ';
+					}
+
+					$query .= 'ORDER BY i.distance, p.post_date LIMIT ' . $count;
 					$result = Lib\Db::Query($query, $params);
+                    
 					$time = time();
 					if ($result) {
 					
@@ -367,44 +382,21 @@ namespace Api {
 						$retVal->original = $file;
                         $retVal->sourceSearch = $sourceSearch;
 						while($row = Lib\Db::Fetch($result)) {
-							$obj = new Post($row);
-							$obj->image = new Image($row);
-							$obj->distance = $row->distance;
-							$obj->similarity = abs(100 - (100 * ($row->distance / HISTOGRAM_BUCKETS * 3)));
-							$obj->age = $time - $obj->dateCreated;
-							
-                            if ($sourceSearch && isset($obj->meta->tags)) {
-                                // What's going on here
-                                // - trim off the bullshit extra spaces on each end
-                                // - spaces denote different tags, so replace those with commas
-                                // - replace underscores with spaces as underscores denote word separation
-                                // - uppercase the first letter of each word
-                                // - make it all a nice, tidy array using our commas from earlier as a delimiter
-                                $obj->meta->tags = str_replace(' ', ',', trim($obj->meta->tags));
-                                $obj->meta->tags = explode(',', ucwords(str_replace('_', ' ', $obj->meta->tags)));
-                            }
-                            
-							if ($getSource) {
-								$obj->source = Source::getById([ 'sourceId' => $obj->sourceId ]);
-							}
-							
-                            if ($getCount) {
-                                $obj->count = (int) $row->count;
-                            }
-                            
-							$retVal->results[] = $obj;
+							$retVal->results[] = $row;
 						}
 						
 					}
 				
 				}
+
+				Lib\Cache::Set($cacheKey, $retVal);
 				
 			}
 			
 			return $retVal;
-		
-		}
-		
+            
+        }
+        
 		/**
 		 * Creates an instance of Post from a row returned from the reddit API
 		 */
@@ -414,7 +406,12 @@ namespace Api {
 			$retVal->externalId = $obj->id;
 			$retVal->title = $obj->title;
 			$retVal->link = $obj->url;
-			$retVal->poster = $obj->author;
+			
+			$userId = User::getByName($obj->author);
+			if ($userId) {
+				$retVal->userId = $userId->id;
+			}
+
 			$retVal->score = $obj->score;
 			$retVal->dateCreated = $obj->created_utc;
 			$retVal->dateUpdated = time();
@@ -460,6 +457,121 @@ namespace Api {
 			return implode(' ', $retVal);
 			
 		}
+
+		/**
+		 * Searches for posts by image
+		 */
+		public static function reverseImageSearchInt($vars) {
+		
+			$file = Lib\Url::Get('imageUri', null, $vars);
+			$count = Lib\Url::GetInt('count', 5, $vars);
+			$getSource = Lib\Url::GetBool('getSource', $vars);
+			$sources = Lib\Url::Get('sources', null, $vars);
+            $getCount = Lib\Url::GetBool('getCount', $vars);
+            $maxRating = Lib\Url::Get('maxRating', 0, $vars);
+            $sourceSearch = false;
+
+			$cacheKey = 'Post_reverseImageSearch_' . implode('_', $vars);
+			$retVal = Lib\Cache::Get($cacheKey);
+			
+			if (null != $file && false === $retVal) {
+				$image = Image::createFromImage($file, false);
+				if (null !== $image) {
+					
+					$query = 'SELECT i.image_id, i.image_url, i.image_cdn_url, i.image_width, i.image_height, i.source_id, q.distance';
+					$query .= ', p.post_id, p.post_external_id, p.post_title, p.post_date';
+                    
+                    if ($getCount) {
+                        $query .= ', (SELECT COUNT(1) FROM images WHERE post_id = p.post_id) AS count ';
+                    }
+                    
+					$params = array();
+                    $innerQuery = 'SELECT image_id, ';
+					for ($i = 1; $i <= HISTOGRAM_BUCKETS; $i++) {
+						$prop = 'histR' . $i;
+						$params[':red' . $i] = round($image->$prop * 0x1f);
+						$prop = 'histG' . $i;
+						$params[':green' . $i] = round($image->$prop * 0x1f);
+						$prop = 'histB' . $i;
+						$params[':blue' . $i] = round($image->$prop * 0x1f);
+                        $base = ($i - 1) * 3;
+						$innerQuery .= 'ABS((image_histogram >> ' . ($base * 5) . ' & 0x1f) - :red' . $i . ') + ';
+						$innerQuery .= 'ABS((image_histogram >> ' . (($base + 1) * 5) . ' & 0x1f) - :green' . $i . ') + ';
+						$innerQuery .= 'ABS((image_histogram >> ' . (($base + 2) * 5) . ' & 0x1f) - :blue' . $i . ') + ';
+					}
+					
+                    $innerQuery .= '0 AS distance FROM images WHERE ';
+					if ($sources) {
+                        if ($sources === 'source') {
+                            $sources = 12; // To be replaced with a query that get's all booru sources
+                            $getSource = false;
+                            $sourceSearch = true;
+                            $query .= ', p.post_link, p.post_meta ';
+                        }
+                        $sources = !is_array($sources) ? explode(',', $sources) : $sources;
+                        $tmpList = [];
+                        $i = 0;
+                        foreach ($sources as $source) {
+                            $params[':source' . $i] = $source;
+                            $tmpList[] = ':source' . $i;
+                            $i++;
+                        }
+                        $innerQuery .= 'source_id IN (' . implode(',', $tmpList) . ')';
+					}
+                    $innerQuery .= ' ORDER BY distance LIMIT ' . $count;
+                    echo $innerQuery;
+                    // $params[':maxRating'] = $maxRating;
+                    
+					// Find the top five most similar images in the database
+					$query .= ' FROM (' . $innerQuery . ') AS q INNER JOIN images i ON i.image_id = q.image_id INNER JOIN posts p ON p.post_id = i.post_id ORDER BY q.distance, p.post_date LIMIT ' . $count;
+					$result = Lib\Db::Query($query, $params);
+                    
+					$time = time();
+					if ($result) {
+					
+						$retVal = new stdClass;
+						$retVal->original = $file;
+                        $retVal->sourceSearch = $sourceSearch;
+						while($row = Lib\Db::Fetch($result)) {
+                        
+							$obj = new Post($row);
+							$obj->image = new Image($row);
+							$obj->distance = $row->distance;
+							$obj->similarity = abs(100 - (100 * ($row->distance / HISTOGRAM_BUCKETS * 3)));
+							$obj->age = $time - $obj->dateCreated;
+
+                            if ($sourceSearch && isset($obj->meta->tags)) {
+                                // What's going on here
+                                // - trim off the bullshit extra spaces on each end
+                                // - spaces denote different tags, so replace those with commas
+                                // - replace underscores with spaces as underscores denote word separation
+                                // - uppercase the first letter of each word
+                                // - make it all a nice, tidy array using our commas from earlier as a delimiter
+                                $obj->meta->tags = str_replace(' ', ',', trim($obj->meta->tags));
+                                $obj->meta->tags = explode(',', ucwords(str_replace('_', ' ', $obj->meta->tags)));
+                            }
+                            
+							if ($getSource) {
+								$obj->source = Source::getById([ 'sourceId' => $obj->sourceId ]);
+							}
+							
+                            if ($getCount) {
+                                $obj->count = (int) $row->count;
+                            }
+                            
+							$retVal->results[] = $obj;
+						}
+						
+					}
+				
+				}
+				
+			}
+			
+			return $retVal;
+            
+        }
+		
 	
 	}
 
