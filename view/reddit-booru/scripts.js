@@ -9,90 +9,91 @@
  */
 (function ($, document, undefined) {
 
-	var pluses = /\+/g;
+    var pluses = /\+/g;
 
-	function raw(s) {
-		return s;
-	}
+    function raw(s) {
+        return s;
+    }
 
-	function decoded(s) {
-		return decodeURIComponent(s.replace(pluses, ' '));
-	}
+    function decoded(s) {
+        return decodeURIComponent(s.replace(pluses, ' '));
+    }
 
-	var config = $.cookie = function (key, value, options) {
+    var config = $.cookie = function (key, value, options) {
 
-		// write
-		if (value !== undefined) {
-			options = $.extend({}, config.defaults, options);
+        // write
+        if (value !== undefined) {
+            options = $.extend({}, config.defaults, options);
 
-			if (value === null) {
-				options.expires = -1;
-			}
+            if (value === null) {
+                options.expires = -1;
+            }
 
-			if (typeof options.expires === 'number') {
-				var days = options.expires, t = options.expires = new Date();
-				t.setDate(t.getDate() + days);
-			}
+            if (typeof options.expires === 'number') {
+                var days = options.expires, t = options.expires = new Date();
+                t.setDate(t.getDate() + days);
+            }
 
-			value = config.json ? JSON.stringify(value) : String(value);
+            value = config.json ? JSON.stringify(value) : String(value);
 
-			return (document.cookie = [
-				encodeURIComponent(key), '=', config.raw ? value : encodeURIComponent(value),
-				options.expires ? '; expires=' + options.expires.toUTCString() : '', // use expires attribute, max-age is not supported by IE
-				options.path    ? '; path=' + options.path : '',
-				options.domain  ? '; domain=' + options.domain : '',
-				options.secure  ? '; secure' : ''
-			].join(''));
-		}
+            return (document.cookie = [
+                encodeURIComponent(key), '=', config.raw ? value : encodeURIComponent(value),
+                options.expires ? '; expires=' + options.expires.toUTCString() : '', // use expires attribute, max-age is not supported by IE
+                options.path    ? '; path=' + options.path : '',
+                options.domain  ? '; domain=' + options.domain : '',
+                options.secure  ? '; secure' : ''
+            ].join(''));
+        }
 
-		// read
-		var decode = config.raw ? raw : decoded;
-		var cookies = document.cookie.split('; ');
-		for (var i = 0, l = cookies.length; i < l; i++) {
-			var parts = cookies[i].split('=');
-			if (decode(parts.shift()) === key) {
-				var cookie = decode(parts.join('='));
-				return config.json ? JSON.parse(cookie) : cookie;
-			}
-		}
+        // read
+        var decode = config.raw ? raw : decoded;
+        var cookies = document.cookie.split('; ');
+        for (var i = 0, l = cookies.length; i < l; i++) {
+            var parts = cookies[i].split('=');
+            if (decode(parts.shift()) === key) {
+                var cookie = decode(parts.join('='));
+                return config.json ? JSON.parse(cookie) : cookie;
+            }
+        }
 
-		return null;
-	};
+        return null;
+    };
 
-	config.defaults = {};
+    config.defaults = {};
 
-	$.removeCookie = function (key, options) {
-		if ($.cookie(key) !== null) {
-			$.cookie(key, null, options);
-			return true;
-		}
-		return false;
-	};
+    $.removeCookie = function (key, options) {
+        if ($.cookie(key) !== null) {
+            $.cookie(key, null, options);
+            return true;
+        }
+        return false;
+    };
 
 })(jQuery, document);
 
 (function() {
 
-	var
-	
-	config = {
-		panelWidth:215,
-		afterDate:null,
-        itemsPerPage:25
-	},
-	
-	templates = {
-		thumbs:Handlebars.templates.galleryThumbs,
-		images:Handlebars.templates.galleryImages,
-		more:Handlebars.templates.moreButton,
-		subChecks:Handlebars.templates.subCheckbox,
-		imageSearchOriginal:Handlebars.templates.imageSearchOriginal,
-		imageSearchList:Handlebars.templates.imageSearchList,
-        uploadImageItem:Handlebars.templates.uploadImageItem,
-        postTitle:Handlebars.templates.postTitle,
-        sourceMatch:Handlebars.templates.sourceMatch
-	},
-	
+    var
+    
+    config = {
+        panelWidth:215,
+        afterDate:null,
+        itemsPerPage:25,
+        displayNsfw: $.cookie('nsfw') || false
+    },
+    
+    templates = {
+        thumbs:RB.Templates.galleryThumbs,
+        images:RB.Templates.galleryImages,
+        more:RB.Templates.moreButton,
+        subChecks:RB.Templates.subCheckbox,
+        imageSearchOriginal:RB.Templates.imageSearchOriginal,
+        imageSearchList:RB.Templates.imageSearchList,
+        uploadImageItem:RB.Templates.uploadImageItem,
+        postTitle:RB.Templates.postTitle,
+        sourceMatch:RB.Templates.sourceMatch
+    },
+    
     parseQueryString = function(qs) {
     
         var
@@ -112,99 +113,118 @@
                 retVal[kvp[0]] = kvp.length === 1 ? true : kvp[1];
             }
         }
-        
+
         return retVal;
     
     },
     
-	$images = $('#images'),
-	$searchForm = $('#searchForm'),
-	$overlay = $('#overlay'),
+    $images = $('#images'),
+    $searchForm = $('#searchForm'),
+    $overlay = $('#overlay'),
     $window = $(window),
-	
-	makeRelativeTime = function(seconds) {
-	
-		var
-			value = seconds,
-			label = 'second';
-			
-		// Years
-		if (seconds > 31536000) { 
-			value = Math.round(seconds / 31536000);
-			label = 'year';
-		// Months (30-days)
-		} else if (seconds > 2592000) { 
-			value = Math.round(seconds  / 2592000);
-			label = 'month';
-		// Days
-		} else if (seconds > 86400) {
-			value = Math.round(seconds / 86400);
-			label = 'day';
-		// Hours
-		} else if (seconds > 3600) {
-			value = Math.round(seconds / 3600);
-			label = 'hour';
-		// Minutes
-		} else {
-			value = Math.round(seconds / 60);
-			label = 'minute';
-		}
-	
-		return value + ' ' + label + (value != 1 ? 's' : '');
-	
-	},
-	
-	windowResize = function(e) {
-		var
-			width = $window.width(),
-			cols = Math.floor(width / config.panelWidth);
-		
-		$images.width(cols * config.panelWidth);
-	},
-	
-	moreClick = function() {
-		$.ajax({
-			url:nextUrl + '&afterDate=' + config.afterId,
-			dataType:'json',
-			success:ajaxCallback
-		});
-	},
-	
-	displayImages = function(data) {
+    
+    makeRelativeTime = function(seconds) {
+    
+        var
+            value = seconds,
+            label = 'second';
+            
+        // Years
+        if (seconds > 31536000) { 
+            value = Math.round(seconds / 31536000);
+            label = 'year';
+        // Months (30-days)
+        } else if (seconds > 2592000) { 
+            value = Math.round(seconds  / 2592000);
+            label = 'month';
+        // Days
+        } else if (seconds > 86400) {
+            value = Math.round(seconds / 86400);
+            label = 'day';
+        // Hours
+        } else if (seconds > 3600) {
+            value = Math.round(seconds / 3600);
+            label = 'hour';
+        // Minutes
+        } else {
+            value = Math.round(seconds / 60);
+            label = 'minute';
+        }
+    
+        return value + ' ' + label + (value != 1 ? 's' : '');
+    
+    },
+    
+    windowResize = function(e) {
+        var
+            width = $window.width(),
+            cols = Math.floor(width / config.panelWidth);
+        
+        $images.width(cols * config.panelWidth);
+    },
+
+    getSources = function() {
+        var retVal = $.cookie('sources');
+        if (retVal) {
+            retVal = retVal.split(',');
+            for (var i = 0, count = retVal.length; i < count; i++) {
+                retVal[i] = parseInt(retVal[i]);
+            }
+        } else {
+            retVal = [ 1 ];
+        }
+        return retVal;
+    },
+    
+    moreClick = function() {
+        $.ajax({
+            url:nextUrl + '&afterDate=' + config.afterDate,
+            dataType:'json',
+            success:ajaxCallback
+        });
+    },
+    
+    displayImages = function(data) {
         
         var
             out = [],
             template = templates[display];
-		
-		$images.find('.more').remove();
-		for (var i = 0, count = data.length; i < count; i++) {
-            out.push(template(data[i]));
-		}
+
+        $images.find('.more').remove();
+
+        if (window.display === 'thumbs') {
+            out.push(template(data));
+            config.afterDate = data[data.length - 1].dateCreated;
+        } else {
+            for (var i = 0, count = data.length; i < count; i++) {
+                out.push(template(data[i]));
+            }
+            config.afterDate = data[data.length - 1].dateCreated;
+        }
         
         if (data.length >= config.itemsPerPage) {
             out.push(templates.more({}));
         }
-		config.afterId = data[data.length - 1].dateCreated;
-		
-		$images.append(out.join(''));
-	},
-	
-	searchForm = {
-	
-		display:function(e) {
-			$overlay.find('.form').hide();
+        
+        $images.append(out.join(''));
+    },
+    
+    searchForm = {
+    
+        display:function(e) {
+            $overlay.find('.form').hide();
             $overlay.find('#searchForm').show();
             $overlay.fadeIn();
-		},
-		
-		hide:function(e) {
-			if (e.target === e.currentTarget) {
-				$overlay.fadeOut();
-			}
-		},
-		
-		typeCheck:function(e) {
-			var name = e.currentTarget.getAttribute('value');
+        },
+        
+        hide:function(e) {
+            if (e.target === e.currentTarget) {
+                $overlay.fadeOut();
+            }
+        },
+        
+        typeCheck:function(e) {
+            var name = e.currentTarget.getAttribute('value');
             switch (name) {
                 case 'all':
                     $overlay.find('#sources input[type="checkbox"]').prop('checked', true);
@@ -215,27 +235,31 @@
                     $overlay.find('#sources input[name="rdoType"]').prop('checked', false);
                     break;
             }
-		},
-		
-		keyPress:function(e) {
-			var key = e.keyCode || e.charCode;
-			if (key === 13) {
-				searchForm.submit(e);
-			}
-		},
-		
-		submit:function(e, forcedKeywords) {
-			
-			var
-				query = '/api/?type=json&method=post.searchPosts&getImages=true&getSource=true',
-				sources = $('[name="chkSources"]:checked'),
-				sizes = $('[name="chkSizes"]:checked'),
-				keywords = forcedKeywords || $('#txtKeywords').val(),
-				upload = $('#uplImage').val(),
-				temp = [],
-                sourceSearch = $('#rdoSource:checked').length > 0;
-			
-			// We'll tack on the sources here because they're used in multiple search types
+        },
+        
+        keyPress:function(e) {
+            var key = e.keyCode || e.charCode;
+            if (key === 13) {
+                searchForm.submit(e);
+            }
+        },
+        
+        submit:function(e, forcedKeywords) {
+            
+            var
+                query = '/images/?dummy',
+                sources = $('[name="chkSources"]:checked'),
+                sizes = $('[name="chkSizes"]:checked'),
+                keywords = forcedKeywords || $('#txtKeywords').val(),
+                upload = $('#uplImage').val(),
+                temp = [],
+                sourceSearch = $('#rdoSource:checked').length > 0,
+                nsfw = $('[name="chkNsfw"]:checked').length > 0;
+
+            config.displayNsfw = nsfw;
+            $.cookie('nsfw', config.displayNsfw, { expires: 365 });
+
+            // We'll tack on the sources here because they're used in multiple search types
             if (sourceSearch) {
                 sources = 'source';
                 query += '&sources=source';
@@ -256,82 +280,87 @@
                         });
                     }
                     sources = temp.join(',');
-                    $.cookie('sources', sources, { expires:365 });
+                    
+                    // Only cookie the sources if the user actually filled the form themselves
+                    if (e) {
+                        $.cookie('sources', sources, { expires:365 });
+                    }
                 } else if ($('[name="sourceId"]').length > 0) {
                     sources = $('[name="sourceId"]').val();
                     query += '&sources=' + sources;
                 }
             }
-			
-			// If keywords isn't a url and no upload, do a standard search
-			if (keywords.indexOf('http://') === -1 && upload.length === 0 && !sourceSearch) {
-			
-				if (keywords) {
-					query += '&keywords=' + encodeURIComponent(keywords);
-				}
-				
-				if (sizes.length) {
-					temp = [];
-					sizes.each(function() {
-						temp.push($(this).val());
-					});
-					if (temp[0] !== 'all') {
-						query += '&ratios=' + temp.join(',');
-					}
-				}
-				
-				$images.empty();
-				$overlay.fadeOut();
-				
-				$.ajax({
-					url:query,
-					dataType:'json',
-					success:ajaxCallback
-				});
-				
-				window.nextUrl = query;
-				
-			} else {
-			
-				if (upload.length === 0) {
-				
-					query = query.replace('searchPosts', 'reverseImageSearch');
-					query += '&imageUri=' + encodeURIComponent(keywords) + '&count=6&getCount=true';
-					$.ajax({
-						url:query,
-						dataType:'json',
-						success:imageSearchCallback
-					});
-				
-				} else {
-					$('#hdnSources').val(temp.join(','));
-					$('#uploadForm').submit();
-				}
-			
-			}
+            
+            // If keywords isn't a url and no upload, do a standard search
+            if (keywords.indexOf('http://') === -1 && upload.length === 0 && !sourceSearch) {
+            
+                if (keywords) {
+                    query += '&keywords=' + encodeURIComponent(keywords);
+                }
+                
+                if (sizes.length) {
+                    temp = [];
+                    sizes.each(function() {
+                        temp.push($(this).val());
+                    });
+                    if (temp[0] !== 'all') {
+                        query += '&ratios=' + temp.join(',');
+                    }
+                }
+                
+                $images.empty();
+                $overlay.fadeOut();
+                
+                $.ajax({
+                    url:query,
+                    dataType:'json',
+                    success:ajaxCallback
+                });
+                
+                window.nextUrl = query;
+                
+            } else {
+            
+                if (upload.length === 0) {
+                
+                    query = query.replace('searchPosts', 'reverseImageSearch');
+                    query += '&imageUri=' + encodeURIComponent(keywords) + '&count=6&getCount=true';
+                    $.ajax({
+                        url:query,
+                        dataType:'json',
+                        success:imageSearchCallback
+                    });
+                
+                } else {
+                    $('#hdnSources').val(temp.join(','));
+                    $('#uploadForm').submit();
+                }
+            
+            }
             
             window.location.hash = '#!q=' + keywords + '&source=' + sources;
-			
-		},
-		
-		init:function() {
-			$('#btnSubmit').on('click', searchForm.submit);
-			$('#searchButton').on('click', searchForm.display);
-			$('#txtKeywords').on('keypress', searchForm.keyPress);
-			$overlay.on('click', searchForm.hide);
-			if ($('#sources').length > 0) {
-				var
-					prefSources = ($.cookie('sources') || '1').split(','),
-					sourceChecks = templates.subChecks(sources);
-				$('#sources').html(sourceChecks);
-				for (var i = 0, count = prefSources.length; i < count; i++) {
-					$('#chkSource' + prefSources[i]).attr('checked', true);
-				}
-			}
-			$overlay.find('#sources input').on('change', searchForm.typeCheck);
-		}
-		
-	},
+            
+        },
+        
+        init:function() {
+            $('#btnSubmit').on('click', searchForm.submit);
+            $('#searchButton').on('click', searchForm.display);
+            $('#txtKeywords').on('keypress', searchForm.keyPress);
+            $overlay.on('click', searchForm.hide);
+            if ($('#sources').length > 0) {
+                var
+                    prefSources = ($.cookie('sources') || '1').split(','),
+                    sourceChecks = templates.subChecks(sources);
+                $('#sources').html(sourceChecks);
+                for (var i = 0, count = prefSources.length; i < count; i++) {
+                    $('#chkSource' + prefSources[i]).prop('checked', true);
+                }
+            }
+            $overlay.find('#sources input').on('change', searchForm.typeCheck);
+            $('#chkNsfw').prop('checked', config.displayNsfw);
+        }
+        
+    },
     
     uploadForm = {
         
@@ -348,7 +377,7 @@
         images:[],
         
         display:function() {
-			$overlay.find('.form').hide();
+            $overlay.find('.form').hide();
             uploadForm.$.form.show();
             $overlay.fadeIn();
         },
@@ -432,7 +461,7 @@
         }
     
     },
-	
+
     screensaver = (function() {
         
         var
@@ -524,6 +553,7 @@
                 clearTimeout(controlsTimer);
                 $overlay.removeClass('screenSaver');
                 $overlay.off('mousemove', mouseMove);
+                $controls.hide();
             },
             
             init = function() {
@@ -536,41 +566,41 @@
     
     }()),
     
-	imageSearchCallback = window.imageSearchCallback = function(data) {
-	
-		var out = '', match = {};
-		
-		$overlay.fadeOut();
-		
-		if (typeof data === 'object' && data.hasOwnProperty('body') && data.body.hasOwnProperty('results') && data.body.results.length > 0) {
-            if (data.body.sourceSearch) {
-                match.sourceUrl = data.body.results[0].link;
-                match.tags = data.body.results[0].meta.tags;
-                match.imageUrl = encodeURIComponent(data.body.results[0].image.url);
-                match.confidence = data.body.results[0].similarity;
-                out = templates.sourceMatch(match);
-            } else {
-                data.body.original = encodeURIComponent(data.body.original);
-                out = templates.imageSearchOriginal(data.body);
-                
-                for (var i = 0, count = data.body.results.length; i < count; i++) {
-                    data.body.results[i].age = makeRelativeTime(data.body.results[i].age);
-                    data.body.results[i].showCount = data.body.results[i].count > 1;
-                }
-                
-                out += templates.imageSearchList(data.body.results);
+    /**
+     * Determine whether or not an image is NSFW based upon the user's saved preferences
+     */
+    determineNsfw = function(post) {
+        var retVal = post.nsfw,
+            sources = getSources();
+        // return retVal ? sources.indexOf(post.sourceId) === -1 : retVal;
+        return post.nsfw && !config.displayNsfw ? 'nsfw' : '';
+    },
+
+    imageSearchCallback = window.imageSearchCallback = function(data) {
+    
+        var out = '', match = {};
+        
+        $overlay.fadeOut();
+        
+        if (data && data.length > 0) {
+            out = templates.imageSearchOriginal($('#txtKeywords').val());
+            for (var i = 0, count = data.length; i < count; i++) {
+                data[i].age = makeRelativeTime(data[i].age);
+                data[i].showCount = data[i].idxInAlbum > 1;
             }
+            
+            out += templates.imageSearchList(data);
             $images.html(out);
-		}
-	
-	},
-	
+        }
+    
+    },
+    
     displayDefault = function() {
         if (startUp) {
             if (postTitle) {
                 $images.html(templates.postTitle(postTitle));
             }
-            displayImages(startUp); 
+            displayImages(startUp);
         } else {
             $.ajax({
                 url:'/api/?type=json&method=image.getImagesBySource&sources=' + window.sources + '&deep=true',
@@ -580,28 +610,35 @@
         }
     },
     
-	ajaxCallback = function(data) {
-		if (typeof data == 'object' && data.hasOwnProperty('body') && data.body) {
-			displayImages(data.body);
-		}
-	},
-	
-	init = (function() {
-		
-		$(window).on('resize', windowResize);
-		$(function() {
-			windowResize();
-		});
-		
-		$images
+    ajaxCallback = function(data) {
+        if (typeof data == 'object' && data.hasOwnProperty('body') && data.body) {
+            displayImages(data.body);
+        } else if (data instanceof Array) {
+            displayImages(data);
+        }
+    },
+    
+    init = (function() {
+        
+
+
+        $(window).on('resize', windowResize);
+        $(function() {
+            windowResize();
+        });
+        
+        $images
             .on('click', '.more', moreClick)
             .addClass(display);
-		
+
         // Initialize sub modules
         searchForm.init();
         uploadForm.init();
         screensaver.init();
         
+        // Template helpers
+        Handlebars.registerHelper('determineNsfw', determineNsfw);
+
         // Check for a search on the query string (genuine query string or hashbang)
         var queryString = window.location.href.split('?');
         queryString = queryString.length === 1 ? window.location.hash.split('#!') : queryString;
@@ -632,9 +669,7 @@
                 }
                 
                 searchForm.submit(null, decodeURIComponent(queryString.q));
-            }
-            
-            if (queryString.hasOwnProperty('dialog')) {
+            } else if (queryString.hasOwnProperty('dialog')) {
                 
                 switch (queryString.dialog) {
                     case 'search':
@@ -644,10 +679,12 @@
                 
                 displayDefault();
                 
+            } else {
+                displayDefault();
             }
             
         }
-	
-	}());
+
+    }());
 
 }());
