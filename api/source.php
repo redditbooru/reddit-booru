@@ -16,7 +16,8 @@ namespace Api {
 			'baseUrl' => 'source_baseurl',
 			'type' => 'source_type',
 			'enabled' => 'source_enabled',
-			'subdomain' => 'source_subdomain'
+			'subdomain' => 'source_subdomain',
+            'contentRating' => 'source_content_rating'
 		);
 		
 		/**
@@ -58,7 +59,12 @@ namespace Api {
 		 * Associated subdomain
 		 */
 		public $subdomain;
-	
+        
+        /**
+         * Content rating
+         */
+        public $contentRating;
+        
 		/**
 		 * Constructor
 		 * @param $obj mixed Data to construct object around
@@ -129,30 +135,6 @@ namespace Api {
 				Lib\Cache::Set($cacheKey, $retVal, 3600);
 			}
 			
-			return $retVal;
-			
-		}
-		
-		/**
-		 * Gets a record by its external ID
-		 */
-		public static function getById($vars) {
-			
-			$retVal = null;
-			$sourceId = Lib\Url::GetInt('sourceId', null, $vars);
-			if ($sourceId) {
-				$cacheKey = 'Source_getById_' . $sourceId;
-				$retVal = Lib\Cache::Get($cacheKey);
-				if (false === $retVal) {
-					$params = [ ':sourceId' => $sourceId ];
-					$result = Lib\Db::Query('SELECT * FROM `sources` WHERE source_id = :sourceId', $params);
-					if (null != $result && $result->count > 0) {
-						$row = Lib\Db::Fetch($result);
-						$retVal = new Source($row);
-					}
-					Lib\Cache::Set($cacheKey, $retVal, 86400);
-				}
-			}
 			return $retVal;
 			
 		}
