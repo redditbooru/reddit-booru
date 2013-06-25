@@ -1,0 +1,18 @@
+<div class="sourceMatch">
+    <h2>Source Search ({{confidence}}% confidence)</h2>
+    <img src="/imageProxy.php?url={{imageUrl}}" alt="Matched Image" />
+    <dl class="sourceInfo">
+        <dt>Source Url</dt>
+        <dd><a href="{{sourceUrl}}" target="_blank">{{sourceUrl}}</a></dd>
+        <dt>Rating</dt>
+        <dd>{{rating}}</dd>
+        <dt>Tags</dt>
+        <dd>
+            <ul>
+                {{#tags}}
+                    <li>{{.}}</li>
+                {{/tags}}
+            </ul>
+        </dd>
+    </dl>
+</div>

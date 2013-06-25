@@ -1,14 +1,14 @@
 <div class="imageSearchList">
     <h2>Similar Images</h2>
     {{#.}}
-        <div class="imageSearchResult" data-id="{{postId}}" data-source="{{sourceId}}">
-            <a href="{{source.baseUrl}}/comments/{{externalId}}" target="_blank">
-                <img src="/thumb.php?file={{image.cdnUrl}}&height=180&&width=360" alt="{{title}} [Score: {{score}}]" title="{{title}} [Score: {{score}}]" />
+        <div class="imageSearchResult {{determineNsfw .}}" data-id="{{postId}}" data-source="{{sourceId}}">
+            <a href="{{baseUrl}}/comments/{{externalId}}" target="_blank">
+                <img src="/cache/{{thumb}}_360_180.jpg" alt="{{title}} [Score: {{score}}]" title="{{title}} [Score: {{score}}]" />
             </a>
-            <span class="source">{{source.name}}</span>
+            <span class="source">{{sourceName}}</span>
             <span class="age">{{age}} ago</span>
             {{#if showCount}}
-                <span class="count">In album of {{count}}</span>
+                <span class="count">In album of {{idxInAlbum}}</span>
             {{/if}}
         </div>
     {{/.}}
