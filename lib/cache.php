@@ -42,6 +42,18 @@ namespace Lib {
 			self::$_conn->flush();
 		}
 
+		/**
+		 * Creates a cache key using selected values from an array of values (usually _GET)
+		 */
+		public static function createCacheKey($prefix, $params, $values) {
+			$retVal = [ $prefix ];
+			foreach ($params as $param) {
+				$value = Url::Get($param, 'null', $values);
+				$retVal[] = $value;
+			}
+			return implode('_', $retVal);
+		}
+
 	}
 
 }
