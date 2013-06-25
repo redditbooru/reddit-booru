@@ -27,17 +27,16 @@ namespace Controller {
 			if (preg_match('/([\w]+)\.redditbooru\.com/is', $_SERVER['HTTP_HOST'], $matches)) {
 				$domain = $matches[1];
 				if ($domain != 'www' && $domain != 'beta') {
-					$domain = Api\Source::getBySubdomain([ 'domain' => $domain ]);
-					// If no sub was found, redirect to the main page
-					if (!$domain) {
-						header('Location: http://redditbooru.com/');
-						exit;
-					} else {
-						$sources = $domain->id;
-						Lib\Display::setVariable('SOURCE_NAME', $domain->subdomain);
-						Lib\Display::setVariable('SOURCE_ID', $domain->id);
-					}
-					
+                    $domain = Api\Source::getBySubdomain([ 'domain' => $domain ]);
+                    // If no sub was found, redirect to the main page
+                    if (!$domain) {
+                        header('Location: http://redditbooru.com/');
+                        exit;
+                    } else {
+                        $sources = $domain->id;
+                        Lib\Display::setVariable('SOURCE_NAME', $domain->subdomain);
+                        Lib\Display::setVariable('SOURCE_ID', $domain->id);
+                    }
 				}
 			}
 			
@@ -45,13 +44,15 @@ namespace Controller {
 			$thumb = null;
             $jsonOut = null;
             $postTitle = null;
-			$urlOut = '/api/?type=json&method=post.searchPosts&getSource=true&getImages=true';
+			$urlOut = '/images/?';
 			
 			switch ($action) {
 				case 'user':
 					$user = Lib\Url::Get('user');
-					$jsonOut = Api\Post::searchPosts([ 'user' => $user, 'getImages' => true, 'getSource' => true, 'sources' => $sources ]);
-					$urlOut .= '&user=' . $user;
+					$jsonOut = Images::getByQuery([ 'user' => $user, 'sources' => $sources ]);
+					$urlOut = '/images/?sources=';
+                    $urlOut .= is_array($sources) ? implode(',', $sources) : $sources;
+                    $urlOut .= '&user=' . $user;
                     
                     if (count($jsonOut) > 0) {
                         $postTitle = 'Posts by ' . $user;
@@ -59,33 +60,36 @@ namespace Controller {
                     
 					break;
                 case 'gallery':
-                    $jsonOut = Api\Post::searchPosts([ 'id' => $_GET['post'], 'getImages' => true, 'getSource' => true ]);
+                    $postId = Lib\Url::Get('post', null);
+                    $jsonOut = Images::getByQuery([ 'postId' => $postId, 'ignoreSource' => true, 'ignoreUser' => true ]);
                     if (count($jsonOut) > 0) {
                         $postTitle = $jsonOut[0]->title;
                     }
                     $display = 'images';
                     break;
 				case 'post':
-					$jsonOut = Api\Post::searchPosts([ 'externalId' => $_GET['post'], 'getImages' => true, 'getSource' => true ]);
+                    $postId = Lib\Url::Get('post', null);
+					$jsonOut = Images::getByQuery([ 'externalId' => $postId ]);
                     if (count($jsonOut) > 0) {
                         $postTitle = $jsonOut[0]->title;
                     }
                     $display = 'images';
 					break;
 				default:
-					if (is_array($sources)) {
-						$urlOut .= '&sources=' . implode(',', $sources);
-					} else {
-						$urlOut .= '&sources=' . $sources;
-					}
-					$jsonOut = Api\Post::searchPosts([ 'getImages' => true, 'getSource' => true, 'sources' => $sources ]);
+					$urlOut = '/images/?sources=';
+					$urlOut .= is_array($sources) ? implode(',', $sources) : $sources;
+                    $jsonOut = Images::getByQuery([ 'sources' => $sources ]);
 					break;
 			}
 			
             if (count($jsonOut) > 0) {
-                $thumb = $jsonOut[0]->images[0]->cdnUrl;
+                if ($jsonOut[0] instanceof JsonDataObject) {
+                    $thumb = $jsonOut[0]->cdnUrl;
+                }
             }
             
+            $urlOut .= isset($_GET['flushCache']) ? '&flushCache' : '';
+
             Lib\Display::setVariable('display', $display);
             Lib\Display::setVariable('thumb', addslashes($thumb));
             Lib\Display::setVariable('post_title', addslashes($postTitle));
