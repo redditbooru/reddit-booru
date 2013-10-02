@@ -4,10 +4,12 @@ namespace Lib {
 
 	use Memcache;
 
-	Cache::Connect();
+	if (!defined('DISABLE_CACHE')) {
+		define('DISABLE_CACHE', false);
+	}
 
-	if (isset($_GET['flushCache'])) {
-		Cache::flush();
+	if (!DISABLE_CACHE) {
+		Cache::Connect();
 	}
 
 	// memcache class
