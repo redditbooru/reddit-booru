@@ -25,8 +25,10 @@ namespace Controller {
             
 			// Check to see if we got a specific subdomain
 			if (preg_match('/([\w]+)\.redditbooru\.com/is', $_SERVER['HTTP_HOST'], $matches)) {
-				$domain = $matches[1];
-				if ($domain != 'www' && $domain != 'beta') {
+                $domain = $matches[1];
+                if ($domain === 'moesaic') {
+                    self::_renderMoesaic();
+                }else if ($domain != 'www' && $domain != 'beta') {
                     $domain = Api\Source::getBySubdomain([ 'domain' => $domain ]);
                     // If no sub was found, redirect to the main page
                     if (!$domain) {
@@ -61,7 +63,7 @@ namespace Controller {
 					break;
                 case 'gallery':
                     $postId = Lib\Url::Get('post', null);
-                    $jsonOut = Images::getByQuery([ 'postId' => $postId, 'ignoreSource' => true, 'ignoreUser' => true ]);
+                    $jsonOut = Images::getByQuery([ 'postId' => $postId, 'ignoreSource' => true, 'ignoreUser' => true, 'ignoreVisible' => true ]);
                     if (count($jsonOut) > 0) {
                         $postTitle = $jsonOut[0]->title;
                     }
@@ -69,7 +71,7 @@ namespace Controller {
                     break;
 				case 'post':
                     $postId = Lib\Url::Get('post', null);
-					$jsonOut = Images::getByQuery([ 'externalId' => $postId ]);
+					$jsonOut = Images::getByQuery([ 'externalId' => $postId, 'ignoreVisible' => true ]);
                     if (count($jsonOut) > 0) {
                         $postTitle = $jsonOut[0]->title;
                     }
@@ -110,6 +112,18 @@ namespace Controller {
 		public static function registerExtension($class, $module, $type) {
 		
 		}
+
+        /**
+         * Renders a moesaic for the user
+         */
+        private static function _renderMoesaic() {
+            $user = str_replace('/', '', $_SERVER['REQUEST_URI']);
+            Lib\Display::setVariable('USER', $user);
+            Lib\Display::setVariable('TITLE', ($user ? $user . '\'s ' : '') . 'Moesaic');
+            Lib\Display::setTemplate('moesaic');
+            Lib\Display::render();
+            exit;
+        }
 
 	}
 	
