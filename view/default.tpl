@@ -3,14 +3,13 @@
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf8" />
 		<title>redditbooru - a place where cute girls come to meet</title>
-		<link rel="stylesheet" type="text/css" href="/view/reddit-booru/styles.css?2013-04-28" />
-        <link rel="stylesheet" type="text/css" href="/view/reddit-booru/sources/{SOURCE_NAME}/styles.css?2013-04-28v2" />
+        <link rel="stylesheet" type="text/css" href="/view/css/{SOURCE_NAME}.css?2013-07-042" />
 	</head>
 	<body>
 		<header class="rb-header">
 			<h1>
 				<a href="/">
-					<img src="/view/reddit-booru/sources/{SOURCE_NAME}/images/logo.png" alt="RedditBooru" />
+					<img src="/view/css/images/{SOURCE_NAME}/logo.png" alt="RedditBooru" />
 				</a>
 			</h1>
 			<button id="screenButton" class="rb-button button screenButton" title="Screen Saver Mode">Screen Saver</button>
@@ -20,6 +19,12 @@
 		<div id="images">
             <img src="{THUMB}" class="redditThumb" />
 		</div>
+        <div id="loader">
+            <div class="loader-inner">
+                <img src="http://cdn.awwni.me/m0pi.gif" alt="loading" />
+                <span class="loader-text"></span>
+            </div>
+        </div>
 		<div id="overlay">
 			<div id="searchForm" class="form">
 				<h2>Search</h2>
@@ -114,9 +119,7 @@
 		</script>
         
 		<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
-		<script type="text/javascript" src="/view/reddit-booru/handlebars.runtime.js"></script>
-		<script type="text/javascript" src="/view/reddit-booru/templates.js?2013-03-11"></script>
-		<script type="text/javascript" src="/view/reddit-booru/scripts.js?2013-04-28"></script>
+		<script type="text/javascript" src="/view/js/RedditBooru.js?2013-07-04"></script>
         
 		<script type="text/javascript">
 			var _gaq=_gaq||[];_gaq.push(["_setAccount","UA-280226-8"]);_gaq.push(["_trackPageview"]);(function(){var a=document.createElement("script");a.type="text/javascript";a.async=!0;a.src=("https:"==document.location.protocol?"https://ssl":"http://www")+".google-analytics.com/ga.js";var b=document.getElementsByTagName("script")[0];b.parentNode.insertBefore(a,b)})();

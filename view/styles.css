@@ -26,7 +26,7 @@ button:hover { cursor:pointer; }
 #images .more { width:180px; height:0; padding-top:180px; overflow:hidden; cursor:pointer; }
 #images .more:hover { background-position:0 -180px; }
 
-#images.images .image { float:none; margin:0 0 25px; text-align:center; }
+#images.images .image { float:none; margin:0 0 25px; text-align:center; height:auto; width:auto; border:0; }
 #images.images .image img { max-width:100%; width:auto; display:inline-block; height:auto; box-sizing:border-box; -moz-box-sizing:border-box; }
 #images.images .more { display:none; }
 
@@ -84,6 +84,12 @@ button:hover { cursor:pointer; }
 .ss-controls button:hover { background-color:#000; border-color:#000; }
 .ss-controls .play { background-position:0 -64px; }
 .ss-controls .pause { background-position:0 -96px; }
+
+#loader { position:fixed; top:0; left:0; right:0; bottom:0; display:none; }
+#loader.visible { display:block; }
+#loader .loader-inner { display:table; width:500px; margin:250px auto 0; }
+#loader img { display:table-cell; width:190px; }
+#loader span { display:table-cell; vertical-align:middle; width:300px; font:bold 20px sans-serif; color:#333; }
 
 footer { padding:15px; overflow:hidden; }
 footer p { font:16px sans-serif; }
