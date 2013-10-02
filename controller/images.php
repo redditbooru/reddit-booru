@@ -18,6 +18,11 @@ namespace Controller {
          * Determines how the page needs to be rendered and passes control off accordingly
          */
         public static function render() {
+            
+            // Dumb, but instantiate an image class to get the include
+            $img = new Api\Image();
+            unset($img);
+
             $url = Lib\Url::Get('imageUri', null);
             $images = $url ? self::getByImage($_GET) : self::getByQuery($_GET);
             header('Content-Type: text/javascript; charset=utf-8');
@@ -41,6 +46,7 @@ namespace Controller {
             $title = Lib\Url::Get('keywords', null, $vars);
             $ignoreSource = Lib\Url::GetBool('ignoreSource', $vars);
             $ignoreUser = Lib\Url::GetBool('ignoreUser', $vars);
+            $ignoreVisible = Lib\Url::GetBool('ignoreVisible', $vars);
 
             $cacheKey = Lib\Cache::createCacheKey('Images::getByQuery_', [
                 'sources',
@@ -52,6 +58,7 @@ namespace Controller {
                 'ignoreSource',
                 'ignoreUser',
                 'user',
+                'ignoreVisible',
                 'keywords' ], $vars);
             
             $retVal = Lib\Cache::Get($cacheKey);
@@ -85,7 +92,10 @@ namespace Controller {
                         'INNER JOIN `posts` p ON p.post_id = i.post_id'
                     ];
 
-                    $where = [ 'i.image_good = 1', 'p.post_visible = 1' ];
+                    $where = [ 'i.image_good = 1' ];
+                    if (!$ignoreVisible) {
+                        $where[] = 'p.post_visible = 1';
+                    }
 
                     if (!$ignoreSource) {
                         $columns = array_merge($columns, [
@@ -181,13 +191,39 @@ namespace Controller {
             $retVal = [];
             $vars['getSource'] = true;
             $vars['getUser'] = true;
+
+            $evented = Lib\Url::GetBool('evented', $vars);
+
+            // Register the event listeners
+            if ($evented) {
+                Lib\Events::beginAjaxEvent();
+                Lib\Events::addEventListener(IMGEVT_DOWNLOAD_BEGIN, function($data) { self::_imageDownloadBegin($data); });
+                Lib\Events::addEventListener(IMGEVT_PROCESSING, function($data) { self::_imageProcessing($data); });
+            }
+
             $images = Api\Post::reverseImageSearch($vars);
             if (null != $images && count($images->results) > 0) {
                 foreach ($images->results as $image) {
                     $retVal[] = new JsonDataObject($image);
                 }
             }
+
+            if ($evented) {
+                Lib\Events::sendAjaxEvent('DATA', $retVal);
+                Lib\Events::endAjaxEvent();
+            }
+
             return $retVal;
+        }
+
+        /**
+         * Event listeners
+         */
+        public static function _imageDownloadBegin($data) {
+            Lib\Events::sendAjaxEvent(IMGEVT_DOWNLOAD_BEGIN, null);
+        }
+        public static function _imageProcessing($data) {
+            Lib\Events::sendAjaxEvent(IMGEVT_PROCESSING, null);
         }
 
         /**
