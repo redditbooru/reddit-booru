@@ -10,6 +10,15 @@ namespace Api {
 	define('CDN_FOLDER', '');
     define('CDN_URL_BASE', 'http://cdn.awwni.me/');
     define('LOCAL_STORAGE', '/var/www/redditbooru-images');
+
+    // Events
+    define('IMGEVT_DOWNLOAD_BEGIN', 'IMGEVT_DOWNLOAD_BEGIN');
+    define('IMGEVT_DOWNLOAD_COMPLETE', 'IMGEVT_DOWNLOAD_COMPLETE');
+    define('IMGEVT_DOWNLOAD_ERROR', 'IMGEVT_DOWNLOAD_ERROR');
+    define('IMGEVT_PROCESSING', 'IMGEVT_PROCESSING');
+    define('IMGEVT_UPLOAD_BEGIN', 'IMGEVT_UPLOADING');
+    define('IMGEVT_UPLOAD_COMPLETE', 'IMGEVT_UPLOAD_COMPLETE');
+    define('IMGEVT_UPLOAD_FAILED', 'IMGEVT_UPLOAD_FAILED');
 	
 	if (!defined('__INCLUDE__')) {
 		define('__INCLUDE__', (strlen($_SERVER['DOCUMENT_ROOT']) > 0 ? $_SERVER['DOCUMENT_ROOT'] : getcwd()) . '/');
@@ -203,6 +212,7 @@ namespace Api {
 					
 						// Rename and upload to Amazon
 						if ($retVal->id) {
+							Lib\Events::fire(IMGEVT_UPLOAD_BEGIN);
 							$newFile = base_convert($retVal->id, 10, 36) . '.' . $ext;
 							rename($retVal->localFile, __INCLUDE__ . 'cache/' . $newFile);
 							$retVal->localFile = __INCLUDE__ . 'cache/' . $newFile;
@@ -221,6 +231,7 @@ namespace Api {
                                 }
                             }
                             $retVal->sync();
+                            Lib\Events::fire(IMGEVT_UPLOAD_COMPLETE);
 						}
 						
 					}
@@ -317,6 +328,8 @@ namespace Api {
 		public static function downloadImage($url, $fileName) {
 
 			$retVal = false;
+
+			Lib\Events::fire(IMGEVT_DOWNLOAD_BEGIN);
 			
 			$url = self::parseUrl($url);
 			if ($url) {
@@ -328,14 +341,19 @@ namespace Api {
 				} else {
 					$file = self::curl_get_contents($url);
 				}
-				
-				if (null != self::_getImageType($file)) {
+
+				if (!$file) {
+					Lib\Events::fire(IMGEVT_DOWNLOAD_ERROR, 'Unable to download file');
+				} else if (null != self::_getImageType($file)) {
 					$handle = fopen($fileName, 'wb');
 					if ($handle) {
 						fwrite($handle, $file);
 						fclose($handle);
 						$retVal = true;
+						Lib\Events::fire(IMGEVT_DOWNLOAD_COMPLETE);
 					}
+				} else {
+					Lib\Events::fire(IMGEVT_DOWNLOAD_ERROR, 'Invalid image type');
 				}
 			}
 
@@ -365,7 +383,8 @@ namespace Api {
 		 * Generates a simplified histogram from the provided image
 		 */
 		public function generateHistogram() {
-			
+
+			Lib\Events::fire(IMGEVT_PROCESSING);
 			$retVal = null;
 			if (null == $this->gdImage) {
 				if (null == $this->localFile) {
@@ -378,6 +397,7 @@ namespace Api {
 			
 			if (null != $this->gdImage && $this->gdImage->image) {
 				
+
 				$resampled = imagecreatetruecolor(256, 256);
 				imagecopyresampled($resampled, $this->gdImage->image, 0, 0, 0, 0, 256, 256, imagesx($this->gdImage->image), imagesy($this->gdImage->image));
 			
@@ -589,15 +609,20 @@ namespace Api {
 			// Check for the host part as we don't need to do anything for local files
 			if ($urlInfo !== false && isset($urlInfo['host'])) {
 				// Handle deviantArt submissions
-				if (strpos($url, 'deviantart.com') !== false) {
+				if (strpos($url, 'deviantart.com') !== false || strpos($url, 'fav.me') !== false) {
 					$info = json_decode(self::curl_get_contents('http://backend.deviantart.com/oembed?url=' . urlencode($url)));
 					if (is_object($info)) {
 						$url = $info->url;
 					}
 				
 				// Handle imgur images that didn't link directly to the image
-				} elseif ($urlInfo['host'] == 'imgur.com' && strpos($urlInfo['path'], '.') === false) {
+				} elseif (strpos($urlInfo['host'], 'imgur.com') !== false && strpos($urlInfo['path'], '.') === false) {
 					$url .= '.jpg';
+				} elseif (strpos($urlInfo['host'], 'mediacru.sh') !== false && strpos($urlInfo['path'], '.') === false) {
+					$info = json_decode(self::curl_get_contents($url . '.json'));
+					if (is_object($info)) {
+						$url = 'http://mediacru.sh' . $info->original;
+					}
 				}
 			}
 			
@@ -621,8 +646,11 @@ namespace Api {
             }
             
 			curl_setopt($c, CURLOPT_RETURNTRANSFER, true);
-			curl_setopt($c, CURLOPT_TIMEOUT, 5);
-			return curl_exec($c);
+			curl_setopt($c, CURLOPT_TIMEOUT, 15);
+			$retVal = curl_exec($c);
+			curl_close($c);
+
+			return $retVal;
 		}
 	
 	}
