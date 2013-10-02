@@ -32,8 +32,8 @@ require_once('../lib/dxapi.php');
 Api\DxApi::initialize();
 
 // Get the type, library and method off the query string
-$type = strtolower($_GET['type']);
-$method = $_GET['method'];
+$type = Lib\Url::Get('type', 'json');
+$method = Lib\Url::Get('method');
 
 // Check for a cache of this call and parse out the parameters
 $vars = array();
