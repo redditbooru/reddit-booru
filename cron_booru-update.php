@@ -4,14 +4,25 @@ define('BOORU_POSTS_LIMIT', 100);
 
 require('lib/aal.php');
 
+$ratings = [ 'e' => 2, 'q' => 1, 's' => 0 ];
+
+function curl_get_contents($url) {
+    $c = curl_init($url);
+    curl_setopt($c, CURLOPT_USERAGENT, 'moe downloader by /u/dxprog');
+    curl_setopt($c, CURLOPT_FOLLOWLOCATION, true);
+    curl_setopt($c, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($c, CURLOPT_TIMEOUT, 5);
+    return curl_exec($c);
+}
+
 function getBooruPage($page, $sourceUrl) {
-    $url = $sourceUrl . 'index.php?page=dapi&s=post&q=index&limit=' . BOORU_POSTS_LIMIT . '&pid=' . ($page * BOORU_POSTS_LIMIT);
+    $url = $sourceUrl . 'index.php?page=dapi&s=post&q=index&limit=' . BOORU_POSTS_LIMIT . '&pid=' . $page;
     return simplexml_load_file($url);
 }
 
 function convertPixivLink($link) {
     $retVal = $link;
-    if (preg_match('/([\d]+)\.([\w]{3,4})\b/i', $link, $matches)) {
+    if (preg_match('/\/([\d]+)[\D]/i', $link, $matches)) {
         $retVal = 'http://www.pixiv.net/member_illust.php?mode=medium&illust_id=' . $matches[1];
     }
     return $retVal;
@@ -22,9 +33,10 @@ while ($row = Lib\Db::fetch($result)) {
     
     // We loop until we find an image that's already been inserted into the database
     $check = true;
-    $page = 0;
+    $page = isset($argv[1]) ? (int) $argv[1] : 0;
     
     while ($check) {
+        echo 'Entering page ', $page, PHP_EOL;
         $listing = getBooruPage($page, $row->source_baseurl);
         if ($listing) {
             foreach ($listing->post as $post) {
@@ -32,13 +44,13 @@ while ($row = Lib\Db::fetch($result)) {
                 $attr = $post->attributes();
                 echo $attr->id, ': ';
                     
-                if (strlen($attr->source) > 0) {
+                if (strlen($attr->source) > 0 && strpos($attr->source, 'http://') === 0) {
                 
                     $dbPost = Api\Post::getByExternalId($attr->id, $row->source_id);
                 
                     if ($dbPost) {
                         echo 'ALREADY ADDED';
-                        $check = false;
+                        // $check = false;
                     } else {
                         // Download and scan the image
                         $image = Api\Image::createFromImage((string) $attr->sample_url, false, $row->source_id);
@@ -60,6 +72,7 @@ while ($row = Lib\Db::fetch($result)) {
                             
                             if ($dbPost->sync()) {
                                 $image->postId = $dbPost->id;
+                                $image->contentRating = $ratings[(int) $attr->rating];
                                 $image->sync();
                                 echo 'DONE';
                             } else {
