@@ -161,39 +161,38 @@ foreach ($posts as $id => $rank) {
 // Get the gelbooru IDs and pull the image data from the gelbooru API
 // TODO - use interanally stored histogram data instead of going to API
 $images = [];
-$query = 'SELECT post_external_id, post_link, post_id FROM posts WHERE post_id IN (' . implode(',', $where) . ')';
+$query = 'SELECT i.*, p.post_external_id, p.post_link, p.post_id, p.post_keywords FROM posts p INNER JOIN images i ON i.post_id = p.post_id WHERE post_id IN (' . implode(',', $where) . ')';
 $result = Lib\Db::Query($query, $params);
 while ($row = Lib\Db::Fetch($result)) {
-	$xml = simplexml_load_file('http://gelbooru.com/index.php?page=dapi&s=post&q=index&id=' . $row->post_external_id);
+	
 	// Only safe images
 	// TODO - make this controlled by the source (e.g. questionable for r/pantsu, explicit for r/ecchi)
-	if ($xml->post->attributes()->rating == 's') {
-		$image = (string) $xml->post->attributes()->sample_url;
-		$repost = Api\Post::reverseImageSearch([ 'imageUri' => $image, 'sources' => SOURCE_AWWNIME ]);
-		if (isset($repost->results)) {
-			$rank = 0;
-			
-			// Similarity of 98% or more is considered a repost and will have a rank of 0
-			// It should probably be thrown out entirely
-			if (round($repost->results[0]->similarity) < 98) {
-				foreach ($repost->results as $item) {
-					// Rank is the the closeness percentage times the score
-					// The idea is, high similarity should give more weight to score, especially if that score is also high
-					$rank += $item->similarity / 100 * $item->score;
-				}
-				$rank /= count($repost->results);
+	$image = new Api\Image($row);
+	$repost = Api\Post::reverseImageSearch([ 'image' => $image, 'sources' => SOURCE_AWWNIME ]);
+	if (isset($repost->results)) {
+		$rank = 0;
+		
+		// Similarity of 98% or more is considered a repost and will have a rank of 0
+		// It should probably be thrown out entirely
+		if (round($repost->results[0]->similarity) < 98) {
+			foreach ($repost->results as $item) {
+				// Rank is the the closeness percentage times the score
+				// The idea is, high similarity should give more weight to score, especially if that score is also high
+				$rank += $item->similarity / 100 * $item->score;
 			}
-			$out = new stdClass;
-			$out->url = $image;
-			
-			// Add the ranking from above to the ranking from the keywords
-			$out->rank = $rank + $params[':id' . $row->post_id];
-
-			$out->keywords = (string) $xml->post->attributes()->tags;
-			$out->source = $row->post_link;
-			$images[] = $out;
+			$rank /= count($repost->results);
 		}
+		$out = new stdClass;
+		$out->url = $image;
+		
+		// Add the ranking from above to the ranking from the keywords
+		$out->rank = $rank + $params[':id' . $row->post_id];
+
+		$out->keywords = $row->post_keywords;
+		$out->source = $row->post_link;
+		$images[] = $out;
 	}
+
 }
 
 usort($images, function($a, $b) {
