@@ -38,5 +38,9 @@
     {
         "rule": "^cache/([^/.]+)",
         "replace": "page=thumb&file=$1"
+    },
+    {
+        "rule": "^stats/",
+        "replace": "page=stats"
     }
 ]
