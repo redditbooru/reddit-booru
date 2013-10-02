@@ -1,19 +1,29 @@
 <?php
 
+define('DISABLE_CACHE', true);
 chdir('/var/www/reddit-booru');
 
 require('lib/aal.php');
 
 define('POST_COUNT', 100);
 
+function debug_log($message) {
+    echo $message, PHP_EOL;
+    $file = fopen('/home/matt/cron/reddit-booru/logs/reddit-booru.log', 'ab');
+    fwrite($file, '[' . date('Y-m-d h:i:s') . '] ' . $message . PHP_EOL);
+    fclose($file);
+}
+
 function downloadImage($url, $postId, $sourceId) {
-	echo 'Downloading "', $url, '"...';
+	$log = 'Downloading "' . $url . '"...';
 	$image = Api\Image::createFromImage($url, $postId, $sourceId);
 	if (null == $image) {
-		echo 'FAILED', PHP_EOL;
+		$log .= 'FAILED';
 	} else {
-		echo 'SUCCESS', PHP_EOL;
+		$log .= 'SUCCESS';
 	}
+    debug_log($log);
+    return !(null == $image);
 }
 
 /**
@@ -37,18 +47,22 @@ function handleRedditbooruGallery($id, $sourceId, $redditPost, $updateTime) {
         // We already have all the images, so additional processing is unecessary
         $post->processed = true;
         $post->visible = true;
+        $post->score = $redditPost->score;
         $post->sync();
 
         // Update all children images
         Lib\Db::Query('UPDATE images SET source_id = :sourceId WHERE post_id = :postId', [ ':sourceId' => $post->sourceId, ':postId' => $post->id ]);
 
-        echo 'Redditbooru gallery: ' . $post->link, PHP_EOL;
+        debug_log('Redditbooru gallery synced: ' . $post->link);
     } else {
         if (!$post) {
-            echo '[FAIL] Invalid Redditbooru gallery: ', $id, PHP_EOL;
+            debug_log('Invalid Redditbooru gallery: ' . $id);
         } else {
             $post->dateUpdated = $updateTime;
+            $post->visible = true;
+            $post->score = $redditPost->score;
             $post->sync();
+            debug_log('Redditbooru gallery ' . $id . ' updated');
         }
     }
 }
@@ -79,14 +93,15 @@ function processSubreddit($source) {
     					$post = Api\Post::createFromRedditObject($child);
                         
     					$post->sourceId = $source->id;
-    					echo 'New post: ', $post->title, PHP_EOL;
+    					log('New post: ' . $post->title . ' (' . $post->externalId . ')');
     				} else {
     					if ($post->meta->flair != $child->data->link_flair_text) {
     						$post->meta->flair = $child->data->link_flair_text;
     						$post->keywords = Api\Post::generateKeywords($post->title . ' ' . $post->meta->flair);
     					}
     					$post->score = $child->data->score;
-    					echo 'Updated post: ', $post->title, PHP_EOL;
+                        $post->visible = true;
+    					debug_log('Updated post: ' . $post->title . ' (' . $post->externalId . ')');
     				}
     				
     				if (null != $post) {
@@ -102,54 +117,67 @@ function processSubreddit($source) {
 	}
 	
 	// Check for deleted/removed posts
-	echo '---- Checking for removed posts ----', PHP_EOL;
+	debug_log('---- Checking for removed posts ----');
 	$params = [ ':sourceId' => $source->id, ':dateCreated' => $earliest, ':dateUpdated' => $time ];
 	$result = Lib\Db::Query('SELECT * FROM posts WHERE source_id = :sourceId AND post_date >= :dateCreated AND post_updated != :dateUpdated AND post_visible = 1', $params);
 	if ($result && $result->count > 0) {
-		echo '-- ', $result->count, ' posts found --', PHP_EOL;
+		debug_log('-- ' . $result->count . ' posts found --');
 		while ($row = Lib\Db::Fetch($result)) {
 			$post = new Api\Post($row);
 			$post->visible = false;
 			$post->dateUpdated = $time;
 			$post->sync();
-			echo 'Hiding "', $post->title, '" (', $post->externalId, ')', PHP_EOL;
+			debug_log('Hiding "' . $post->title . '" (' . $post->externalId, ')');
 		}
 	} else {
-		echo 'None', PHP_EOL;
+		debug_log('None');
 	}
 	
 	// Process images
 	$posts = Api\Post::getUnprocessed($source->id);
-    echo count($posts) . ' unprocessed posts', PHP_EOL;
+    debug_log(count($posts) . ' unprocessed posts');
 	if (null != $posts) {
 		foreach ($posts as $post) {
             
-            // Check for redditbooru hosted images
-            if (strpos($post->link, 'http://cdn.awwni.me') === 0) {                
-                // Find the image entry in the database for this
-                $query = 'SELECT * FROM images WHERE post_id IS NULL AND image_cdn_url = :cdnUrl';
-                $result = Lib\Db::Query($query, [ ':cdnUrl' => $post->link ]);
-                if ($result && $result->count > 0) {
-                    $image = new Api\Image(Lib\Db::Fetch($result));
-                    $image->postId = $post->id;
-                    $image->sourceId = $source->id;
-                    $image->contentRating = $source->contentRating;
-                    $image->sync();
-                }
-            } else if (preg_match('/imgur\.com\/a\/([\w]+)/i', $post->link, $matches)) {
-				echo 'Imgur album "', $matches[1], '"', PHP_EOL;
-				$images = Api\Image::getImgurAlbum($matches[1]);
-				if (null != $images) {
-					foreach ($images as $image) {
-						downloadImage($image, $post->id, $post->sourceId);
+			$processed = true;
+
+			// Check to see if another thread is already working on this post
+			$row = Lib\Db::Fetch(Lib\Db::Query('SELECT COUNT(1) AS total FROM images WHERE post_id = :postId', [ ':postId' => $post->id ]));
+			if ($row->total == 0) {
+
+	            // Check for redditbooru hosted images
+	            if (strpos($post->link, 'http://cdn.awwni.me') === 0) {                
+	                // Find the image entry in the database for this
+	                $debug = 'Found CDN hosted image ' . $post->link . ' (' . $post->id . ')...';
+	                $query = 'SELECT * FROM images WHERE (post_id IS NULL OR post_id = :postId) AND image_cdn_url = :cdnUrl';
+	                $result = Lib\Db::Query($query, [ ':cdnUrl' => $post->link, ':postId' => $post->id ]);
+	                if ($result && $result->count > 0) {
+	                    $image = new Api\Image(Lib\Db::Fetch($result));
+	                    $image->postId = $post->id;
+	                    $image->sourceId = $source->id;
+	                    $image->contentRating = $source->contentRating;
+	                    $image->sync();
+	                    $debug .= 'UPDATED';
+	                } else {
+	                    $debug .= 'FAILED';
+	                }
+	                debug_log($debug);
+	            } else if (preg_match('/imgur\.com\/a\/([\w]+)/i', $post->link, $matches)) {
+					echo 'Imgur album "', $matches[1], '"', PHP_EOL;
+					$images = Api\Image::getImgurAlbum($matches[1]);
+					if (null != $images) {
+						foreach ($images as $image) {
+							$processed &= downloadImage($image, $post->id, $post->sourceId);
+						}
 					}
+				} else {
+					$processed = downloadImage($post->link, $post->id, $post->sourceId);
 				}
-			} else {
-				downloadImage($post->link, $post->id, $post->sourceId);
+				
+				$post->processed = $processed;
+				$post->sync();
+
 			}
-			
-			$post->processed = true;
-			$post->sync();
 			
 		}
 	}
@@ -184,7 +212,7 @@ $sources = Api\Source::getAllEnabled();
 
 foreach ($sources as $source) {
 	
-	echo '---- Processing ', $source->name, ' ---', PHP_EOL;
+	debug_log('---- Processing ' . $source->name . ' ---');
 	
 	switch ($source->type) {
 		case 'subreddit':
