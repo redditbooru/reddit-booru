@@ -97,6 +97,14 @@ namespace Lib {
 				}
 			}
 		}
+
+
+        public static function getSingleById($id) {
+        	$className = get_called_class();
+        	$retVal = new $className();
+        	$retVal->getById($id['id']);
+        	return $retVal;
+        }
         
         /**
          * Gets a record from the database by the primary key
