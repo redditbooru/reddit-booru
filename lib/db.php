@@ -14,7 +14,7 @@ namespace Lib {
 		/**
 		 * The handle to the database connection
 		 */
-		private static $_conn = null;
+		public static $_conn = null;
 		
 		/**
 		 * The value of the last error message
