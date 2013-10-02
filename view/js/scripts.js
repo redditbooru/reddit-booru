@@ -73,10 +73,60 @@
 
 (function() {
 
+    window.EventedAjax = function(url, eventCallback, completeCallback) {
+
+        var xmlHttp = new XMLHttpRequest(),
+            lastResponse = '',
+            finalData = '',
+            useEventedModel = /(webkit|firefox)/i.test(navigator.userAgent),
+            readyStateChange = function() {
+                var newData = $.trim(xmlHttp.responseText.replace(lastResponse, '')),
+                    jsonData = null;
+                if (xmlHttp.readyState === 3) {
+                    // Once the DATA event is fired, we need to save the entire response until it's completed.
+                    // Otherwise, it goes to the event handler
+                    if (newData.indexOf('"eventType":"DATA"') !== -1 || finalData.length > 0) {
+                        finalData += newData;
+                    } else {
+                        // Only send non null data packets
+                        jsonData = $.parseJSON(newData);
+                        if (jsonData) {
+                            eventCallback(jsonData);
+                        }
+                    }
+                } else if (xmlHttp.readyState === 4) {
+                    finalData = $.parseJSON(finalData + newData);
+                    
+                    // Just send the data parameter to keep BC with standard ajax calls
+                    finalData  = typeof finalData === 'object' && finalData.hasOwnProperty('data') ? finalData.data : null;
+                    completeCallback(finalData);
+                }
+                lastResponse = xmlHttp.responseText;
+            };
+        
+        if (useEventedModel) {
+            url += '&evented';
+            xmlHttp.open('GET', url, true);
+            xmlHttp.onreadystatechange = readyStateChange;
+            xmlHttp.send();
+        } else {
+            $.ajax({
+                url:url,
+                dataType:'json',
+                success:completeCallback
+            });
+        }
+
+    };
+
+}());
+
+(function() {
+
     var
     
     config = {
-        panelWidth:215,
+        panelWidth:200,
         afterDate:null,
         itemsPerPage:25,
         displayNsfw: $.cookie('nsfw') || false
@@ -92,6 +142,14 @@
         uploadImageItem:RB.Templates.uploadImageItem,
         postTitle:RB.Templates.postTitle,
         sourceMatch:RB.Templates.sourceMatch
+    },
+
+    eventTypes = {
+        IMGEVT_DOWNLOAD_BEGIN:'Retrieving image...',
+        IMGEVT_DOWNLOAD_COMPLETE:'Image retrieved!',
+        IMGEVT_UPLOAD_BEGIN:'Creating moe backup...',
+        IMGEVT_UPLOAD_COMPLETE:'Complete!',
+        IMGEVT_PROCESSING:'Analyzing image...'
     },
     
     parseQueryString = function(qs) {
@@ -110,7 +168,7 @@
             qs = qs.split('&');
             for (i = 0, count = qs.length; i < count; i++) {
                 kvp = qs[i].split('=');
-                retVal[kvp[0]] = kvp.length === 1 ? true : kvp[1];
+                retVal[kvp[0]] = kvp.length === 1 ? true : decodeURIComponent(kvp[1]);
             }
         }
 
@@ -158,9 +216,12 @@
     windowResize = function(e) {
         var
             width = $window.width(),
+            height = $window.height() - $('header').outerHeight(true) - $('footer').outerHeight(true) - $images.outerHeight(true),
             cols = Math.floor(width / config.panelWidth);
         
-        $images.width(cols * config.panelWidth);
+        $images
+            .width(cols * config.panelWidth)
+            .css('min-height', height + 'px');
     },
 
     getSources = function() {
@@ -182,6 +243,47 @@
             dataType:'json',
             success:ajaxCallback
         });
+    },
+
+    navigate = function(url, queryString) {
+        
+        if (typeof queryString === 'object') {
+            var qs = [];
+            for (var i in queryString) {
+                if (queryString.hasOwnProperty(i)) {
+                    qs.push(i + '=' + encodeURIComponent(queryString[i]));
+                }
+            }
+            queryString = qs.join('&');
+        }
+
+        if (queryString) {
+            url += (url.indexOf('?') === -1 ? '?' : '&') + queryString;
+        }
+
+        if (typeof history.pushState === 'function') {
+            history.pushState({}, '', url);
+        } else {
+            window.location.hash = '#!' + queryString;
+        }
+    },
+
+    loader = {
+        $el:$('#loader'),
+        show:function() {
+            loader.$el.addClass('visible');
+        },
+        hide:function() {
+            loader.$el.removeClass('visible');
+        },
+        setText:function(text) {
+            loader.$el.find('.loader-text').html(text);
+        },
+        setMessage:function(eventType) {
+            if (eventTypes.hasOwnProperty(eventType)) {
+                loader.setText(eventTypes[eventType]);
+            }
+        }
     },
     
     displayImages = function(data) {
@@ -308,9 +410,6 @@
                     }
                 }
                 
-                $images.empty();
-                $overlay.fadeOut();
-                
                 $.ajax({
                     url:query,
                     dataType:'json',
@@ -325,10 +424,14 @@
                 
                     query = query.replace('searchPosts', 'reverseImageSearch');
                     query += '&imageUri=' + encodeURIComponent(keywords) + '&count=6&getCount=true';
-                    $.ajax({
-                        url:query,
-                        dataType:'json',
-                        success:imageSearchCallback
+
+                    loader.setText('Hold tight while we check your image!');
+                    loader.show();
+                    EventedAjax(query, function(data) {
+                        loader.setMessage(data.eventType);
+                    }, function(data) {
+                        loader.hide();
+                        imageSearchCallback(data);
                     });
                 
                 } else {
@@ -338,7 +441,9 @@
             
             }
             
-            window.location.hash = '#!q=' + keywords + '&source=' + sources;
+            $images.empty();
+            $overlay.fadeOut();
+            navigate('/', { q:keywords, source:sources })
             
         },
         
@@ -461,7 +566,7 @@
         }
     
     },
-
+    
     screensaver = (function() {
         
         var
@@ -580,8 +685,6 @@
     
         var out = '', match = {};
         
-        $overlay.fadeOut();
-        
         if (data && data.length > 0) {
             out = templates.imageSearchOriginal($('#txtKeywords').val());
             for (var i = 0, count = data.length; i < count; i++) {
@@ -630,7 +733,7 @@
         $images
             .on('click', '.more', moreClick)
             .addClass(display);
-
+        
         // Initialize sub modules
         searchForm.init();
         uploadForm.init();
@@ -647,7 +750,7 @@
             displayDefault();
         } else {
             queryString = parseQueryString(queryString[1]);
-            
+            console.log(queryString);
             if (queryString.hasOwnProperty('q')) {
                 $('#txtKeywords').val(queryString.q);
                 if (queryString.hasOwnProperty('source')) {
@@ -684,7 +787,7 @@
             }
             
         }
-
+    
     }());
 
 }());
