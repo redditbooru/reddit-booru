@@ -42,5 +42,9 @@
     {
         "rule": "^stats/",
         "replace": "page=stats"
+    },
+    {
+        "rule": "^single/([\\w]+)$",
+        "replace": "action=single&file=$1"
     }
 ]

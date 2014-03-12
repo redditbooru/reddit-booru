@@ -28,7 +28,9 @@ namespace Controller {
                 $domain = $matches[1];
                 if ($domain === 'moesaic') {
                     self::_renderMoesaic();
-                }else if ($domain != 'www' && $domain != 'beta') {
+                } else if ($domain === 'myfirst') {
+                    self::_getMyFirst();
+                } else if ($domain != 'www' && $domain != 'beta') {
                     $domain = Api\Source::getBySubdomain([ 'domain' => $domain ]);
                     // If no sub was found, redirect to the main page
                     if (!$domain) {
@@ -49,6 +51,9 @@ namespace Controller {
 			$urlOut = '/images/?';
 			
 			switch ($action) {
+                case 'single':
+                    self::_displaySingle();
+                    break;
 				case 'user':
 					$user = Lib\Url::Get('user');
 					$jsonOut = Images::getByQuery([ 'user' => $user, 'sources' => $sources ]);
@@ -121,6 +126,28 @@ namespace Controller {
             Lib\Display::setVariable('USER', $user);
             Lib\Display::setVariable('TITLE', ($user ? $user . '\'s ' : '') . 'Moesaic');
             Lib\Display::setTemplate('moesaic');
+            Lib\Display::render();
+            exit;
+        }
+
+        private static function _getMyFirst() {
+            if (count($_POST) > 0 && isset($_POST['username'])) {
+                $row = Lib\Db::Fetch(Lib\Db::Query('SELECT post_external_id FROM posts WHERE source_id = 1 AND user_id = (SELECT user_id FROM users WHERE user_name = :username) ORDER BY post_date ASC LIMIT 1', [ ':username' => $_POST['username'] ]));
+                if ($row) {
+                    header('Location: http://redd.it/' . $row->post_external_id);
+                    exit;
+                }
+            }
+            Lib\Display::setTemplate('myfirst');
+            Lib\Display::render();
+            exit;
+        }
+
+        private static function _displaySingle() {
+            $file = Lib\Url::Get('file', null);
+            $url = 'http://cdn.awwni.me/' . str_replace('_', '.', $file);
+            Lib\Display::setTemplate('upload');
+            Lib\Display::setVariable('URL', $url);
             Lib\Display::render();
             exit;
         }

@@ -19,7 +19,10 @@ namespace Api {
     define('IMGEVT_UPLOAD_BEGIN', 'IMGEVT_UPLOADING');
     define('IMGEVT_UPLOAD_COMPLETE', 'IMGEVT_UPLOAD_COMPLETE');
     define('IMGEVT_UPLOAD_FAILED', 'IMGEVT_UPLOAD_FAILED');
-	
+
+    define('IMGERR_INVALID_FORMAT', 'IMGERR_INVALID_FORMAT');
+    define('IMGERR_DOWNLOAD_FAILURE', 'IMGERR_DOWNLOAD_FAILURE');
+
 	if (!defined('__INCLUDE__')) {
 		define('__INCLUDE__', (strlen($_SERVER['DOCUMENT_ROOT']) > 0 ? $_SERVER['DOCUMENT_ROOT'] : getcwd()) . '/');
 	}
@@ -177,7 +180,12 @@ namespace Api {
          * Content rating
          */
         public $contentRating;
-		
+
+        /**
+         * Nasty way of figuring out why an image failed to be created
+         */
+        public static $imageLoadError;
+
 		/**
 		 * Downloads and syncs an image to the database
 		 */
@@ -185,7 +193,9 @@ namespace Api {
 		
 			$localFile = __INCLUDE__ . 'cache/' . $postId . '_' . md5(microtime(true));
 			$retVal = null;
-			
+
+			self::_log('createFromImage', $url);
+
 			if (self::downloadImage($url, $localFile)) {
 				
 				$retVal = new Image();
@@ -344,16 +354,21 @@ namespace Api {
 
 				if (!$file) {
 					Lib\Events::fire(IMGEVT_DOWNLOAD_ERROR, 'Unable to download file');
+					self::_log('downloadImage_fail', $url);
+					self::$imageLoadError = IMGERR_DOWNLOAD_FAILURE;
 				} else if (null != self::_getImageType($file)) {
 					$handle = fopen($fileName, 'wb');
 					if ($handle) {
 						fwrite($handle, $file);
 						fclose($handle);
 						$retVal = true;
+						self::_log('downloadImage_success', $url);
 						Lib\Events::fire(IMGEVT_DOWNLOAD_COMPLETE);
 					}
 				} else {
+					self::_log('downloadImage_invalid', $url);
 					Lib\Events::fire(IMGEVT_DOWNLOAD_ERROR, 'Invalid image type');
+					self::$imageLoadError = IMGERR_INVALID_FORMAT;
 				}
 			}
 
@@ -378,7 +393,92 @@ namespace Api {
 			}
 			return $retVal;
 		}
-		
+
+		/**
+		 * Returns a list of image URLs in a tumblr post
+		 */
+		public static function getTumblrImages($url) {
+			$retVal = [];
+
+			// Parse out the ID
+			$url = parse_url($url);
+			if (preg_match('/\/post\/([\d]+)\//', $url['path'], $matches)) {
+				$apiCall = 'http://api.tumblr.com/v2/blog/' . $url['host'] . '/posts?id=' . $matches[1] . '&api_key=' . TUMBLR_CONSUMER_KEY;
+				$response = json_decode(self::curl_get_contents($apiCall));
+				if ($response && is_object($response->response)) {
+					foreach ($response->response->posts[0]->photos as $photo) {
+						$retVal[] = $photo->original_size->url;
+					}
+				}
+			}
+
+			return $retVal;
+		}
+
+		public static function getYandereImage($url) {
+			$retVal = [];
+			$response = self::curl_get_contents($url);
+			if (preg_match('/original-file-changed\" href=\"([^\"]+)\"/', $response, $match)) {
+				$retVal[] = $match[1];
+			}
+			return $retVal;
+		}
+
+		/**
+		 * Returns a list of image URLs in a mediacrush post
+		 */
+		public static function getMediacrushImages($url) {
+			$retVal = [];
+
+			$response = json_decode(self::curl_get_contents($url . '.json'));
+			if (is_object($response) && is_array($response->files)) {
+				$url = parse_url($url);
+				if (count($response->files) === 1) {
+					$retVal[] = $url['scheme'] . '://mediacru.sh' . $response->original;
+				} else {
+					foreach ($response->files as $file) {
+						$retVal[] = $url['scheme'] . '://mediacru.sh' . $file->original;
+					}
+				}
+			}
+
+			return $retVal;
+		}
+
+		/**
+		 * Scrapes a minus album page and gets the URLs for all images
+		 */
+		public static function getMinusAlbum($id) {
+
+			$retVal = null;
+
+			$page = self::curl_get_contents('http://minus.com/' . $id);
+			if ($page) {
+
+				// Get the image data json
+				$dataBeginToken = 'var gallerydata = ';
+				$dataEndToken = '};';
+				$start = strpos($page, $dataBeginToken);
+				if (false !== $start) {
+					$end = strpos($page, $dataEndToken, $start) + 1;
+					$start += strlen($dataBeginToken);
+					$jsonData = json_decode(substr($page, $start, $end - $start));
+					if (is_object($jsonData) && is_array($jsonData->items)) {
+						$retVal = [];
+						foreach ($jsonData->items as $item) {
+							$ext = explode('.', $item->name);
+							$ext = end($ext);
+							$retVal[] = 'http://i.minus.com/i' . $item->id . '.' . $ext;
+						}
+					}
+				}
+
+			}
+
+			return $retVal;
+
+		}
+
 		/**
 		 * Generates a simplified histogram from the provided image
 		 */
@@ -652,7 +752,14 @@ namespace Api {
 
 			return $retVal;
 		}
-	
+
+		private static function _log($name, $data) {
+			$log = new stdClass;
+			$log->name = 'Image_' . $name;
+			$log->data = $data;
+			Lib\Logger::log('model', $log);
+		}
+
 	}
 
 }

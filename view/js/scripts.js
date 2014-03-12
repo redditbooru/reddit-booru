@@ -394,8 +394,8 @@
             }
             
             // If keywords isn't a url and no upload, do a standard search
-            if (keywords.indexOf('http://') === -1 && upload.length === 0 && !sourceSearch) {
-            
+            if (!/^https?\:\/\//i.test(keywords) && upload.length === 0 && !sourceSearch) {
+
                 if (keywords) {
                     query += '&keywords=' + encodeURIComponent(keywords);
                 }
@@ -517,7 +517,8 @@
             if (uploadForm.images.length > 0) {
                 
                 if (uploadForm.images.length === 1) {
-                    window.location.href = uploadForm.imageFirst;
+                    var t = uploadForm.imageFirst.split('/');
+                    window.location.href = '/single/' + t[t.length - 1];
                 }
                 
                 var data = { title:$.trim(uploadForm.$.txtTitle.val()), images:uploadForm.images.join(',') };

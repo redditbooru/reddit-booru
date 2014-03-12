@@ -42,7 +42,10 @@ if (isset($_FILES['uplPicture']) && is_uploaded_file($_FILES['uplPicture']['tmp_
     }
     
     if ($redirect && $retVal->success) {
-        header('Location: ' . $retVal->image->cdnUrl);
+        Lib\Display::setTheme('reddit-booru');
+        Lib\Display::setTemplate('upload');
+        Lib\Display::setVariable('URL', $retVal->image->cdnUrl);
+        Lib\Display::render();
         exit;
     }
     

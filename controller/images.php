@@ -25,6 +25,12 @@ namespace Controller {
 
             $url = Lib\Url::Get('imageUri', null);
             $images = $url ? self::getByImage($_GET) : self::getByQuery($_GET);
+
+            // CORS support for RES
+            if (isset($_SERVER['HTTP_ORIGIN'])) {
+                header('Access-Control-Allow-Origin: *');
+            }
+
             header('Content-Type: text/javascript; charset=utf-8');
             echo json_encode($images);
             exit;
@@ -181,6 +187,8 @@ namespace Controller {
 
             }
 
+            self::_log('getByQuery', $vars, $retVal);
+
             return $retVal;
         }
 
@@ -213,6 +221,8 @@ namespace Controller {
                 Lib\Events::endAjaxEvent();
             }
 
+            self::_log('getByImage', $vars, $retVal);
+
             return $retVal;
         }
 
@@ -230,7 +240,18 @@ namespace Controller {
          * Handles registering extensions
          */
         public static function registerExtension($class, $module, $type) {
-        
+
+        }
+
+        /**
+         * Logs the input and output of a function
+         */
+        private static function _log($name, $vars, $result) {
+            $log = new stdClass;
+            $log->name = 'Images_' . $name;
+            $log->data = $vars;
+            $log->result = null == $result;
+            Lib\Logger::log('controller', $log);
         }
 
     }

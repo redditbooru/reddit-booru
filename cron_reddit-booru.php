@@ -6,12 +6,42 @@ chdir('/var/www/reddit-booru');
 require('lib/aal.php');
 
 define('POST_COUNT', 100);
+define('REPOST_ALLOWANCE', 60 * 24 * 60 * 60); // sixty days
 
 function debug_log($message) {
     echo $message, PHP_EOL;
     $file = fopen('/home/matt/cron/reddit-booru/logs/reddit-booru.log', 'ab');
     fwrite($file, '[' . date('Y-m-d h:i:s') . '] ' . $message . PHP_EOL);
     fclose($file);
+}
+
+function checkForRepost($image, $sourceId) {
+
+	$time = time();
+
+	if ($image instanceof Api\Image) {
+		// Run a repost check
+		$repost = Api\Post::reverseImageSearch([
+			'image' => $image,
+			'sources' => $sourceId
+		]);
+
+		if (null != $repost && count($repost->results) > 0) {
+			// Check the closest image to see how close it is
+			foreach ($repost->results as $post) {
+				if ($post->post_id != $image->postId) {
+					if (round($post->distance, 4) == 0 && $post->post_date >= $time - REPOST_ALLOWANCE) {
+					    // JSON encode/decode the object to strip private keys
+					    $data = json_decode(json_encode($image));
+					    $data->repost = $post;
+						Lib\Logger::log('reposts', $data);
+						break;
+					}
+				}
+			}
+		}
+	}
+
 }
 
 function downloadImage($url, $postId, $sourceId) {
@@ -22,6 +52,9 @@ function downloadImage($url, $postId, $sourceId) {
 	} else {
 		$log .= 'SUCCESS';
 	}
+
+	checkForRepost($image, $sourceId);
+
     debug_log($log);
     return !(null == $image);
 }
@@ -93,7 +126,7 @@ function processSubreddit($source) {
     					$post = Api\Post::createFromRedditObject($child);
                         
     					$post->sourceId = $source->id;
-    					log('New post: ' . $post->title . ' (' . $post->externalId . ')');
+    					debug_log('New post: ' . $post->title . ' (' . $post->externalId . ')');
     				} else {
     					if ($post->meta->flair != $child->data->link_flair_text) {
     						$post->meta->flair = $child->data->link_flair_text;
@@ -145,8 +178,13 @@ function processSubreddit($source) {
 			$row = Lib\Db::Fetch(Lib\Db::Query('SELECT COUNT(1) AS total FROM images WHERE post_id = :postId', [ ':postId' => $post->id ]));
 			if ($row->total == 0) {
 
+				$url = parse_url($post->link);
+				$domain = isset($url['host']) ? $url['host'] : null;
+				$path = isset($url['path']) ? $url['path'] : null;
+				$images = [];
+
 	            // Check for redditbooru hosted images
-	            if (strpos($post->link, 'http://cdn.awwni.me') === 0) {                
+	            if ($url['host'] === 'cdn.awwni.me') {
 	                // Find the image entry in the database for this
 	                $debug = 'Found CDN hosted image ' . $post->link . ' (' . $post->id . ')...';
 	                $query = 'SELECT * FROM images WHERE (post_id IS NULL OR post_id = :postId) AND image_cdn_url = :cdnUrl';
@@ -162,19 +200,62 @@ function processSubreddit($source) {
 	                    $debug .= 'FAILED';
 	                }
 	                debug_log($debug);
-	            } else if (preg_match('/imgur\.com\/a\/([\w]+)/i', $post->link, $matches)) {
-					echo 'Imgur album "', $matches[1], '"', PHP_EOL;
-					$images = Api\Image::getImgurAlbum($matches[1]);
-					if (null != $images) {
-						foreach ($images as $image) {
-							$processed &= downloadImage($image, $post->id, $post->sourceId);
-						}
+
+	            // Imgur album
+	            } else if (preg_match('/imgur\.com\/(a|gallery)\/([\w]+)/i', $post->link, $matches)) {
+					debug_log('Imgur album "' . $matches[2] . '"');
+					$images = Api\Image::getImgurAlbum($matches[2]);
+
+				// Comma delimited imgur album
+				} else if (strtolower($url['host']) === 'imgur.com' && strpos($url['path'], ',') !== false) {
+					$path = str_replace('/', '', $url['path']);
+					$files = explode(',', $path);
+					debug_log('imgur comma delimited album: ' . $path);
+					foreach ($files as $file) {
+						$images[] = 'http://imgur.com/' . $file . '.jpg';
 					}
+
+                // Yandere image
+                } else if ($url['host'] === 'yande.re') {
+                    debug_log('Yandere post "' . $post->link . '"');
+                    $images = Api\Image::getYandereImage($post->link);
+
+				// Minus album
+                } else if (preg_match('/([\w]+\.)?minus\.com\/([^\.])+$/i', $post->link, $matches)) {
+                    debug_log('Minus album "' . $matches[2] . '"');
+                    $images = Api\Image::getMinusAlbum($matches[2]);
+
+                // tumblr posts
+                } else if (preg_match('/\/post\/([\d]+)\//', $url['path'], $matches)) {
+                	debug_log('Tumblr post: ' . $matches[1]);
+                	$images = Api\Image::getTumblrImages($post->link);
+
+                // mediacrush
+                } else if ($url['host'] === 'mediacru.sh') {
+                	debug_log('Media crush');
+                	$images = Api\Image::getMediacrushImages($post->link);
+
+                // Everything else
 				} else {
-					$processed = downloadImage($post->link, $post->id, $post->sourceId);
+					$images[] = $post->link;
+				}
+
+				// If there are images to get, get all of them and assign to the current post
+				if (count($images)) {
+                    foreach ($images as $image) {
+                        $processed &= downloadImage($image, $post->id, $post->sourceId);
+                    }
 				}
 				
 				$post->processed = $processed;
+
+				// If there was an image format failure, mark the post as processed but hidden so we don't keep
+				// coming back to broken shit
+				if (Api\Image::$imageLoadError === IMGERR_INVALID_FORMAT) {
+					$post->processed = true;
+					$post->visible = false;
+				}
+
 				$post->sync();
 
 			}
