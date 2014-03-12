@@ -1,0 +1,5 @@
+{
+    "require": {
+        "xamin/handlebars.php": "dev-master"
+    }
+}
