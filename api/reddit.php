@@ -143,8 +143,7 @@ namespace Api {
 		public function GetPageListing($page, $count = 0, $afterId = null, $limit = 25) {
 			$retVal = false;
 			$count *= 25;
-			$file = self::curl_get_contents('http://www.reddit.com/' . $page . '.json?count=' . $count . '&after=' . $afterId . '&limit=' . $limit, $this->_cookie);
-			echo 'http://www.reddit.com/' . $page . '.json?count=' . $count . '&afterId=' . $afterId, PHP_EOL;
+			$file = Lib\Http::get('http://www.reddit.com/' . $page . '.json?count=' . $count . '&after=' . $afterId . '&limit=' . $limit, $this->_cookie);
 			if (strlen($file) > 0) {
 				$obj = json_decode($file);
 				if (is_object($obj) && is_array($obj->data->children)) {
@@ -263,23 +262,6 @@ namespace Api {
 			}
 			
 			return $retVal;
-		}
-		
-		/**
-		 * A drop in replacement for file_get_contents. Changes the user-agent to make reddit happy
-		 * @param string $url Url to retrieve
-		 * @return string Data received
-		 */
-		private static function curl_get_contents($url, $cookie = null) {
-			$c = curl_init($url);
-			curl_setopt($c, CURLOPT_USERAGENT, 'moe downloader by /u/dxprog');
-			curl_setopt($c, CURLOPT_FOLLOWLOCATION, true);
-			curl_setopt($c, CURLOPT_RETURNTRANSFER, true);
-			if (null !== $cookie) {
-				curl_setopt($c, CURLOPT_COOKIE, 'reddit_session=' . $cookie);
-			}
-			curl_setopt($c, CURLOPT_TIMEOUT, 5);
-			return curl_exec($c);
 		}
 		
 	}
