@@ -7,11 +7,16 @@ module.exports = function(grunt) {
             },
             dist: {
                 src: [
-                    'view/js/handlebars.runtime.js',
-                    'view/js/templates.js',
-                    'view/js/scripts.js'
+                    'static/js/dev/lib/jquery.min.js',
+                    'static/js/dev/lib/underscore.min.js',
+                    'static/js/dev/lib/backbone.min.js',
+                    'static/js/dev/lib/handlebars.runtime.js',
+                    'static/js/dev/model/*.js',
+                    'static/js/templates.js',
+                    'static/js/dev/view/*.js',
+                    'static/js/dev/App.js'
                 ],
-                dest: 'view/js/<%= pkg.name %>.js'
+                dest: 'static/js/<%= pkg.name %>.js'
             }
         },
         uglify: {
@@ -20,15 +25,14 @@ module.exports = function(grunt) {
             },
             dist: {
                 files: {
-                    'view/js/<%= pkg.name %>.min.js': ['<%= concat.dist.dest %>']
+                    'static/js/<%= pkg.name %>.min.js': ['<%= concat.dist.dest %>']
                 }
             }
         },
         sass: {
             dist: {
                 files: {
-                    'view/css/default.css': 'view/css/default.scss',
-                    'view/css/awwnime.css': 'view/css/awwnime.scss'
+                    'static/scss/styles.css': 'static/scss/styles.scss'
                 }
             }
         },
@@ -44,22 +48,25 @@ module.exports = function(grunt) {
                     }
                 },
                 files: {
-                    'view/js/templates.js': 'view/handlebars/*.handlebars'
+                    'static/js/templates.js': 'views/*.handlebars'
                 }
             }
         },
         watch: {
             files: [
-                'view/js/scripts.js',
-                'view/handlebars/*.handlebars',
-                'view/css/*.scss'
+                'static/js/dev/lib/*.js',
+                'static/js/dev/model/*.js',
+                'static/js/dev/view/*.js',
+                'static/js/dev/*.js',
+                'views/*.handlebars',
+                'views/partials/*.handlebars',
+                'static/scss/*.scss'
             ],
             tasks: ['handlebars', 'concat', 'sass']
         }
     });
 
     grunt.loadNpmTasks('grunt-contrib-uglify');
-    grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-handlebars');
