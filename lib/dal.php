@@ -99,17 +99,17 @@ namespace Lib {
 		}
 
 
-        public static function getSingleById($id) {
+        public static function getById($id) {
         	$className = get_called_class();
         	$retVal = new $className();
-        	$retVal->getById($id['id']);
+        	$retVal->_getById($id);
         	return $retVal;
         }
         
         /**
          * Gets a record from the database by the primary key
          */
-        public function getById($id) {
+        private function _getById($id) {
 
             $retVal = null;
             if (property_exists($this, '_dbTable') && property_exists($this, '_dbMap') && property_exists($this, '_dbPrimaryKey') && is_numeric($id)) {
