@@ -82,6 +82,91 @@ namespace Lib {
 		
 		}
 		
+        /**
+         * Performs a generic query against the database
+         */
+        public static function query($conditions = null, $sort = null, $limit = null, $offset = null) {
+
+            $retVal = null;
+
+            $obj = self::_instantiateThisObject();
+            if (self::_verifyProperties($obj)) {
+
+                $query = 'SELECT `' . implode('`, `', array_values($obj->_dbMap)) . '` FROM `' . $obj->_dbTable . '`';
+
+                // Add WHERE
+                $params = null;
+                if (is_array($conditions)) {
+
+                    $where = [];
+                    $params = [];
+                    foreach ($conditions as $col => $info) {
+
+                        // Verify that the property actually exists in the map. Ensures constraint and prevents SQLi
+                        if (isset($obj->_dbMap[$col])) {
+                            if (is_array($info)) {
+                                // TODO - fancy implementation
+                            
+                            // If an array wasn't passed, assume testing equality on the value with AND logic
+                            } else {
+                                $where[] = 'AND `' . $obj->_dbMap[$col] . '` = :' . $col;
+                                $params[':' . $col] = $info;
+                            }
+                        } else {
+                            throw new Exception('Property "' . $col . '" does not exist in DB map for table "' . $obj->_dbTable . '"');
+                        }
+
+                    }
+
+                    // Remove the logic operator from the first item
+                    $where[0] = substr($where[0], strpos($where[0], ' ') + 1);
+
+                    $query .= ' WHERE ' . implode(' ', $where);
+
+                }
+
+                // Add ORDER BY
+                if (is_array($sort)) {
+                    $order = [];
+
+                    foreach ($sort as $col => $direction) {
+                        
+                        // Verify that the property actually exists in the map. Ensures constraint and prevents SQLi
+                        if (isset($obj->_dbMap[$col])) {
+                            switch (strtolower($direction)) {
+                                case 'desc':
+                                case 'descending':
+                                    $direction = 'DESC';
+                                    break;
+                                default:
+                                    $direction = 'ASC';
+                            }
+                            $order[] = '`' . $obj->_dbMap[$col] . '` ' . $direction;
+                        } else {
+                            throw new Exception('Property "' . $col . '" does not exist in DB map for table "' . $obj->_dbTable . '"');
+                        }
+                    }
+
+                    $query .= ' ORDER BY ' . implode(', ', $order);
+
+                }
+
+                // Add LIMIT
+                if (is_numeric($limit)) {
+                    $query .= ' LIMIT ' . $limit;
+                    if (is_numeric($offset)) {
+                        $query .= ', ' . $offset;
+                    }
+                }
+
+                $retVal = Db::Query($query, $params);
+
+            }
+
+            return $retVal;
+
+        }
+
 		/**
 		 * Creates an object from the passed database row
 		 */
@@ -100,10 +185,8 @@ namespace Lib {
 
 
         public static function getById($id) {
-        	$className = get_called_class();
-        	$retVal = new $className();
-        	$retVal->_getById($id);
-        	return $retVal;
+        	$obj = self::_instantiateThisObject();
+        	return $obj->_getById($id);
         }
         
         /**
@@ -112,26 +195,45 @@ namespace Lib {
         private function _getById($id) {
 
             $retVal = null;
-            if (property_exists($this, '_dbTable') && property_exists($this, '_dbMap') && property_exists($this, '_dbPrimaryKey') && is_numeric($id)) {
+            if (self::_verifyProperties($this)) {
+                if (is_numeric($id)) {
+                    $cacheKey = $this->_dbTable . '_getById_' . $id;
+                    $retVal = Cache::Get($cacheKey);
 
-                $cacheKey = $this->_dbTable . '_getById_' . $id;
-                $retVal = Cache::Get($cacheKey);
-
-                if (!$retVal) {
-                    $query  = 'SELECT ' . implode(',', $this->_dbMap) . ' FROM `' . $this->_dbTable . '` ';
-                    $query .= 'WHERE ' . $this->_dbMap[$this->_dbPrimaryKey] . ' = :id LIMIT 1';
-                    
-                    $result = Db::Query($query, [ ':id' => $id ]);
-                    if (null != $result && $result->count === 1) {
-                        $retVal = $this->copyFromDbRow(Db::Fetch($result));
+                    if (!$retVal) {
+                        $query  = 'SELECT ' . implode(',', $this->_dbMap) . ' FROM `' . $this->_dbTable . '` ';
+                        $query .= 'WHERE ' . $this->_dbMap[$this->_dbPrimaryKey] . ' = :id LIMIT 1';
+                        
+                        $result = Db::Query($query, [ ':id' => $id ]);
+                        if (null != $result && $result->count === 1) {
+                            $retVal = $this->copyFromDbRow(Db::Fetch($result));
+                        }
+                        Cache::Set($cacheKey, $retVal);
                     }
-                    Cache::Set($cacheKey, $retVal);
+                } else {
+                    throw new Exception('ID must be a number');
                 }
 
             } else {
                 throw new Exception('Class must have "_dbTable", "_dbMap", and "_dbPrimaryKey" properties to use method "getById"');
             }
             return $retVal;
+        }
+
+        /**
+         * Instantiates an object of the current class and returns it
+         */
+        private static function _instantiateThisObject() {
+            $className = get_called_class();
+            return new $className();
+        }
+
+        /**
+         * Ensures that the class has all the properties needed for these methods to work
+         */
+        private static function _verifyProperties($obj = null) {
+            $obj = null === $obj ? self::_instantiateThisObject() : $obj;
+            return property_exists($obj, '_dbTable') && property_exists($obj, '_dbMap') && property_exists($obj, '_dbPrimaryKey');
         }
 	
 	}
