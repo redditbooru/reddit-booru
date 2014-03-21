@@ -4,7 +4,7 @@ namespace Lib {
 
     use stdClass;
 
-    define('LOGGING_ENABLED', false);
+    define('LOGGING_ENABLED', true);
 
     class Logger {
 
@@ -16,7 +16,7 @@ namespace Lib {
             }
         }
 
-        public static function log($collection, $data) {
+        public static function log($data) {
             if (LOGGING_ENABLED) {
                 $obj = $data;
                 if (!is_object($data)) {
@@ -26,7 +26,7 @@ namespace Lib {
                 }
                 $obj->_timestamp = time();
 
-                self::$_document->$collection->insert($obj);
+                self::$_document->log->insert($obj);
             }
         }
 
