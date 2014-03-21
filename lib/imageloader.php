@@ -2,9 +2,18 @@
 
 namespace Lib {
 
+    use stdClass;
+    use MongoGridFS;
+
     define('IMAGE_TYPE_JPEG', 'jpg');
     define('IMAGE_TYPE_PNG', 'png');
     define('IMAGE_TYPE_GIF', 'gif');
+
+    define('IMGEVT_DOWNLOAD_BEGIN', 'IMGEVT_DOWNLOAD_BEGIN');
+    define('IMGEVT_DOWNLOAD_COMPLETE', 'IMGEVT_DOWNLOAD_COMPLETE');
+    define('IMGEVT_DOWNLOAD_ERROR', 'IMGEVT_DOWNLOAD_ERROR');
+
+    define('CACHE_MAX_SIZE', 16 * 1024 * 1024);
 
     class ImageLoader {
 
@@ -268,51 +277,117 @@ namespace Lib {
             
         }
 
-        /**
-         * Given a URL, downloads and saves the output. Does some special case processing depending on where the image is hosted
-         * @param string $url URL to download
-         * @param string $fileName File path to save to
-         * @return bool Whether the image was downloaded successfully
-         */
-        public static function downloadImage($url, $fileName) {
-
-            $retVal = false;
-
-            Lib\Events::fire(IMGEVT_DOWNLOAD_BEGIN);
+        private static function _downloadImage($url) {
             
-            $url = self::parseUrl($url);
-            if ($url) {
-                $file = null;
-                
-                // Account for local files or URLs
-                if ($url{0} === '/' && is_readable($url)) {
-                    $file = file_get_contents($url);
-                } else {
-                    $file = Http::get($url);
-                }
+            $retVal = null;
 
-                if (!$file) {
-                    Lib\Events::fire(IMGEVT_DOWNLOAD_ERROR, 'Unable to download file');
-                    self::_log('downloadImage_fail', $url);
-                    self::$imageLoadError = IMGERR_DOWNLOAD_FAILURE;
-                } else if (null != self::_getImageType($file)) {
-                    $handle = fopen($fileName, 'wb');
-                    if ($handle) {
-                        fwrite($handle, $file);
-                        fclose($handle);
-                        $retVal = true;
-                        self::_log('downloadImage_success', $url);
-                        Lib\Events::fire(IMGEVT_DOWNLOAD_COMPLETE);
+            // Account for local files or URLs
+            if ($url{0} === '/' && is_readable($url) || strpos($url, 'file://') === 0) {
+                $file = file_get_contents($url);
+            } else {
+                $file = Http::get($url);
+            }
+
+            if (!$file) {
+                Events::fire(IMGEVT_DOWNLOAD_ERROR, 'Unable to download file');
+                self::_log('downloadImage_fail', $url);
+            } else {
+                $type = self::_getImageType($file);
+                if (null !== $type) {
+
+                    $retVal = new stdClass;
+                    $retVal->type = $type;
+                    $retVal->timestamp = time();
+                    $retVal->data = $file;
+                    self::_log('downloadImage_success', $url);
+
+                    // Cache to mongo
+                    $rb = Mongo::getDatabase();
+                    if ($rb) {
+                        $gridFS = $rb->getGridFS();
+
+                        // Make an array because WHAT THE FUCK, MONGO
+                        $obj = [ 'url' => $url, 'type' => $retVal->type, 'timestamp' => $retVal->timestamp ];
+                        $id = $gridFS->storeBytes($file, $obj);
+                        if (!$id) {
+                            self::_log('downloadImage_mongo_save_fail', $url);
+                        } else {
+                            self::_log('downloadImage_mongo_save_success', $url);
+                        }
+
                     }
+
                 } else {
                     self::_log('downloadImage_invalid', $url);
-                    Lib\Events::fire(IMGEVT_DOWNLOAD_ERROR, 'Invalid image type');
-                    self::$imageLoadError = IMGERR_INVALID_FORMAT;
+                    Events::fire(IMGEVT_DOWNLOAD_ERROR, 'Invalid image type');
                 }
             }
 
             return $retVal;
 
+        }
+
+        /**
+         * Attempts to retrieve an image from mongocache
+         */
+        private static function _fetchFromMongo($url) {
+            
+            $retVal = null;
+
+            $rb = Mongo::getDatabase();
+            if ($rb) {
+                $gridFS = $rb->getGridFS();
+                $result = $gridFS->findOne([ 'url' => $url ]);
+
+                if ($result) {
+                    $retVal = new stdClass;
+                    $retVal->type = $result->file['type'];
+                    $retVal->timestamp = $result->file['timestamp'];
+                    $retVal->data = $result->getBytes();
+                    self::_log('fetchImage_mongo_hit', $url);
+                }
+            }
+
+            return $retVal;
+        }
+
+        /**
+         * Given a URL, downloads and saves the output. Does some special case processing depending on where the image is hosted
+         * @param string $url URL to download
+         * @return object Object containing the image data and type
+         */
+        public static function fetchImage($url) {
+
+            $retVal = null;
+
+            Events::fire(IMGEVT_DOWNLOAD_BEGIN);
+            
+            // Check mongo for a copy of the image
+            $retVal = self::_fetchFromMongo($url);
+
+            // If nothing was found in the mongo cache, go fetch it the old fashioned way
+            if (null === $retVal) {
+                $retVal = self::_downloadImage($url);
+            }
+
+
+            if (null !== $retVal) {
+                self::_log('fetchImage_success', $url);
+                Events::fire(IMGEVT_DOWNLOAD_COMPLETE);
+            }
+
+            return $retVal;
+
+        }
+
+        /**
+         * Mongo logging helper function
+         */
+        private static function _log($name, $data) {
+            $log = new stdClass;
+            $log->name = 'ImageLoader_' . $name;
+            $log->data = $data;
+            Logger::log($log);
         }
 
     }
