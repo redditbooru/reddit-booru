@@ -1,13 +1,13 @@
 <?php
 
 namespace Api {
-	
-	use Lib;
-	use stdClass;
-	
-	define('HISTOGRAM_BUCKETS', 4);
-	define('HISTORGAM_GRANULARITY', 256 / HISTOGRAM_BUCKETS);
-	define('CDN_FOLDER', '');
+    
+    use Lib;
+    use stdClass;
+    
+    define('HISTOGRAM_BUCKETS', 4);
+    define('HISTORGAM_GRANULARITY', 256 / HISTOGRAM_BUCKETS);
+    define('CDN_FOLDER', '');
     define('CDN_URL_BASE', 'http://cdn.awwni.me/');
     define('LOCAL_STORAGE', '/var/www/redditbooru-images');
 
@@ -23,124 +23,124 @@ namespace Api {
     define('IMG_RESAMPLE_WIDTH', 256);
     define('IMG_RESAMPLE_HEIGHT', 256);
 
-	if (!defined('__INCLUDE__')) {
-		define('__INCLUDE__', (strlen($_SERVER['DOCUMENT_ROOT']) > 0 ? $_SERVER['DOCUMENT_ROOT'] : getcwd()) . '/');
-	}
-	
-	class Image extends Lib\Dal {
-		
-		/**
-		 * Object property to table map
-		 */
-		protected $_dbMap = array(
-			'id' => 'image_id',
-			'url' => 'image_url',
-			'width' => 'image_width',
-			'height' => 'image_height',
-			'histR1' => 'image_hist_r1',
-			'histR2' => 'image_hist_r2',
-			'histR3' => 'image_hist_r3',
-			'histR4' => 'image_hist_r4',
-			'histG1' => 'image_hist_g1',
-			'histG2' => 'image_hist_g2',
-			'histG3' => 'image_hist_g3',
-			'histG4' => 'image_hist_g4',
-			'histB1' => 'image_hist_b1',
-			'histB2' => 'image_hist_b2',
-			'histB3' => 'image_hist_b3',
-			'histB4' => 'image_hist_b4',
-			'type' => 'image_type'
-		);
-		
-		/**
-		 * Database table name
-		 */
-		protected $_dbTable = 'images';
-		
-		/**
-		 * Table primary key
-		 */
-		protected $_dbPrimaryKey = 'id';
-		
-		/**
-		 * Image ID
-		 */
-		public $id = 0;
-		
-		/**
-		 * URL of image
-		 */
-		public $url;
-		
-		/**
-		 * Width of image
-		 */
-		public $width;
-		
-		/**
-		 * Height of image
-		 */
-		public $height;
-		
-		/**
-		 * Red component 1
-		 */
-		public $histR1;
-		
-		/**
-		 * Red component 2
-		 */
-		public $histR2;
-		
-		/**
-		 * Red component 3
-		 */
-		public $histR3;
-		
-		/**
-		 * Red component 4
-		 */
-		public $histR4;
-		
-		/**
-		 * Green component 1
-		 */
-		public $histG1;
-		
-		/**
-		 * Green component 2
-		 */
-		public $histG2;
-		
-		/**
-		 * Green component 3
-		 */
-		public $histG3;
-		
-		/**
-		 * Green component 4
-		 */
-		public $histG4;
-		
-		/**
-		 * Blue component 1
-		 */
-		public $histB1;
-		
-		/**
-		 * Blue component 2
-		 */
-		public $histB2;
-		
-		/**
-		 * Blue component 3
-		 */
-		public $histB3;
-		
-		/**
-		 * Blue component 4
-		 */
-		public $histB4;
+    if (!defined('__INCLUDE__')) {
+        define('__INCLUDE__', (strlen($_SERVER['DOCUMENT_ROOT']) > 0 ? $_SERVER['DOCUMENT_ROOT'] : getcwd()) . '/');
+    }
+    
+    class Image extends Lib\Dal {
+        
+        /**
+         * Object property to table map
+         */
+        protected $_dbMap = array(
+            'id' => 'image_id',
+            'url' => 'image_url',
+            'width' => 'image_width',
+            'height' => 'image_height',
+            'histR1' => 'image_hist_r1',
+            'histR2' => 'image_hist_r2',
+            'histR3' => 'image_hist_r3',
+            'histR4' => 'image_hist_r4',
+            'histG1' => 'image_hist_g1',
+            'histG2' => 'image_hist_g2',
+            'histG3' => 'image_hist_g3',
+            'histG4' => 'image_hist_g4',
+            'histB1' => 'image_hist_b1',
+            'histB2' => 'image_hist_b2',
+            'histB3' => 'image_hist_b3',
+            'histB4' => 'image_hist_b4',
+            'type' => 'image_type'
+        );
+        
+        /**
+         * Database table name
+         */
+        protected $_dbTable = 'images';
+        
+        /**
+         * Table primary key
+         */
+        protected $_dbPrimaryKey = 'id';
+        
+        /**
+         * Image ID
+         */
+        public $id = 0;
+        
+        /**
+         * URL of image
+         */
+        public $url;
+        
+        /**
+         * Width of image
+         */
+        public $width;
+        
+        /**
+         * Height of image
+         */
+        public $height;
+        
+        /**
+         * Red component 1
+         */
+        public $histR1;
+        
+        /**
+         * Red component 2
+         */
+        public $histR2;
+        
+        /**
+         * Red component 3
+         */
+        public $histR3;
+        
+        /**
+         * Red component 4
+         */
+        public $histR4;
+        
+        /**
+         * Green component 1
+         */
+        public $histG1;
+        
+        /**
+         * Green component 2
+         */
+        public $histG2;
+        
+        /**
+         * Green component 3
+         */
+        public $histG3;
+        
+        /**
+         * Green component 4
+         */
+        public $histG4;
+        
+        /**
+         * Blue component 1
+         */
+        public $histB1;
+        
+        /**
+         * Blue component 2
+         */
+        public $histB2;
+        
+        /**
+         * Blue component 3
+         */
+        public $histB3;
+        
+        /**
+         * Blue component 4
+         */
+        public $histB4;
         
         /**
          * Image type
@@ -152,131 +152,131 @@ namespace Api {
          */
         public static function createFromUrl($url) {
 
-        	$retVal = null;
+            $retVal = null;
 
-        	$image = Lib\ImageLoader::fetchImage($url);
-        	if (null !== $image) {
-        		$retVal = self::createFromBuffer($image->data);
-        		if (null !== $retVal) {
-        			$retVal->url = $url;
-        			$retVal->type = $image->type;
-        			unset($image);
-        		} else {
-        			$retVal = null;
-        		}
-        	}
+            $image = Lib\ImageLoader::fetchImage($url);
+            if (null !== $image) {
+                $retVal = self::createFromBuffer($image->data);
+                if (null !== $retVal) {
+                    $retVal->url = $url;
+                    $retVal->type = $image->type;
+                    unset($image);
+                } else {
+                    $retVal = null;
+                }
+            }
 
-        	return $retVal;
+            return $retVal;
 
         }
 
-		/**
-		 * Given the image data buffer, returns an Image object with histogram information
-		 */
-		public static function createFromBuffer($buffer) {
+        /**
+         * Given the image data buffer, returns an Image object with histogram information
+         */
+        public static function createFromBuffer($buffer) {
 
-			$retVal = null;
+            $retVal = null;
 
-			Lib\Events::fire(IMGEVT_PROCESSING);
-			$image = imagecreatefromstring($buffer);
-			
-			if (null !== $image) {
-				
-				$retVal = new Image();
-				$retVal->width = imagesx($image);
-				$retVal->height = imagesy($image);
+            Lib\Events::fire(IMGEVT_PROCESSING);
+            $image = imagecreatefromstring($buffer);
+            
+            if (null !== $image) {
+                
+                $retVal = new Image();
+                $retVal->width = imagesx($image);
+                $retVal->height = imagesy($image);
 
-				$resampled = imagecreatetruecolor(IMG_RESAMPLE_WIDTH, IMG_RESAMPLE_HEIGHT);
-				imagecopyresampled($resampled, $image, 0, 0, 0, 0, IMG_RESAMPLE_WIDTH, IMG_RESAMPLE_HEIGHT, $retVal->width, $retVal->height);
-				imagedestroy($image);
-			
-				$total = IMG_RESAMPLE_WIDTH * IMG_RESAMPLE_HEIGHT;
-				$red = [ 0, 0, 0, 0 ];
-				$green = [ 0, 0, 0, 0 ];
-				$blue = [ 0, 0, 0, 0 ];
-				for ($x = 0; $x < IMG_RESAMPLE_WIDTH; $x++) {
-					for ($y = 0; $y < IMG_RESAMPLE_HEIGHT; $y++) {
-						$c = imagecolorat($resampled, $x, $y);
-						$red[floor(($c >> 16) / HISTORGAM_GRANULARITY)]++;
-						$green[floor(($c >> 8 & 0xff) / HISTORGAM_GRANULARITY)]++;
-						$blue[floor(($c & 0xff) / HISTORGAM_GRANULARITY)]++;
-					}
-				}
+                $resampled = imagecreatetruecolor(IMG_RESAMPLE_WIDTH, IMG_RESAMPLE_HEIGHT);
+                imagecopyresampled($resampled, $image, 0, 0, 0, 0, IMG_RESAMPLE_WIDTH, IMG_RESAMPLE_HEIGHT, $retVal->width, $retVal->height);
+                imagedestroy($image);
+            
+                $total = IMG_RESAMPLE_WIDTH * IMG_RESAMPLE_HEIGHT;
+                $red = [ 0, 0, 0, 0 ];
+                $green = [ 0, 0, 0, 0 ];
+                $blue = [ 0, 0, 0, 0 ];
+                for ($x = 0; $x < IMG_RESAMPLE_WIDTH; $x++) {
+                    for ($y = 0; $y < IMG_RESAMPLE_HEIGHT; $y++) {
+                        $c = imagecolorat($resampled, $x, $y);
+                        $red[floor(($c >> 16) / HISTORGAM_GRANULARITY)]++;
+                        $green[floor(($c >> 8 & 0xff) / HISTORGAM_GRANULARITY)]++;
+                        $blue[floor(($c & 0xff) / HISTORGAM_GRANULARITY)]++;
+                    }
+                }
 
-				imagedestroy($resampled);
-				
-				$retVal = new Image;
-				for ($i = 0; $i < HISTOGRAM_BUCKETS; $i++) {
-					$prop = 'histR' . ($i + 1);
-					$retVal->$prop = $red[$i] / $total;
-					
-					$prop = 'histG' . ($i + 1);
-					$retVal->$prop = $green[$i] / $total;
-					
-					$prop = 'histB' . ($i + 1);
-					$retVal->$prop = $blue[$i] / $total;
-				}
-				
-			}
-			
-			return $retVal;
+                imagedestroy($resampled);
+                
+                $retVal = new Image;
+                for ($i = 0; $i < HISTOGRAM_BUCKETS; $i++) {
+                    $prop = 'histR' . ($i + 1);
+                    $retVal->$prop = $red[$i] / $total;
+                    
+                    $prop = 'histG' . ($i + 1);
+                    $retVal->$prop = $green[$i] / $total;
+                    
+                    $prop = 'histB' . ($i + 1);
+                    $retVal->$prop = $blue[$i] / $total;
+                }
+                
+            }
+            
+            return $retVal;
 
-		}
-		
-		/**
-		 * Given an image file, finds similar images in the database
-		 * @param string $file Path or URL to the file to check against
-		 * @param int $limit Number of matches to return
-		 * @return array Array of matched posts, null on error
-		 */
-		public static function findSimilarImages($file, $limit = 5) {
-			
-			$limit = !is_int($limit) ? 5 : $limit;
-			$retVal = null;
-			
-			$histogram = self::generateHistogram($file);
-			if (null !== $histogram) {
-				
-				$query = '';
-				$params = array();
-				for ($i = 1; $i <= HISTOGRAM_BUCKETS; $i++) {
-					$params[':red' . $i] = $histogram->red[$i - 1];
-					$params[':green' . $i] = $histogram->green[$i - 1];
-					$params[':blue' . $i] = $histogram->blue[$i - 1];
-					$query .= 'ABS(i.image_hist_r' . $i . ' - :red' . $i . ') + ABS(i.image_hist_g' . $i . ' - :green' . $i . ') + ABS(i.image_hist_b' . $i . ' - :blue' . $i . ') + ';
-				}
-				
-				// Find the top five most similar images in the database
-				$result = Db::Query('SELECT i.image_id, i.post_id, p.post_title, i.image_url, p.post_date, ' . $query . '0 AS distance FROM images i INNER JOIN posts p ON p.post_id = i.post_id ORDER BY distance LIMIT ' . $limit, $params);
-				if ($result) {
-				
-					$retVal = array();
-					while($row = Db::Fetch($result)) {
-						$obj = new stdClass;
-						$obj->image_id = $row->image_id;
-						$obj->id = $row->post_id;
-						$obj->title = $row->post_title;
-						$obj->url = self::parseUrl($row->image_url);
-						$obj->similarity = abs(100 - (100 * ($row->distance / 12)));
-						$obj->date = $row->post_date;
-						$retVal[] = $obj;
-					}
-					
-				}
-			
-			}
-			
-			return $retVal;
-		
-		}
+        }
+        
+        /**
+         * Given an image file, finds similar images in the database
+         * @param string $file Path or URL to the file to check against
+         * @param int $limit Number of matches to return
+         * @return array Array of matched posts, null on error
+         */
+        public static function findSimilarImages($file, $limit = 5) {
+            
+            $limit = !is_int($limit) ? 5 : $limit;
+            $retVal = null;
+            
+            $histogram = self::generateHistogram($file);
+            if (null !== $histogram) {
+                
+                $query = '';
+                $params = array();
+                for ($i = 1; $i <= HISTOGRAM_BUCKETS; $i++) {
+                    $params[':red' . $i] = $histogram->red[$i - 1];
+                    $params[':green' . $i] = $histogram->green[$i - 1];
+                    $params[':blue' . $i] = $histogram->blue[$i - 1];
+                    $query .= 'ABS(i.image_hist_r' . $i . ' - :red' . $i . ') + ABS(i.image_hist_g' . $i . ' - :green' . $i . ') + ABS(i.image_hist_b' . $i . ' - :blue' . $i . ') + ';
+                }
+                
+                // Find the top five most similar images in the database
+                $result = Db::Query('SELECT i.image_id, i.post_id, p.post_title, i.image_url, p.post_date, ' . $query . '0 AS distance FROM images i INNER JOIN posts p ON p.post_id = i.post_id ORDER BY distance LIMIT ' . $limit, $params);
+                if ($result) {
+                
+                    $retVal = array();
+                    while($row = Db::Fetch($result)) {
+                        $obj = new stdClass;
+                        $obj->image_id = $row->image_id;
+                        $obj->id = $row->post_id;
+                        $obj->title = $row->post_title;
+                        $obj->url = self::parseUrl($row->image_url);
+                        $obj->similarity = abs(100 - (100 * ($row->distance / 12)));
+                        $obj->date = $row->post_date;
+                        $retVal[] = $obj;
+                    }
+                    
+                }
+            
+            }
+            
+            return $retVal;
+        
+        }
 
-		private static function _log($name, $data) {
-			$log = new stdClass;
-			$log->name = 'Image_' . $name;
-			$log->data = $data;
-			Lib\Logger::log($log);
-		}
+        private static function _log($name, $data) {
+            $log = new stdClass;
+            $log->name = 'Image_' . $name;
+            $log->data = $data;
+            Lib\Logger::log($log);
+        }
 
-	}
+    }
 
 }
