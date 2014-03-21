@@ -186,7 +186,8 @@ namespace Lib {
 
         public static function getById($id) {
         	$obj = self::_instantiateThisObject();
-        	return $obj->_getById($id);
+            $obj->_getById($id);
+        	return $obj;
         }
         
         /**
@@ -201,12 +202,12 @@ namespace Lib {
                     $retVal = Cache::Get($cacheKey);
 
                     if (!$retVal) {
-                        $query  = 'SELECT ' . implode(',', $this->_dbMap) . ' FROM `' . $this->_dbTable . '` ';
-                        $query .= 'WHERE ' . $this->_dbMap[$this->_dbPrimaryKey] . ' = :id LIMIT 1';
-                        
+                        $query  = 'SELECT `' . implode('`, `', $this->_dbMap) . '` FROM `' . $this->_dbTable . '` ';
+                        $query .= 'WHERE `' . $this->_dbMap[$this->_dbPrimaryKey] . '` = :id LIMIT 1';
+
                         $result = Db::Query($query, [ ':id' => $id ]);
-                        if (null != $result && $result->count === 1) {
-                            $retVal = $this->copyFromDbRow(Db::Fetch($result));
+                        if (null !== $result && $result->count === 1) {
+                            $this->copyFromDbRow(Db::Fetch($result));
                         }
                         Cache::Set($cacheKey, $retVal);
                     }
@@ -217,7 +218,6 @@ namespace Lib {
             } else {
                 throw new Exception('Class must have "_dbTable", "_dbMap", and "_dbPrimaryKey" properties to use method "getById"');
             }
-            return $retVal;
         }
 
         /**
