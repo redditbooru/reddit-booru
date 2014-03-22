@@ -2,6 +2,7 @@
 
 namespace Api {
     
+    use Aws\S3\S3Client;
     use Lib;
     use stdClass;
     
@@ -225,8 +226,8 @@ namespace Api {
         /**
          * Takes an ID and type and generates the current CDN filename
          */
-        public static function generateFilename($id, $type) {
-            return CDN_BASE_URL . base_convert($id, 10, 36) . '.' . $type;
+        public static function generateFilename($id, $type, $fullUrl = true) {
+            return ($fullUrl ? CDN_BASE_URL : '') . base_convert($id, 10, 36) . '.' . $type;
         }
         
         /**
@@ -274,6 +275,87 @@ namespace Api {
             
             return $retVal;
         
+        }
+
+        /**
+         * Saves an image to all the various dumping grounds
+         */
+        private function _saveImage() {
+
+            $retVal = false;
+
+            if ($this->id && $this->url && $this->type) {
+                
+                // Fetch the image. Since we're at this point in the show, there should
+                // be data in the mongo cache and performance hit will be minimal
+                $image = Lib\ImageLoader::fetchImage($this->url);
+                if ($image) {
+                    $fileName = $this->_generateFilename(false);
+                    $localPath = LOCAL_IMAGE_PATH . $fileName;
+
+                    if (file_put_contents($localPath, $image->data)) {
+
+                        // Upload to AWS
+                        if (AWS_ENABLED) {
+                            $s3 = S3Client::factory([ 'key' => AWS_KEY, 'secret' => AWS_SECRET ]);
+
+                            // Figure out the MIME type
+                            $mime = '';
+                            switch ($this->type) {
+                                case IMAGE_TYPE_JPEG:
+                                    $mime = 'image/jpeg';
+                                    break;
+                                case IMAGE_TYPE_PNG:
+                                    $mime = 'image/png';
+                                    break;
+                                case IMAGE_TYPE_GIF:
+                                    $mime = 'image/gif';
+                                    break;
+                            }
+
+                            if ($s3) {
+                                $result = $s3->putObject([
+                                    'Body' => $image->data,
+                                    'Bucket' => AWS_BUCKET,
+                                    'CacheControl' => 'max-age=' . AWS_EXPIRATION,
+                                    'ACL' => 'public-read',
+                                    'Key' => AWS_PATH . $fileName,
+                                    'Expires' => time() + AWS_EXPIRATION,
+                                    'ContentType' => $mime
+                                ]);
+                                if ($result) {
+                                    $retVal = true;
+                                }
+                            }
+                        }
+
+                    }
+                }
+
+            }
+
+            return $retVal;
+
+        }
+
+        /**
+         * Syncs this object to the database and saves local and backup copies
+         * @override
+         */
+        public function sync() {
+            $isInsert = $this->id === null || $this->id === 0;
+            $retVal = parent::sync();
+            
+            // On successful image insert, save copies
+            if ($retVal && $isInsert) {
+                $this->_saveImage();
+            }
+
+            return $retVal;
+        }
+
+        private function _generateFilename($fullUrl = true) {
+            return self::generateFilename($this->id, $this->type, $fullUrl);
         }
 
         private static function _log($name, $data) {
