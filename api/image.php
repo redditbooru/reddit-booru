@@ -205,7 +205,6 @@ namespace Api {
 
                 imagedestroy($resampled);
                 
-                $retVal = new Image;
                 for ($i = 0; $i < HISTOGRAM_BUCKETS; $i++) {
                     $prop = 'histR' . ($i + 1);
                     $retVal->$prop = $red[$i] / $total;
