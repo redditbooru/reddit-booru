@@ -8,6 +8,8 @@ namespace Lib {
 
     class Db {
 
+        public static $lastResult;
+
         public static function Connect() {
 
         }
@@ -16,6 +18,7 @@ namespace Lib {
             $retVal = new stdClass;
             $retVal->query = $query;
             $retVal->params = $params;
+            self::$lastResult = $retVal;
             return $retVal;
         }
 
