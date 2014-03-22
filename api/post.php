@@ -395,13 +395,12 @@ namespace Api {
          * Creates an instance of Post from a row returned from the reddit API
          */
         public static function createFromRedditObject($obj) {
-            $obj = $obj->data;
             $retVal = new Post();
             $retVal->externalId = $obj->id;
             $retVal->title = $obj->title;
             $retVal->link = $obj->url;
             
-            $userId = User::query([ 'name' => $obj->author ]);
+            $userId = User::getByName($obj->author);
             if ($userId) {
                 $retVal->userId = $userId->id;
             }
@@ -409,7 +408,7 @@ namespace Api {
             $retVal->score = $obj->score;
             $retVal->dateCreated = $obj->created_utc;
             $retVal->dateUpdated = time();
-            $retVal->keywords = self::generateKeywords($retVal->title . ' ' . $retVal->meta->flair);
+            $retVal->keywords = self::generateKeywords($retVal->title . ' ' . $obj->link_flair_text);
             $retVal->nsfw = $obj->over_18 ? 1 : 0;
             return $retVal;
         }
