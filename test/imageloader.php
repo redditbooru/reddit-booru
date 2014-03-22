@@ -2,7 +2,7 @@
 
 require('harness.php');
 
-class ImageTest extends PHPUnit_Framework_TestCase {
+class ImageLoaderTest extends PHPUnit_Framework_TestCase {
     
     private function getImagesFromUrl($url) {
         return Lib\ImageLoader::getImagesFromUrl($url);

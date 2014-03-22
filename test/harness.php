@@ -2,5 +2,13 @@
 
 // RedditBooru Unit Test Harness
 
-chdir('/home/www/reddit-booru');
+if (!defined('USE_MOCK_DB')) {
+    define('USE_MOCK_DB', false);
+}
+
+if (USE_MOCK_DB) {
+    require('test/test_db.php');
+}
+
+chdir('/var/www/reddit-booru');
 require('lib/aal.php');
