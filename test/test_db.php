@@ -22,7 +22,7 @@ namespace Lib {
             self::$lastResult = $retVal;
 
             // Action specific returns
-            switch (strtolower(current(explode(' ', $sql)))) {
+            switch (strtolower(current(explode(' ', $query)))) {
                 case 'insert':
                     $retVal = 1;
                     break;
