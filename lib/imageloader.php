@@ -228,11 +228,11 @@ namespace Lib {
         
             $retVal = null;
             if (ord($data{0}) == 0xff && ord($data{1}) == 0xd8) {
-                $retVal = 'jpg';
+                $retVal = IMAGE_TYPE_JPEG;
             } else if (ord($data{0}) == 0x89 && substr($data, 1, 3) == 'PNG') {
-                $retVal = 'image/png';
+                $retVal = IMAGE_TYPE_PNG;
             } else if (substr($data, 0, 6) == 'GIF89a' || substr($data, 0, 6) == 'GIF87a') {
-                $retVal = 'image/gif';
+                $retVal = IMAGE_TYPE_GIF;
             }
             
             return $retVal;
