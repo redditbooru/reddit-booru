@@ -1,5 +1,7 @@
 {
     "require": {
-        "xamin/handlebars.php": "dev-master"
+        "xamin/handlebars.php": "dev-master",
+        "aws/aws-sdk-php": "*",
+        "amazonwebservices/aws-sdk-for-php": "*"
     }
 }
