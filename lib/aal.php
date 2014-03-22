@@ -26,6 +26,9 @@ namespace Lib {
 	 */
 	$GLOBALS['_apiHits'] = 0;
 
+	// Include the composer autoloader
+	require_once('./vendor/autoload.php');
+
 	// Include the DX API libraries
 	require_once('./lib/dxapi.php');
 	Api\DxApi::initialize();
