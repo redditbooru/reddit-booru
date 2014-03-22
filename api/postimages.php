@@ -18,7 +18,7 @@ namespace Api {
             $params = [ ':postId' => $post->id ];
 
             for ($i = 0, $count = count($images); $i < $count; $i++) {
-                $values[] = '(:postId, :image' . $i . ')';
+                $values[] = '(:image' . $i . ', :postId)';
                 $params[':image' . $i] = $images[$i]->id;
             }
 

@@ -16,7 +16,7 @@ class PostImagesTest extends PHPUnit_Framework_TestCase {
 
         $this->assertTrue(Api\PostImages::assignImagesToPost([ $img1, $img2 ], $post));
         $result = Lib\Db::$lastResult;
-        $this->assertEquals($result->query, 'INSERT INTO post_images VALUES (:postId, :image0), (:postId, :image1)');
+        $this->assertEquals($result->query, 'INSERT INTO post_images VALUES (:image0, :postId), (:image1, :postId)');
         $this->assertEquals($result->params, [ ':postId' => $post->id, ':image0' => $img1->id, ':image1' => $img2->id ]);
 
     }
