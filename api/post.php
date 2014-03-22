@@ -23,9 +23,8 @@ namespace Api {
             'userId' => 'user_id',
             'keywords' => 'post_keywords',
             'score' => 'post_score',
-            'processed' => 'post_processed',
             'visible' => 'post_visible',
-            'meta' => 'post_meta'
+            'nsfw' => 'post_nsfw'
         );
         
         /**
@@ -87,21 +86,16 @@ namespace Api {
          * Post's score/rating
          */
         public $score;
-        
+
         /**
-         * Whether this post has been processed
+         * Is this post NSFW
          */
-        public $processed;
+        public $nsfw;
         
         /**
          * Whether this post is visible to the public or not
          */
         public $visible = true;
-        
-        /**
-         * Object for storing non-schema data
-         */
-        public $meta;
         
         private function __copy($obj) {
             if ($obj instanceOf Post) {
@@ -407,7 +401,7 @@ namespace Api {
             $retVal->title = $obj->title;
             $retVal->link = $obj->url;
             
-            $userId = User::getByName($obj->author);
+            $userId = User::query([ 'name' => $obj->author ]);
             if ($userId) {
                 $retVal->userId = $userId->id;
             }
@@ -415,10 +409,8 @@ namespace Api {
             $retVal->score = $obj->score;
             $retVal->dateCreated = $obj->created_utc;
             $retVal->dateUpdated = time();
-            $retVal->meta = new stdClass;
-            $retVal->meta->flair = $obj->link_flair_text;
             $retVal->keywords = self::generateKeywords($retVal->title . ' ' . $retVal->meta->flair);
-            $retVal->processed = false;
+            $retVal->nsfw = $obj->over_18 ? 1 : 0;
             return $retVal;
         }
         

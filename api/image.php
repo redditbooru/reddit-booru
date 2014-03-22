@@ -222,6 +222,13 @@ namespace Api {
             return $retVal;
 
         }
+
+        /**
+         * Takes an ID and type and generates the current CDN filename
+         */
+        public static function generateFilename($id, $type) {
+            return CDN_BASE_URL . base_convert($id, 10, 36) . '.' . $type;
+        }
         
         /**
          * Given an image file, finds similar images in the database
