@@ -1,6 +1,7 @@
 <?php
 
-require('test_db.php');
+define('USE_MOCK_DB', true);
+
 require('harness.php');
 
 class DalObject extends Lib\Dal {
