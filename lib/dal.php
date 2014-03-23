@@ -185,6 +185,24 @@ namespace Lib {
 
         }
 
+        /**
+         * Performs a query but resolves to database result to an array of objects
+         */
+        public static function queryReturnAll($conditions = null, $sort = null, $limit = null, $offset = null) {
+            $retVal = null;
+            $result = self::query($conditions, $sort, $limit, $offset);
+            if ($result && $result->count > 0) {
+
+                $retVal = [];
+                $className = get_called_class();
+                while ($row = Db::Fetch($result)) {
+                    $retVal[] = new $className($row);
+                }
+
+            }
+            return $retVal;
+        }
+
 		/**
 		 * Creates an object from the passed database row
 		 */
