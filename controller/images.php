@@ -71,115 +71,39 @@ namespace Controller {
 
             if (!$retVal) {
                 
-                $sources = strpos($sources, ',') !== false ? explode(',', $sources) : $sources;
+                if (is_string($sources)) {
+                    $sources = strpos($sources, ',') !== false ? explode(',', $sources) : $sources;
+                }
 
                 if (is_numeric($sources) || is_array($sources)) {
 
-                    $params = [];
-                    $joins = [];
-                    
-                    // Images and posts are required
-                    $columns = [ 
-                        'i.image_id',
-                        'i.post_id',
-                        'i.image_url',
-                        'i.image_width',
-                        'i.image_height',
-                        'i.image_cdn_url',
-                        'i.source_id',
-                        'p.post_title',
-                        'p.post_date',
-                        'p.post_score',
-                        'p.post_external_id',
-                        'p.post_keywords'
-                    ];
-
-                    $joins = [
-                        'INNER JOIN `posts` p ON p.post_id = i.post_id'
-                    ];
-
-                    $where = [ 'i.image_good = 1' ];
-                    if (!$ignoreVisible) {
-                        $where[] = 'p.post_visible = 1';
-                    }
-
-                    if (!$ignoreSource) {
-                        $columns = array_merge($columns, [
-                            's.source_name',
-                            's.source_baseurl',
-                            's.source_content_rating'
-                        ]);
-                        $joins[] = 'INNER JOIN `sources` s ON s.source_id = i.source_id';
-
-                        // Source, sources, or no source
-                        if (is_numeric($sources)) {
-                            $params[':sourceId'] = $sources;
-                            $where[] = 'i.source_id = :sourceId';
-                        } else if (is_array($sources)) {
-                            for ($i = 0, $count = count($sources); $i < $count; $i++) {
-                                $params[':sourceId' . $i] = $sources[$i];
-                            }
-                            $where[] = 'i.source_id IN (' . implode(',', array_keys($params)) . ')';
-                        } else if (null === $sources) {
-                            $where[] = 'i.source_id IS NULL';
-                        }
-
-                    }
-
-                    if (!$ignoreUser) {
-                        $columns = array_merge($columns, [
-                            'u.user_name', 
-                            'u.user_reddit_id',
-                            'u.user_date_created',
-                            'u.user_id'
-                        ]);
-                        $joins[] = 'INNER JOIN `users` u ON u.user_id = p.user_id';
-
-                        if ($userName) {
-                            $where[] = 'u.user_name = :userName';
-                            $params[':userName'] = $userName;
-                        }
-
-                    }
+                    $query = [ 'sourceId' => [ 'in' => $sources ] ];
 
                     if ($externalId) {
-                        $where[] = 'p.post_external_id = :externalId';
-                        $params[':externalId'] = $externalId;
+                        $query['externalId'] = $externalId;
                     }
 
                     if ($postId) {
-                        $where[] = 'p.post_id = :postId';
-                        $params[':postId'] = $postId;
+                        $query['postId'] = $postId;
+                    }
+
+                    if ($userName) {
+                        $query['userName'] = $userName;
                     }
 
                     if ($afterId) {
-                        $where[] = 'i.image_id < :afterId';
-                        $params[':afterId'] = $afterId;
+                        $query['imageId'] = [ 'lt' => $afterId ];
                     }
 
                     if ($afterDate) {
-                        $where[] = 'p.post_date < :afterDate';
-                        $params[':afterDate'] = $afterDate;
+                        $query['dateCreated'] = [ 'lt' => $afterDate ];
                     }
 
                     if ($title) {
-                        $where[] = 'p.post_title LIKE :title';
-                        $params[':title'] = '%' . str_replace(' ', '%', $title) . '%';
+                        $query['title'] = [ 'like' => '%' . str_replace(' ', '%', $title) . '%' ];
                     }
 
-                    $query = 'SELECT ' . implode(',', $columns) . ' FROM `images` i ' . implode(' ', $joins) . ' WHERE ' . implode(' AND ', $where);
-                    $query .= ' ORDER BY p.post_date DESC LIMIT ' . $limit;
-
-                    $result = Lib\Db::Query($query, $params);
-
-                    if (null != $result && $result->count > 0) {
-                        $retVal = [];
-                        while ($row = Lib\Db::Fetch($result)) {
-                            $retVal[] = new JsonDataObject($row);
-                        }
-                    } else {
-                        $retVal = null;
-                    }
+                    $retVal = Api\PostData::queryReturnAll($query, [ 'dateCreated' => 'desc' ], $limit);
                     
                     Lib\Cache::Set($cacheKey, $retVal);
                 
