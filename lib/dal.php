@@ -100,30 +100,50 @@ namespace Lib {
 
                     $where = [];
                     $params = [];
-                    
+
                     foreach ($conditions as $col => $info) {
 
                         // Verify that the property actually exists in the map. Ensures constraint and prevents SQLi
                         if (isset($obj->_dbMap[$col])) {
                             if (is_array($info)) {
                                 
-                                $comparison = '=';
-                                $oper = 'AND';
-                                $value = '';
+                                foreach ($info as $operator => $options) {
 
-                                // Check against an array of values
-                                if (isset($info['in'])) {
-                                    $value = [];
-                                    for ($i = 0, $count = count($info['in']); $i < $count; $i++) {
-                                        $param = ':' . $col . $i;
-                                        $params[$param] = $info['in'][$i];
-                                        $value[] = $param;
+                                    $comparison = '=';
+                                    $oper = 'AND';
+                                    $value = ':' . $operator . '_' . $col;
+
+                                    switch (strtolower($operator)) {
+                                        case 'in':
+                                            $value = [];
+                                            for ($i = 0, $count = count($options); $i < $count; $i++) {
+                                                $param = ':' . $col . $i;
+                                                $params[$param] = $options[$i];
+                                                $value[] = $param;
+                                            }
+                                            $value = '(' . implode(', ', $value) . ')';
+                                            $comparison = 'IN';
+                                            break;
+
+                                        case 'lt':
+                                            $params[$value] = $options;
+                                            $comparison = '<';
+                                            break;
+
+                                        case 'gt':
+                                            $params[$value] = $options;
+                                            $comparison = '>';
+                                            break;
+
+                                        case 'like':
+                                            $params[$value] = $options;
+                                            $comparison = 'LIKE';
+                                            break;
                                     }
-                                    $value = '(' . implode(', ', $value) . ')';
-                                    $comparison = 'IN';
-                                }
 
-                                $where[] = $oper . ' `' . $obj->_dbMap[$col] . '` ' . $comparison . ' ' . $value;
+                                    $where[] = $oper . ' `' . $obj->_dbMap[$col] . '` ' . $comparison . ' ' . $value;
+
+                                }
                                 
                             // If an array wasn't passed, assume testing equality on the value with AND logic
                             } else {
