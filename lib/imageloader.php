@@ -33,6 +33,10 @@ namespace Lib {
             if ('imgur.com' === $domain) {
                 $retVal = self::handleImgurLink($url);
 
+            } else if ('redditbooru.com' === $domain) {
+                // Temporary solution to deal with data coming from PROD
+                $retVal = self::getRedditBooruImages($path);
+
             // DeviantArt images
             } else if ('deviantart.com' === $domain || 'fave.me' === $domain) {
                 $retVal[] = self::getDeviantArtImage($url);
@@ -203,6 +207,27 @@ namespace Lib {
 
             return $retVal;
 
+        }
+
+        /**
+         * Retrieves images from a redditbooru album
+         */
+        public static function getRedditBooruImages($path) {
+            $retVal = null;
+
+            // For testing purposes, we'll use a call to the API. In final version, this will be a database call
+            if (preg_match('/gallery\/([\d]+)/', $path, $matches)) {
+                $data = Http::get('http://redditbooru.com/images/?postId=' . $matches[1]);
+                if ($data) {
+                    $data = json_decode($data);
+                    $retVal = [];
+                    foreach ($data as $image) {
+                        $retVal[] = $image->cdnUrl;
+                    }
+                }
+            }
+
+            return $retVal;
         }
 
         /**
