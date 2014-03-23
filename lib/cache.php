@@ -51,6 +51,9 @@ namespace Lib {
 			$retVal = [ $prefix ];
 			foreach ($params as $param) {
 				$value = Url::Get($param, 'null', $values);
+				if (is_array($value)) {
+					$value = implode(',', $value);
+				}
 				$retVal[] = $value;
 			}
 			return implode('_', $retVal);
