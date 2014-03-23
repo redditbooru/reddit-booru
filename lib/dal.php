@@ -100,13 +100,31 @@ namespace Lib {
 
                     $where = [];
                     $params = [];
+                    
                     foreach ($conditions as $col => $info) {
 
                         // Verify that the property actually exists in the map. Ensures constraint and prevents SQLi
                         if (isset($obj->_dbMap[$col])) {
                             if (is_array($info)) {
-                                // TODO - fancy implementation
-                            
+                                
+                                $comparison = '=';
+                                $oper = 'AND';
+                                $value = '';
+
+                                // Check against an array of values
+                                if (isset($info['in'])) {
+                                    $value = [];
+                                    for ($i = 0, $count = count($info['in']); $i < $count; $i++) {
+                                        $param = ':' . $col . $i;
+                                        $params[$param] = $info['in'][$i];
+                                        $value[] = $param;
+                                    }
+                                    $value = '(' . implode(', ', $value) . ')';
+                                    $comparison = 'IN';
+                                }
+
+                                $where[] = $oper . ' `' . $obj->_dbMap[$col] . '` ' . $comparison . ' ' . $value;
+                                
                             // If an array wasn't passed, assume testing equality on the value with AND logic
                             } else {
                                 $where[] = 'AND `' . $obj->_dbMap[$col] . '` = :' . $col;

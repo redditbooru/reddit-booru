@@ -88,4 +88,10 @@ class DalTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals($result->params, [ ':id' => 5, ':prop1' => 'this thing' ]);
     }
 
+    public function testQueryIn() {
+        $result = DalObject::query([ 'id' => [ 'in' => [ 1, 2, 3 ] ] ]);
+        $this->assertEquals($result->query, 'SELECT `table_id`, `table_prop1` FROM `test` WHERE `table_id` IN (:id0, :id1, :id2)');
+        $this->assertEquals($result->params, [ ':id0' => 1, ':id1' => 2, ':id2' => 3 ]);
+    }
+
 }
