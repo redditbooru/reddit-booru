@@ -5,6 +5,8 @@ namespace Api {
 	use Lib;
 	use stdClass;
 	
+	define('QS_SOURCES', 'sources');
+
 	class Source extends Lib\Dal {
 	
 		/**
@@ -137,6 +139,25 @@ namespace Api {
 			
 			return $retVal;
 			
+		}
+
+		/**
+		 * Returns any sources on the query string in an array defaulting to cookie when not present
+		 */
+		public static function getSourcesFromQueryString() {
+			$sources = Lib\Url::Get(QS_SOURCES, null);
+			if (null !== $sources) {
+				$sources = explode(',', $sources);
+			} else {
+				if (isset($_COOKIE[QS_SOURCES])) {
+					$sources = explode(',', $_COOKIE[QS_SOURCES]);
+				} else {
+					$sources = [ 1 ]; // final default is awwnime
+				}
+			}
+
+			return $sources;
+
 		}
 	
 	}
