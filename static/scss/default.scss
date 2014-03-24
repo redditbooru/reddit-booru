@@ -1,0 +1,89 @@
+/* redditbooru default theme specific styles */
+@import "base";
+
+$pink: #e94e77;
+$darkPink: #c8234e;
+$lightGreen: #c6e5d9;
+$darkGreen: #9fcebc;
+$cream: #f4ead5;
+$lightGray: #ddd;
+$mediumGray: #ccc;
+
+body {
+    background: url(/view/css/images/default/background.png);
+}
+
+h1 {
+    background: $pink;
+}
+
+button, .rb-header .rb-button {
+    background-color: $lightGreen;
+    border-color: $lightGreen;
+    &:hover {
+        background-color: $darkGreen;
+        border-color: $darkGreen;
+        color: #000;
+    }
+}
+
+#images {
+    .image {
+        background: #fff;
+        border: 1px solid $lightGray;
+        padding: 9px;
+        span {
+            color: $mediumGray;
+        }
+        &:hover {
+            box-shadow: 0 3px 5px rgba(0, 0, 0, .25);
+        }
+    }
+    
+    .more {
+        border: 1px solid $lightGray;
+        background: $pink;
+        font: 18px sans-serif;
+        padding: 9px 0;
+        color: #fff;
+        &:hover {
+            background: $darkPink;
+        }
+    }
+
+    .imageSearchOriginal img {
+        border: 10px solid $cream;
+    }
+    
+    .imageSearchResult {
+        border: 10px solid $cream;
+        span {
+            color:#fff; 
+        }
+    }
+}
+
+.form {
+    border: 10px solid $cream;
+    background: #fff; 
+
+    h2 {
+        background: $pink;
+        color: $lightGreen;
+    }
+}
+
+.sourceMatch img {
+    border: 10px solid $cream; 
+}
+
+footer {
+    background: $pink;
+    color:#fff;
+    a { 
+        color: $cream; 
+        &:hover { 
+            text-decoration:none; 
+        }
+    }
+}

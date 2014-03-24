@@ -1,0 +1,397 @@
+/* Basic resets */
+* { margin:0; padding:0; }
+ul { list-style:none; }
+a img { border:0; }
+
+.redditThumb { display:none; }
+
+h1 { height:57px; overflow:hidden; }
+button { border:0; font:bold 18px/1 sans-serif; padding:7px 20px; }
+button:hover { cursor:pointer; }
+
+.rb-header .rb-button, .ss-controls button { position:absolute; top:12px; background-image:url(/view/images/icons-sprite.png); background-repeat:no-repeat; width:32px; height:0; padding:32px 0 0; border:4px solid #000; overflow:hidden; box-sizing:content-box; -moz-box-sizing:content-box; }
+#searchButton { right:15px; background-position:0 -32px; }
+#uploadButton { right:62px; }
+#screenButton { right:109px; background-position:0 -128px; }
+
+#images { 
+    
+    padding: 15px 0 0 15px;
+    margin:0 auto;
+    overflow:hidden;
+
+    h2 {
+        font: bold 24px/1 sans-serif;
+        margin-bottom: 10px;
+        text-transform: uppercase; 
+    }
+
+    .image { 
+        float: left;
+        margin: 0 15px 15px 0;
+        width: 180px;
+
+        img {
+            display: block;
+            width: 180px;
+            height: 180px;
+            background: url(/view/images/ajax.gif) no-repeat center center;
+        }
+
+        dl {
+            position: relative;
+            top: 3px;
+
+            dt {
+                position: absolute;
+                left: -9999px;
+                top: -9999px;
+            }
+
+            dd {
+                font: 14px sans-serif;
+                display: inline;
+                &.score {
+                    float: right;
+                    position: relative;
+                    &:before {
+                        content: '';
+                        background: url(/view/images/upvotes.png) no-repeat;
+                        display: block;
+                        width: 9px;
+                        height: 9px;
+                        position: absolute;
+                        left: -12px;
+                        top: 5px;
+                    }
+                }
+            }
+        }
+
+    }
+
+    .image.nsfw,
+    .imageSearchResult.nsfw {
+        background: url(/view/images/nsfw.jpg) no-repeat center bottom;
+        border-color: #e94e77 !important;
+
+        img {
+            position: absolute;
+            top: -9999px;
+
+            &:hover {
+                position: static;
+            }
+        }
+
+    }
+
+    .imageSearchOriginal { 
+        float: left;
+        margin-right: 20px;
+        
+        img {
+            max-width: 580px;
+            display: block;
+        }
+    }
+
+    .imageSearchList { 
+        float: left;
+        overflow: hidden;
+        max-width: 780px;
+    }
+
+    .imageSearchResult { 
+        float: left;
+        margin: 0 10px 10px 0;
+        position: relative;
+        width: 360px;
+        height: 180px;
+
+        .imageSearchResult span.count { 
+            left: 0;
+            top: 0;
+            bottom: auto; 
+        }
+
+        img {
+            display: block;
+            width: 360px;
+            height: 180px;
+            background: url(/view/images/ajax.gif) no-repeat center center; 
+        }
+
+        .source {
+            left: 0;
+        }
+
+        .age {
+            right: 0;
+        }
+
+    }
+
+    .more {
+        float: none;
+        clear: both;
+        cursor: pointer;
+        display: block;
+        width: 100%;
+        margin: 10px 0;
+    }
+
+    &.images {
+        .image {
+            float: none;
+            margin: 0 0 25px;
+            text-align: center;
+            height: auto;
+            width: auto;
+            border: 0;
+            img {
+                max-width: 100%;
+                width: auto;
+                display: inline-block;
+                height: auto;
+                box-sizing: border-box;
+                -moz-box-sizing: border-box;
+            }
+        }
+
+        .more {
+            display: none;
+        }
+
+    }
+
+}
+
+#overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background: url(/view/images/overlay_bg.png);
+    display: none;
+
+    &.screenSaver {
+        background: #000;
+        .ss-controls {
+            display: block;
+        }
+    }
+
+}
+
+.form {
+    width: 600px;
+    margin: 58px auto 0;
+    background: #fff;
+    
+    h2 {
+        font: bold 18px/1 sans-serif;
+        text-transform: uppercase;
+        padding: 10px;
+    }
+
+    fieldset { 
+        margin: 0 10px 20px;
+    }
+
+    legend { 
+        margin: 0 10px;
+        text-transform: uppercase;
+        font: 18px/1 sans-serif; 
+    }
+
+    .field { 
+        padding: 10px;
+        overflow: hidden;
+    }
+
+    .field > label,
+    .form .subField > label { 
+        text-transform: uppercase;
+        font: 18px/1 sans-serif;
+        padding-bottom: 5px;
+    }
+
+    .subField { 
+        width: 50%;
+        float: left;
+        padding-left: 10px;
+        box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        &:first-child {
+            padding-left: 0;
+        }
+    }
+
+    input[type="text"] { 
+        width: 100%;
+        box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        padding: 3px;
+        font: 14px sans-serif;
+    }
+
+    .checkboxList { 
+        overflow:hidden;
+        li {
+            display: block;
+            float: left;
+            padding-right: 20px;
+            width: 115px;
+            &.singleLine {
+                display: block;
+                float: none;
+                padding: 10px 0;
+                clear: both;
+                width: auto;
+            }
+        }
+
+        label {
+            font: 14px/1 sans-serif;
+            padding-left: 5px; 
+        }
+
+    }
+
+    .tip {
+        font: 14px sans-serif;
+        padding: 10px;
+    }
+
+    #btnSubmit { 
+        margin: 10px auto; 
+    }
+
+    .buttons button { 
+        width: 75%;
+        display: block;
+        margin: 0 auto 15px; 
+    }
+
+}
+
+#uploadImagesForm {
+    ul {
+        overflow: hidden; 
+        padding: 10px; 
+    }
+
+    li { 
+        display: block;
+        width: 90px;
+        height: 90px;
+        float: left;
+        margin: 0 10px 10px 0;
+        
+        &.uploading {
+            background: url(/view/images/ajax.gif) no-repeat center center;
+        }
+
+        img { 
+            padding:29px;
+        }
+
+    }
+    
+    .title { 
+        display:none; 
+    }
+}
+
+.sourceMatch { overflow:hidden; }
+.sourceMatch img { float:left; margin-right:20px; max-width:580px; display:block; }
+.sourceInfo { float:left; }
+.sourceInfo dt { font:bold 16px sans-serif; }
+.sourceInfo dd { font:14px sans-serif; margin-bottom:5px; }
+.sourceInfo ul { list-style:disc; padding-left:16px; }
+
+#ifUpload { 
+    display: none;
+}
+
+#screenSaverArea {
+    .ss-image img {
+        position: absolute;
+        max-height: 100%;
+        padding: 10px 0;
+        box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        
+        &.new { 
+            display:none;
+        }
+    }
+
+    .ss-controls {
+        display:none; 
+        button { 
+            right: 15px;
+            top: 15px;
+            background-color :#000;
+            &:hover {
+                background-color: #000;
+                border-color: #000; 
+            }
+        }
+        .play {
+            background-position: 0 -64px; 
+        }
+        .pause {
+            background-position:0 -96px;
+        }
+    }
+    
+}
+
+#loader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: none; 
+
+    &.visible {
+        display:block;
+    }
+
+    .loader-inner {
+        display: table;
+        width: 500px;
+        margin: 250px auto 0; 
+    }
+
+    img { 
+        display: table-cell; 
+        width: 190px; 
+    }
+
+    span { 
+        display: table-cell; 
+        vertical-align: middle; 
+        width: 300px; 
+        font: bold 20px sans-serif; 
+        color: #333; 
+    }
+}
+
+footer { 
+    padding: 15px;
+    overflow: hidden;
+    p { 
+        font :16px sans-serif; 
+    }
+    .disclaimer { 
+        float:left;
+    }
+    .tools { 
+        float:right;
+    }
+}

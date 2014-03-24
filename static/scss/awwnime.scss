@@ -1,0 +1,20 @@
+/* awwnime specific styles */
+h1 { background:url(images/header_bg.png); }
+button, .rb-header .rb-button { background-color:#ccf7ec; border-color:#ccf7ec; color:#494a4c; }
+button:hover, .rb-header .rb-button:hover { background-color:#9fcebc; border-color:#9fcebc; color:#000; }
+
+#images .image { border:10px solid #ccf7ec; }
+#images .more { background:url(images/more.png); border:10px solid #ccf7ec; }
+
+.form { border:10px solid #ccf7ec; }
+.form h2 { background:#a4d9cb; color:#e6fff7; }
+
+.imageSearchOriginal img { border:10px solid #ccf7ec; }
+.imageSearchResult img { border:10px solid #ccf7ec; }
+.imageSearchResult span { color:#fff; }
+
+.sourceMatch img { border:10px solid #ccf7ec; }
+
+footer { background:#9fcebc; }
+footer a { color:#494a4c; }
+footer a:hover { text-decoration:none; }
