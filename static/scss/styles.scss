@@ -98,14 +98,21 @@ header {
 
     .primary-nav {
 
+        margin-left: 20px;
+
         > li {
 
             font: 18px/1 'MG Regular', sans-serif;
-
+            
             position: relative;
             display: inline-block;
             border: 1px solid transparent;
             padding: 10px;
+
+            a {
+                color: #000;
+                text-decoration: none;
+            }
 
             .secondary-nav {
                 list-style: none;
@@ -123,19 +130,21 @@ header {
                     overflow: hidden;
                     li {
                         float: left;
-                        width: 130px;
+                        width: 170px;
                         padding: 5px;
                     }
                 }
 
+                input,
                 label {
                     font-family: 'MG Thin', sans-serif;
+                    cursor: pointer;
                 }
 
             }
 
 
-            &:hover {
+            &.has-secondary-nav:hover {
                 &:before {
                     display: block;
                     position: absolute;
