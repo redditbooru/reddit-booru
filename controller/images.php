@@ -75,6 +75,8 @@ namespace Controller {
                     $sources = strpos($sources, ',') !== false ? explode(',', $sources) : $sources;
                 }
 
+                $sources = is_numeric($sources) ? [ $sources ] : $sources;
+
                 if (is_numeric($sources) || is_array($sources)) {
 
                     $query = [ 'sourceId' => [ 'in' => $sources ] ];
