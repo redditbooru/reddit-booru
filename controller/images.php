@@ -49,10 +49,24 @@ namespace Controller {
             $externalId = Lib\Url::Get('externalId', null, $vars);
             $afterDate = Lib\Url::GetInt('afterDate', null, $vars);
             $userName = Lib\Url::Get('user', null, $vars);
-            $title = Lib\Url::Get('keywords', null, $vars);
+            $keywords = Lib\Url::Get('q', null, $vars);
             $ignoreSource = Lib\Url::GetBool('ignoreSource', $vars);
             $ignoreUser = Lib\Url::GetBool('ignoreUser', $vars);
             $ignoreVisible = Lib\Url::GetBool('ignoreVisible', $vars);
+
+            // Normalize the sources down to an array
+            if (is_string($sources)) {
+                $sources = strpos($sources, ',') !== false ? explode(',', $sources) : $sources;
+            }
+            $sources = is_numeric($sources) ? [ $sources ] : $sources;
+
+            // For the cache key
+            $var['sources'] = $sources;
+
+            // If specified, save the sources off to cookie
+            if (Lib\Url::GetBool('saveSources')) {
+                setcookie('sources', implode(',', $sources), strtotime('+5 years'), '/');
+            }
 
             $cacheKey = Lib\Cache::createCacheKey('Images::getByQuery_', [
                 'sources',
@@ -64,20 +78,15 @@ namespace Controller {
                 'ignoreSource',
                 'ignoreUser',
                 'user',
+                'q',
                 'ignoreVisible',
                 'keywords' ], $vars);
             
             $retVal = Lib\Cache::Get($cacheKey);
 
             if (!$retVal) {
-                
-                if (is_string($sources)) {
-                    $sources = strpos($sources, ',') !== false ? explode(',', $sources) : $sources;
-                }
 
-                $sources = is_numeric($sources) ? [ $sources ] : $sources;
-
-                if (is_numeric($sources) || is_array($sources)) {
+                if (is_array($sources)) {
 
                     $query = [ 'sourceId' => [ 'in' => $sources ] ];
 
@@ -101,8 +110,8 @@ namespace Controller {
                         $query['dateCreated'] = [ 'lt' => $afterDate ];
                     }
 
-                    if ($title) {
-                        $query['title'] = [ 'like' => '%' . str_replace(' ', '%', $title) . '%' ];
+                    if ($keywords) {
+                        $query['keywords'] = [ 'like' => '%' . str_replace(' ', '%', $keywords) . '%' ];
                     }
 
                     $retVal = Api\PostData::queryReturnAll($query, [ 'dateCreated' => 'desc' ], $limit);
