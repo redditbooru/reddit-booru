@@ -4,6 +4,10 @@ namespace Lib {
 
 	use Memcache;
 
+	define('CACHE_LONG', 3600);
+	define('CACHE_MEDIUM', 600);
+	define('CACHE_SHORT', 60);
+
 	if (!defined('DISABLE_CACHE')) {
 		define('DISABLE_CACHE', false);
 	}
@@ -57,6 +61,18 @@ namespace Lib {
 				$retVal[] = $value;
 			}
 			return implode('_', $retVal);
+		}
+
+		/**
+		 * Attempts to get data from cache. On miss, executes the callback function, caches that value, and returns it
+		 */
+		public static function fetch($method, $cacheKey, $duration = CACHE_MEDIUM) {
+			$retVal = self::Get($cacheKey);
+			if (!$retVal && is_callable($method)) {
+				$retVal = $method();
+				self::Set($cacheKey, $retVal, $duration);
+			}
+			return $retVal;
 		}
 
 	}
