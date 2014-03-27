@@ -4,23 +4,23 @@ namespace Controller {
 
     define('IMAGES_PER_PAGE', 30);
 
-	use Api;
-	use Lib;
+    use Api;
+    use Lib;
 
-	/**
-	 * Reddit-Booru
-	 * Copyright (C) 2012 Matt Hackmann
-	 * GPLv3
-	 */
+    /**
+     * Reddit-Booru
+     * Copyright (C) 2012 Matt Hackmann
+     * GPLv3
+     */
 
-	class RedditBooru implements Page {
+    class RedditBooru implements Page {
 
-		/**
-		 * Determines how the page needs to be rendered and passes control off accordingly
-		 */
-		public static function render() {
+        /**
+         * Determines how the page needs to be rendered and passes control off accordingly
+         */
+        public static function render() {
 
-			$sources = QueryOption::getSources();
+            $sources = QueryOption::getSources();
             $enabledSources = [];
             foreach ($sources as $source) {
                 if ($source->checked) {
@@ -30,8 +30,8 @@ namespace Controller {
 
             $action = Lib\Url::Get('action', false);
 
-			// Check to see if we got a specific subdomain
-			if (preg_match('/([\w]+)\.redditbooru\.com/is', $_SERVER['HTTP_HOST'], $matches)) {
+            // Check to see if we got a specific subdomain
+            if (preg_match('/([\w]+)\.redditbooru\.com/is', $_SERVER['HTTP_HOST'], $matches)) {
                 $domain = $matches[1];
                 if ($domain === 'moesaic') {
                     self::_renderMoesaic();
@@ -48,22 +48,22 @@ namespace Controller {
                         Lib\Display::setVariable('SOURCE_NAME', $domain->subdomain);
                         Lib\Display::setVariable('SOURCE_ID', $domain->id);
                     }
-				}
-			}
+                }
+            }
 
             $display = 'thumbs';
-			$thumb = null;
+            $thumb = null;
             $jsonOut = null;
             $postTitle = null;
-			$urlOut = '/images/?';
+            $urlOut = '/images/?';
 
-			switch ($action) {
+            switch ($action) {
                 case 'single':
                     self::_displaySingle();
                     break;
-				case 'user':
+                case 'user':
                     $user = Lib\Url::Get('user');
-					$jsonOut = Images::getByQuery([ 'user' => $user, 'sources' => $enabledSources ]);
+                    $jsonOut = Images::getByQuery([ 'user' => $user, 'sources' => $enabledSources ]);
                     $userData = Api\PostData::getUserProfile($user);
                     Lib\Display::renderAndAddKey('supporting', 'userProfile', $userData);
 
@@ -71,7 +71,7 @@ namespace Controller {
                         $postTitle = 'Posts by ' . $user;
                     }
 
-					break;
+                    break;
                 case 'gallery':
                     $postId = Lib\Url::Get('post', null);
                     $jsonOut = Images::getByQuery([ 'postId' => $postId ]);
@@ -80,18 +80,18 @@ namespace Controller {
                     }
                     $display = 'images';
                     break;
-				case 'post':
+                case 'post':
                     $postId = Lib\Url::Get('post', null);
-					$jsonOut = Images::getByQuery([ 'externalId' => $postId ]);
+                    $jsonOut = Images::getByQuery([ 'externalId' => $postId ]);
                     if (count($jsonOut) > 0) {
                         $postTitle = $jsonOut[0]->title;
                     }
                     $display = 'images';
-					break;
-				default:
+                    break;
+                default:
                     $jsonOut = Images::getByQuery([ 'sources' => $enabledSources ]);
-					break;
-			}
+                    break;
+            }
 
             if (count($jsonOut) > 0) {
                 if ($jsonOut[0] instanceof JsonDataObject) {
@@ -107,14 +107,14 @@ namespace Controller {
             ];
             Lib\Display::renderAndAddKey('body', 'index', $out);
 
-		}
+        }
 
-		/**
-		 * Handles registering extensions
-		 */
-		public static function registerExtension($class, $module, $type) {
+        /**
+         * Handles registering extensions
+         */
+        public static function registerExtension($class, $module, $type) {
 
-		}
+        }
 
         /**
          * Renders a moesaic for the user
@@ -150,6 +150,6 @@ namespace Controller {
             exit;
         }
 
-	}
+    }
 
 }
