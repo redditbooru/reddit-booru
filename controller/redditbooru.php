@@ -2,6 +2,8 @@
 
 namespace Controller {
 
+    define('IMAGES_PER_PAGE', 30);
+
 	use Api;
 	use Lib;
 
@@ -18,8 +20,13 @@ namespace Controller {
 		 */
 		public static function render() {
 
-			$sources = Lib\Url::Get('sources', 1, $_COOKIE);
-			// Lib\Display::setVariable('SOURCE_NAME', 'default');
+			$sources = QueryOption::getSources();
+            $enabledSources = [];
+            foreach ($sources as $source) {
+                if ($source->checked) {
+                    $enabledSources[] = $source->value;
+                }
+            }
 
             $action = Lib\Url::Get('action', false);
 
@@ -37,7 +44,7 @@ namespace Controller {
                         header('Location: http://redditbooru.com/');
                         exit;
                     } else {
-                        $sources = $domain->id;
+                        $sources = [ $domain->id ];
                         Lib\Display::setVariable('SOURCE_NAME', $domain->subdomain);
                         Lib\Display::setVariable('SOURCE_ID', $domain->id);
                     }
@@ -55,11 +62,10 @@ namespace Controller {
                     self::_displaySingle();
                     break;
 				case 'user':
-					$user = Lib\Url::Get('user');
-					$jsonOut = Images::getByQuery([ 'user' => $user, 'sources' => $sources ]);
-					$urlOut = '/images/?sources=';
-                    $urlOut .= is_array($sources) ? implode(',', $sources) : $sources;
-                    $urlOut .= '&user=' . $user;
+                    $user = Lib\Url::Get('user');
+					$jsonOut = Images::getByQuery([ 'user' => $user, 'sources' => $enabledSources ]);
+                    $userData = Api\PostData::getUserProfile($user);
+                    Lib\Display::renderAndAddKey('supporting', 'userProfile', $userData);
 
                     if (count($jsonOut) > 0) {
                         $postTitle = 'Posts by ' . $user;
@@ -68,7 +74,7 @@ namespace Controller {
 					break;
                 case 'gallery':
                     $postId = Lib\Url::Get('post', null);
-                    $jsonOut = Images::getByQuery([ 'postId' => $postId, 'ignoreSource' => true, 'ignoreUser' => true, 'ignoreVisible' => true ]);
+                    $jsonOut = Images::getByQuery([ 'postId' => $postId ]);
                     if (count($jsonOut) > 0) {
                         $postTitle = $jsonOut[0]->title;
                     }
@@ -76,16 +82,14 @@ namespace Controller {
                     break;
 				case 'post':
                     $postId = Lib\Url::Get('post', null);
-					$jsonOut = Images::getByQuery([ 'externalId' => $postId, 'ignoreVisible' => true ]);
+					$jsonOut = Images::getByQuery([ 'externalId' => $postId ]);
                     if (count($jsonOut) > 0) {
                         $postTitle = $jsonOut[0]->title;
                     }
                     $display = 'images';
 					break;
 				default:
-					$urlOut = '/images/?sources=';
-					$urlOut .= is_array($sources) ? implode(',', $sources) : $sources;
-                    $jsonOut = Images::getByQuery([ 'sources' => $sources ]);
+                    $jsonOut = Images::getByQuery([ 'sources' => $enabledSources ]);
 					break;
 			}
 
@@ -97,22 +101,11 @@ namespace Controller {
 
             $urlOut .= isset($_GET['flushCache']) ? '&flushCache' : '';
 
-            /*
-            Lib\Display::setVariable('display', $display);
-            Lib\Display::setVariable('thumb', addslashes($thumb));
-            Lib\Display::setVariable('post_title', addslashes($postTitle));
-            */
-
-            // Filter out only subreddit sources
-            $sources = Api\Source::getAllEnabled();
-            $sources = array_values(array_filter($sources, function($item) { return $item->type === 'subreddit'; }));
-
             $out = [
                 'sources' => json_encode($sources),
                 'images' => json_encode($jsonOut)
             ];
             Lib\Display::renderAndAddKey('body', 'index', $out);
-			// Lib\Display::setVariable('next_url', $urlOut);
 
 		}
 
