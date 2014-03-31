@@ -22,15 +22,19 @@
     font-style: normal;
 }
 
-$lightGrey: #eee;
-$grey: #ddd;
-$darkGrey: #666;
-$pink: #e94e77;
+$LIGHT_GREY: #eee;
+$GREY: #ddd;
+$DARK_GREY: #666;
+$PINK: #e94e77;
 
 // Itty bitty reset
 * {
     margin: 0;
     padding: 0;
+}
+
+body {
+    padding-top: 86px;
 }
 
 header {
@@ -42,7 +46,7 @@ header {
     left: 0;
     right: 0;
     padding: 20px 20px 15px;
-    border-bottom: 1px solid $grey;
+    border-bottom: 1px solid $GREY;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
     z-index: 1000;
 
@@ -59,7 +63,7 @@ header {
             input {
                 font: 18px/1 'MG Thin', sans-serif;
                 padding: 10px 10px 5px;
-                border: 1px solid $grey;
+                border: 1px solid $GREY;
                 border-radius: 2px;
                 width: 250px;
             }
@@ -70,7 +74,7 @@ header {
                 position: absolute;
                 right: 10px;
                 top: -7px;
-                color: $darkGrey;
+                color: $DARK_GREY;
             }
         }
 
@@ -82,9 +86,9 @@ header {
 
         button {
             border-radius: 2px;
-            border: 1px solid $grey;
-            background: $lightGrey;
-            color: $darkGrey;
+            border: 1px solid $GREY;
+            background: $LIGHT_GREY;
+            color: $DARK_GREY;
             padding: 10px 10px 5px;
             font: 18px/1 'MG Thin', sans-serif;
             cursor: pointer;
@@ -103,7 +107,7 @@ header {
         > li {
 
             font: 18px/1 'MG Regular', sans-serif;
-            
+
             position: relative;
             display: inline-block;
             border: 1px solid transparent;
@@ -121,7 +125,7 @@ header {
                 left: -1px;
                 top: 37px;
                 background: #fff;
-                border: 1px solid $grey;
+                border: 1px solid $GREY;
                 padding: 10px;
                 box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.5);
 
@@ -154,7 +158,7 @@ header {
                     bottom: 0;
                     right: 0;
                     background: #fff;
-                    border: 1px solid $grey;
+                    border: 1px solid $GREY;
                     border-bottom: 0;
                     clip: rect(0, 155px, 38px, -1px);
                     box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.25);
@@ -173,12 +177,14 @@ header {
 
 #content {
     padding: 0 10px;
-    margin-top: 86px;
 }
 
 #title {
     font: 30px/1 'MG Thin', sans-serif;
     padding: 15px 0 10px 15px;
+    &.hidden {
+        display: none;
+    }
 }
 
 #images {
@@ -194,7 +200,7 @@ header {
             float: left;
             margin-left: 20px;
             height: 250px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+            @include image-shadow();
             background-size: cover;
             background-position: center center;
 
@@ -251,7 +257,7 @@ header {
     }
 
     .more-row {
-        border-top: 1px solid $grey;
+        border-top: 1px solid $GREY;
         position: relative;
 
         button {
@@ -271,10 +277,90 @@ header {
                 margin-left: -7px;
                 bottom: 10px;
                 border: 7px solid transparent;
-                border-top-color: $pink;
+                border-top-color: $PINK;
             }
 
         }
+    }
+
+}
+
+#supporting {
+    display: none;
+    &.hasContent {
+        display: block;
+        float: left;
+        width: 300px;
+        margin-left: 10px;
+
+        & + #content {
+            margin-left: 310px;
+        }
+
+    }
+
+    h2 {
+        font: 30px/1 'MG Thin', sans-serif;
+        margin: 15px 0 10px;
+    }
+
+    h3 {
+        font: 18px/1 'MG Regular', sans-serif;
+        margin: 15px 0 10px;
+    }
+
+    p {
+        font: 18px/1.4 'MG Thin', sans-serif;
+        margin: 5px 0;
+    }
+
+    a {
+        color: $PINK;
+        text-decoration: none;
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+
+    .userProfile {
+        .avatar {
+            @include image-shadow();
+        }
+
+        table {
+
+            font: 18px/1 'MG Thin', sans-serif;
+            display: block;
+            width: 100%;
+
+            thead {
+                @include hide-element();
+            }
+
+            tr {
+                overflow: hidden;
+                display: block;
+                width: 250px;
+                margin-bottom: 10px;
+            }
+
+            td {
+                display: block;
+                &.thumb {
+                    float: left;
+                    padding-right: 10px;
+                    img {
+                        @include image-shadow();
+                    }
+                }
+
+                &.keywords {
+                    font-family: 'MG Regular';
+                }
+
+            }
+        }
+
     }
 
 }

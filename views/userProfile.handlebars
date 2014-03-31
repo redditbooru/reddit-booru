@@ -1,6 +1,30 @@
-User: {{name}}
-<ul>
-    {{#each postedOn}}
-        {{name}}
-    {{/each}}
-</ul>
+<div class="userProfile">
+    <img src="/cache/{{avatar}}_300_300.jpg" alt="{{name}}'s avatar" class="avatar" />
+    <h2>{{name}}</h2>
+    <p>Poster for <strong>{{relativeTime dateCreated}}</strong> with <strong>{{stats.totalPosts}} posts</strong> and <strong>{{stats.totalImages}} images</strong></p>
+    <p>Contributes to
+        {{#each postedOn}}
+            <a href="#">{{name}}</a>{{sep}}, {{/sep}}
+        {{/each}}
+    </p>
+
+    <h3>Favorite Things to Post</h3>
+    <table>
+        <thead>
+            <tr>
+                <th></th>
+                <th>Keywords</th>
+                <th>Times posted</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each favorites}}
+                <tr>
+                    <td class="thumb"><img src="/cache/{{thumb}}_50_50.jpg" alt="{{title}}" /></td>
+                    <td class="keywords">{{title}}</td>
+                    <td class="count">{{count}} posts</td>
+                </tr>
+            {{/each}}
+        </tbody>
+    </table>
+</div>

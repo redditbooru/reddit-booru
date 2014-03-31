@@ -7,6 +7,12 @@
   background: $background no-repeat;
 }
 
+@mixin hide-element() {
+  position: absolute;
+  left: -9999px;
+  top: -9999px;
+}
+
 @mixin center-block() {
   margin: 0 auto;
 }
@@ -23,16 +29,16 @@
 @mixin gradient($from, $to) {
   /* fallback/image non-cover color */
   background-color: $from;
- 
+
   /* Firefox 3.6+ */
   background-image: -moz-linear-gradient($from, $to);
- 
+
   /* Safari 4+, Chrome 1+ */
   background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, from($from), to($to));
- 
+
   /* Safari 5.1+, Chrome 10+ */
   background-image: -webkit-linear-gradient($from, $to);
- 
+
   /* Opera 11.10+ */
   background-image: -o-linear-gradient($from, $to);
 
@@ -40,4 +46,8 @@
   background-image: -ms-linear-gradient(top, $from 0%, $to 100%);
   filter: 'progid:DXImageTransform.Microsoft.gradient(startColorstr="$from", endColorstr="$to")';
 
+}
+
+@mixin image-shadow() {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
 }
