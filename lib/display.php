@@ -2,6 +2,8 @@
 
 namespace Lib {
 
+	define('KEY_CLIENT_DATA', 'clientData');
+
 	use Handlebars\Handlebars;
 	use stdClass;
 
@@ -17,6 +19,8 @@ namespace Lib {
 				'loader' => new \Handlebars\Loader\FilesystemLoader(__DIR__ . '/../views/'),
 				'partials_loader' => new \Handlebars\Loader\FilesystemLoader(__DIR__ . '/../views/partials/')
 			]);
+			self::addKey(KEY_CLIENT_DATA, new stdClass);
+			self::_addStandardHelpers();
 		}
 
 		/**
@@ -28,14 +32,7 @@ namespace Lib {
 
 		// Displays an error message and halts rendering
 		public static function showError($code, $message) {
-			global $_title;
-			/*
-			$content = self::compile('<error><code>' . $code . '</code><message>' . $message . '</message></error>', 'error');
-			self::setVariable('title', 'Error - ' . $_title);
-			self::setVariable('content', $content);
-			self::setTemplate('simple');
-			self::render();
-			*/
+			// NOOP until I can figure out what to do with this
 		}
 
 		public static function setTheme($name) {
@@ -63,6 +60,36 @@ namespace Lib {
 		 */
 		public static function addKey($key, $value) {
 			self::$_tplData[$key] = $value;
+		}
+
+		/**
+		 * Adds data to the outgoing client side data blob
+		 */
+		public static function addClientData($key, $obj) {
+			self::$_tplData[KEY_CLIENT_DATA]->$key = $obj;
+		}
+
+		/**
+		 * Adds a helper to the Handlebars engine
+		 */
+		public static function addHelper($name, $function) {
+			self::$_hbEngine->addHelper($name, $function);
+		}
+
+		/**
+		 * Adds a set of standard utility helpers to the render engine
+		 */
+		private static function _addStandardHelpers() {
+			self::addHelper('relativeTime', function($template, $context, $args, $source) {
+				return Util::relativeTime($context->get($args));
+			});
+
+			// Idea lifted right out of dust.js
+			self::addHelper('sep', function($template, $context, $args, $source) {
+				if (!$context->get('@last')) {
+					return $source;
+				}
+			});
 		}
 
 	}
