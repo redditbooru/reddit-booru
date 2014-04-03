@@ -4,7 +4,7 @@
     <p>Poster for <strong>{{relativeTime dateCreated}}</strong> with <strong>{{stats.totalPosts}} posts</strong> and <strong>{{stats.totalImages}} images</strong></p>
     <p>Contributes to
         {{#each postedOn}}
-            <a href="#">{{name}}</a>{{sep}}, {{/sep}}
+            <a href="#">{{name}}</a>{{#sep}}, {{/sep}}
         {{/each}}
     </p>
 
