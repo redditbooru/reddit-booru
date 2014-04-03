@@ -141,9 +141,10 @@ namespace Api {
                 $this->sourceId = (int) $this->sourceId;
                 $this->width = (int) $this->width;
                 $this->height = (int) $this->height;
-                $this->nsfw = $this->nsfw === 1;
+                $this->nsfw = (int) $this->nsfw === 1;
                 $this->cdnUrl = Image::generateFilename($this->imageId, $this->type);
                 $this->age = time() - $this->dateCreated;
+                // TODO - models shouldn't be talking to controllers
                 $this->thumb = Controller\Thumb::createThumbFilename($this->cdnUrl);
             }
         }
@@ -206,18 +207,36 @@ namespace Api {
         public static function getUserProfile($user) {
             return Lib\Cache::fetch(function() use ($user) {
 
-                $userObj = User::queryReturnAll([ 'name' => $user ]);
-                if ($userObj) {
+                $retVal = User::queryReturnAll([ 'name' => $user ]);
+                if ($retVal) {
 
-                    $userObj = $userObj[0];
-                    $retVal = new stdClass;
+                    $retVal = $retVal[0];
+                    $retVal->postedOn = self::_getUserPostedSources($retVal->id);
+                    $retVal->stats = self::_getUserCounts($retVal->id);
+                    $retVal->age = time() - $retVal->stats->firstPostDate;
+                    $retVal->avatar = self::_getAvatarImage($retVal->id);
 
-                    // Get the subs this user has posted on
-                    $result = Lib\Db::Query('SELECT DISTINCT source_id, source_name FROM post_data WHERE user_name = :userName', [ ':userName' => $userObj->name ]);
-                    if ($result) {
-                        $retVal->postedOn = [];
-                        while ($row = Lib\Db::Fetch($result)) {
-                            $retVal->postedOn[] = new Source($row);
+                    $retVal->favorites = [];
+                    $keywords = Controller\Stats::getKeywordRanks([ 'user' => $user ]);
+                    $i = 0;
+                    foreach ($keywords as $keyword => $count) {
+
+                        $result = PostData::queryReturnAll([
+                            'userId' => $retVal->id,
+                            'keywords' => [ 'like' => '%' . str_replace(' ', '%', $keyword) . '%' ]
+                        ] , [
+                            'score' => 'desc'
+                        ], 1);
+
+                        $obj = new stdClass;
+                        $obj->title = $keyword;
+                        $obj->count = $count;
+                        $obj->thumb = $result[0]->thumb;
+                        $retVal->favorites[] = $obj;
+
+                        $i++;
+                        if ($i > 4) {
+                            break;
                         }
                     }
 
@@ -226,6 +245,65 @@ namespace Api {
                 return $retVal;
 
             }, 'UserProfile_' . $user, CACHE_LONG);
+        }
+
+        /**
+         * Returns a list of all the subs a user has posted on
+         */
+        private static function _getUserPostedSources($userId) {
+            $retVal = null;
+            $result = Lib\Db::Query('SELECT DISTINCT source_id, source_name FROM post_data WHERE user_id = :userId', [ ':userId' => $userId ]);
+            if ($result) {
+                $retVal = [];
+                while ($row = Lib\Db::Fetch($result)) {
+                    $source = new Source($row);
+                    $source->name = str_replace('r/', '', $source->name);
+                    $retVal[] = $source;
+                }
+            }
+            return $retVal;
+        }
+
+        /**
+         * Returns various numerical statistics for a user
+         */
+        private static function _getUserCounts($userId) {
+            $retVal = null;
+
+            $queries = [
+                'totalPosts' => 'SELECT COUNT(DISTINCT post_id) FROM post_data WHERE user_id = :userId',
+                'totalImages' => 'SELECT COUNT(1) FROM post_data WHERE user_id = :userId',
+                'totalScore' => 'SELECT SUM(post_score) FROM post_data WHERE user_id = :userId',
+                'firstPostDate' => 'SELECT MIN(post_date) FROM post_data WHERE user_id = :userId'
+            ];
+
+            $query = [];
+            foreach ($queries as $key => $val) {
+                $query[] = '(' . $val . ') AS ' . $key;
+            }
+            $result = Lib\Db::Query('SELECT ' . join(',', $query), [ ':userId' => $userId ]);
+
+            if ($result && $result->count) {
+                $retVal = Lib\Db::Fetch($result);
+            }
+
+            return $retVal;
+        }
+
+        /**
+         * Returns the user's avatar (an image randomly selected from their highest rated post)
+         */
+        private static function _getAvatarImage($userId) {
+            $retVal = null;
+
+            $result = Lib\Db::Query('SELECT * FROM post_data WHERE user_id = :userId ORDER BY post_score DESC, RAND() LIMIT 1', [ ':userId' => $userId ]);
+            if ($result && $result->count) {
+                $row = Lib\Db::Fetch($result);
+                $retVal = new PostData($row);
+                $retVal = $retVal->thumb;
+            }
+
+            return $retVal;
         }
 
     }
