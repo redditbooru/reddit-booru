@@ -1,0 +1,15 @@
+<div class="image-row">
+    {{#each .}}
+        <a class="image{{#if nsfw}} nsfw{{/if}}" href="http://redd.it/{{externalId}}" data-src="{{cdnUrl}}" style="width: {{viewWidth}}px; background-image: url(//beta.redditbooru.com/cache/{{thumb}}_300_300.jpg);" data-id="{{postId}}" target="_blank">
+            {{#if nsfw}}
+                <img src="//beta.redditbooru.com/cache/{{thumb}}_300_300.jpg" class="nsfw" alt="{{title}}" style="width: {{viewWidth}}px;" />
+            {{/if}}
+            <dl class="information">
+                <dt>Posted to</dt>
+                <dd class="sub">{{sourceName}}</dd>
+                <dt>Score</dt>
+                <dd class="score">{{score}}</dd>
+            </dl>
+        </a>
+    {{/each}}
+</div>
