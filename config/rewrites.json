@@ -1,5 +1,9 @@
 [
     {
+        "rule": "^api/images/$",
+        "replace": "page=images"
+    },
+    {
         "redirect": true,
         "rule": "^u/([^/.]+)$",
         "replace": "/user/$1/"
