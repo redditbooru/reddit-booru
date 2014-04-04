@@ -4,14 +4,9 @@
 (function(undefined) {
 
     // Amount of time to wait on user to stop making changes before firing off requests
-    var UPDATE_DELAY = 1000;
-
-    RB.Router = Backbone.Router.extend({
-        routes: {
-            'search/?*params': 'querySearch',
-            'user/:userName': '_user'
-        }
-    });
+    var UPDATE_DELAY = 1000,
+        HAS_CONTENT = 'hasContent',
+        HIDDEN = 'hidden';
 
     RB.AppView = Backbone.View.extend({
 
@@ -20,6 +15,7 @@
         router: new RB.Router,
 
         $title: $('#title'),
+        $sidebar: $('#supporting'),
 
         _delayTimer: null,
 
@@ -46,7 +42,7 @@
         _handleSourcesUpdate: function(item) {
             var collections = this.collections;
             clearTimeout(this._delayTimer);
-            this._delayTimer = setTimeout(function() { 
+            this._delayTimer = setTimeout(function() {
                 var sources = collections.sources.where({ checked: true }),
                     updated = [];
 
@@ -59,8 +55,22 @@
         },
 
         setTitle: function(title) {
-            this.$title.html(title);
-            document.title = title + ' - redditbooru';
+            if (title) {
+                this.$title.html(title).removeClass(HIDDEN);
+                document.title = title + ' - redditbooru';
+            } else {
+                this.$title.html('').addClass(HIDDEN);
+                document.title = 'redditbooru - a place where cute girls come to meet';
+            }
+        },
+
+        setSidebar: function(content) {
+            if (content) {
+                this.$sidebar.addClass(HAS_CONTENT).html(content);
+            } else {
+                this.$sidebar.removeClass(HAS_CONTENT).empty();
+            }
+            this.views.images.calculateWindowColumns();
         }
 
     });
