@@ -21,21 +21,32 @@
 
         initialize: function() {
 
+            // Global collections
+            this.collections = {
+                sources: new RB.QueryOptionCollection(),
+                images: new RB.ImageCollection()
+            };
+
+            // Views
+            this.views = {
+                sidebar: new RB.SidebarView(),
+                sources: new RB.QueryOptionsView($('#sources'), this.collections.sources),
+                images: new RB.ImageView($('#images'), this.collections.images),
+                search: new RB.SearchView(this.collections.images, this.router),
+                user: new RB.UserView(this.views.sidebar, this.collections.images, this.router)
+            };
+
+            // Bootstrap data
+            this.collections.sources.reset(window.sources);
+            this.collections.images.reset(window.startUp);
+
+            // TODO - move this into sources view controller
+            this.views.sources.on('update', _.bind(this._handleSourcesUpdate, this));
+
             // Start the router
             Backbone.history.start({
                 pushState: true
             });
-
-            this.collections.sources = new RB.QueryOptionCollection();
-            this.collections.sources.reset(window.sources);
-            this.views.sources = new RB.QueryOptionsView($('#sources'), this.collections.sources);
-            this.views.sources.on('update', _.bind(this._handleSourcesUpdate, this));
-
-            this.collections.images = new RB.ImageCollection();
-            this.collections.images.reset(window.startUp);
-            this.views.images = new RB.ImageView($('#images'), this.collections.images);
-
-            this.views.search = new RB.SearchView(this.collections.images, this.router);
 
         },
 
