@@ -95,7 +95,7 @@ function taskRunner() {
     if (i >= count && processes.length === 0) {
         currentSource = 0;
         cronTimer = setTimeout(taskRunner, CRON_DELAY);
-        console.log('Finished all sources in ' + (Date.now() - start) + ' seconds');
+        console.log('Finished all sources in ' + ((Date.now() - start) / 1000) + ' seconds');
     }
 
 }
