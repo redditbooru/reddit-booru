@@ -25,6 +25,7 @@ namespace Lib {
             
             curl_setopt($c, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($c, CURLOPT_TIMEOUT, 15);
+            curl_setopt($c,CURLOPT_ENCODING , 'gzip');
             $retVal = curl_exec($c);
             curl_close($c);
 
