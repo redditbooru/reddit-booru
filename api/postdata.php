@@ -168,9 +168,9 @@ namespace Api {
 
                 $query =  'INSERT INTO post_data (';
                 $query .= 'post_id, image_id, image_width, image_height, image_type, source_id, source_name, post_title';
-                $query .= ', post_keywords, post_nsfw, post_date, post_external_id, post_score, user_id, user_name) ';
+                $query .= ', post_keywords, post_nsfw, post_date, post_external_id, post_score, post_visible, user_id, user_name) ';
                 $query .= 'SELECT p.post_id, i.image_id, i.image_width, i.image_height, i.image_type, p.source_id, s.source_name';
-                $query .= ', p.post_title, p.post_keywords, p.post_nsfw, p.post_date, p.post_external_id, p.post_score, p.user_id, u.user_name ';
+                $query .= ', p.post_title, p.post_keywords, p.post_nsfw, p.post_date, p.post_external_id, p.post_score, p.post_visible, p.user_id, u.user_name ';
                 $query .= 'FROM post_images x INNER JOIN images i ON i.image_id = x.image_id INNER JOIN posts p ON p.post_id = x.post_id ';
                 $query .= 'INNER JOIN sources s ON s.source_id = p.source_id INNER JOIN users u ON u.user_id = p.user_id WHERE x.post_id = :id';
                 $retVal = null !== Lib\Db::Query($query, [ ':id' => $id ]);
@@ -195,6 +195,8 @@ namespace Api {
             if ($post->sync()) {
                 $set = [];
                 $params = [ ':postId' => $this->postId ];
+
+                // Copy over post related iformation to the denormalized entry
                 foreach ($post as $property => $value) {
                     if (isset($this->_dbMap[$property]) && $property !== 'id') {
                         $set[] = '`' . $this->_dbMap[$property] . '` = :' . $property;
