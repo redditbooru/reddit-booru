@@ -125,10 +125,13 @@ function processPost($post, $source) {
             _log($logHead . 'Syncing post to database...');
             $syncOkay = false;
             try {
+                if (count($imgObjs) > 0) {
+                    $post->visible = 1;
+                }
                 $syncOkay = $post->sync();
             } catch (Exception $e) {
                 // Continue on duplicate entry, it probably means that something else failed down the line
-                // Fetch the post record and try we'll again
+                // Fetch the post record and we'll try again
                 if ($e->errorInfo[1] === 1062) {
                     $result = Api\Post::query([ 'externalId' => $post->externalId ]);
                     if ($result && $result->count > 0) {
@@ -174,6 +177,42 @@ function processPost($post, $source) {
 }
 
 /**
+ * Checks for post removals
+ */
+function checkPostRemovals($sourceId, $listing) {
+
+    // We'll check the latest 3/4 of a normal full load, the idea being that if one isn't in the larger set, it's been removed
+    $posts = Api\Post::queryReturnAll([ 'sourceId' => $sourceId ], [ 'dateCreated' => 'desc' ], ITEMS_TO_LOAD * 0.75);
+    foreach ($posts as $post) {
+
+        if ($post->visible) {
+            $isGood = false;
+
+            for ($i = 0, $count = count($listing); $i < $count; $i++) {
+                if ($post->externalId === $listing[$i]->data->id) {
+
+                    // Mark okay and remove this item from the listings
+                    $isGood = true;
+                    array_splice($listing, $i, 1);
+                    break;
+
+                }
+            }
+
+            if (!$isGood) {
+                _log('[ ' . $post->externalId . ' ] Post no longer found in listing, marking as removed');
+                $post->visible = 0;
+                $postData = new Api\PostData();
+                $postData->postId = $post->id;
+                $postData->updateAll($post);
+            }
+        }
+
+    }
+
+}
+
+/**
  * Processes the top X posts in a subreddit page
  */
 function processSubreddit($id, $page) {
@@ -189,6 +228,7 @@ function processSubreddit($id, $page) {
             foreach ($listing->children as $post) {
                 processPost($post->data, $source);
             }
+            checkPostRemovals($id, $listing->children);
         } else {
             _log('Unable to retrieve page listing for ' . $source->name);
         }

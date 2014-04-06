@@ -400,9 +400,14 @@ namespace Api {
             $retVal->title = $obj->title;
             $retVal->link = $obj->url;
             
-            $userId = User::getByName($obj->author);
-            if ($userId) {
-                $retVal->userId = $userId->id;
+            if ($obj->author !== '[deleted]') {
+                $userId = User::getByName($obj->author);
+                if ($userId) {
+                    $retVal->userId = $userId->id;
+                }
+            } else {
+                $retVal->userId = null;
+                $retVal->visible = 0;
             }
 
             $retVal->score = $obj->score;
