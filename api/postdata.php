@@ -28,6 +28,7 @@ namespace Api {
             'dateCreated' => 'post_date',
             'externalId' => 'post_external_id',
             'score' => 'post_score',
+            'visible' => 'post_visible',
             'userId' => 'user_id',
             'userName' => 'user_name'
         ];
@@ -98,6 +99,11 @@ namespace Api {
         public $score;
 
         /**
+         * Whether the post has been deleted or removed
+         */
+        public $visible;
+
+        /**
          * ID of the posting user
          */
         public $userId;
@@ -142,6 +148,7 @@ namespace Api {
                 $this->width = (int) $this->width;
                 $this->height = (int) $this->height;
                 $this->nsfw = (int) $this->nsfw === 1;
+                $this->visible = (int) $this->visible === 1;
                 $this->cdnUrl = Image::generateFilename($this->imageId, $this->type);
                 $this->age = time() - $this->dateCreated;
                 // TODO - models shouldn't be talking to controllers
