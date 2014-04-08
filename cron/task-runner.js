@@ -49,10 +49,12 @@ Process.prototype.startTask = function() {
 // I expect the PHP script to reasonably spit out data roughly every 30s
 // If we get nothing, kill the task
 Process.prototype.healthUpdate = function() {
-    console.log('Script for source ' + this.sourceId + ' has hung, killing');
-    this.task.kill('SIGHUP');
-    this.task = null;
-    this.completeCallback();
+    if (null !== this.task) {
+        console.log('Script for source ' + this.sourceId + ' has hung, killing');
+        this.task.kill('SIGHUP');
+        this.task = null;
+        this.completeCallback();
+    }
 };
 
 function taskComplete() {
