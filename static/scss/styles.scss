@@ -26,6 +26,8 @@ $LIGHT_GREY: #eee;
 $GREY: #ddd;
 $DARK_GREY: #666;
 $PINK: #e94e77;
+$YELLOW: #ffed77;
+$DARK_YELLOW: #736400;
 
 // Itty bitty reset
 * {
@@ -203,16 +205,25 @@ header {
             @include image-shadow();
             background-size: cover;
             background-position: center center;
+            overflow: hidden;
 
-            .nsfw {
+            &.nsfw {
+                @include image-label('NSFW');
+                &:hover .nsfw {
+                    display: none;
+                }
+            }
+
+            .nsfw,
+            .hidden {
                 display: block;
                 position: absolute;
+                min-width: 125%;
                 top: -30px;
                 left: -30px;
                 bottom: -30px;
                 right: -30px;
                 -webkit-filter: blur(15px);
-                clip: rect(30px, 30px, 90px, 90px);
             }
 
             &:first-child {
@@ -363,4 +374,21 @@ header {
 
     }
 
+}
+
+.searchDetails {
+    img {
+        @include image-shadow();
+    }
+
+    p {
+        margin: 10px 0;
+        &.posted {
+            background: $YELLOW;
+            color: $DARK_YELLOW;
+            border: 1px solid $DARK_YELLOW;
+            border-radius: 2px;
+            padding: 10px;
+        }
+    }
 }

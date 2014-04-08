@@ -1,0 +1,12 @@
+<div class="searchDetails">
+    <h2>Your Image</h2>
+    <img src="/cache/{{preview}}_300_300.jpg" alt="Your image" />
+    {{#if identical}}
+        <p class="posted">It looks like this image may already have been posted to
+        {{#each identical}}
+            {{.}}{{#sep}}, {{/sep}}
+        {{/each}}
+        </p>
+    {{/if}}
+    <button id="postImage">Rehost Image</button>
+</div>
