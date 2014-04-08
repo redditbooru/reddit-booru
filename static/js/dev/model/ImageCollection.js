@@ -18,7 +18,7 @@
         url: function() {
             var separator = this.queryUrl.indexOf('?') !== -1 ? '&' : '?',
                 params = [ 'saveSources=true' ];
-            
+
             if (this.lastDate > 0) {
                 params.push('afterDate=' + this.lastDate);
             }
@@ -48,17 +48,17 @@
             }
         },
 
-        setQueryOption: function(name, value) {
+        setQueryOption: function(name, value, noRequest) {
             var oldQueryUrl = this.queryUrl;
             this.queryOptions[name] = value;
             this.queryUrl = this._buildQueryUrl();
 
             // If the query has changed, reset the paging and invalidate the current results
-            if (oldQueryUrl !== this.queryUrl) {
+            if (oldQueryUrl !== this.queryUrl && !noRequest) {
                 this.lastDate = 0;
                 this.reset();
                 this.loadNext();
-                RB.App.router.navigate('search/' + this.queryUrl.replace(API_PATH, ''));
+                RB.App.router.navigate('search/' + this.queryUrl.replace(API_PATH, ''), { trigger: true });
             }
 
         },
@@ -73,8 +73,10 @@
             return API_PATH + '?' + retVal.join('&');
         },
 
-        loadNext: function() {
+        loadNext: function(filter) {
+            console.log('filter is', filter);
             this.fetch({
+                dataFilter: filter,
                 success: _.bind(function() {
                     this.trigger(EVT_UPDATED);
                 }, this)
