@@ -21,24 +21,26 @@
 
         initialize: function() {
 
+            var sidebar = new RB.SidebarView();
+
             // Global collections
             this.collections = {
                 sources: new RB.QueryOptionCollection(),
                 images: new RB.ImageCollection()
             };
 
-            // Views
-            this.views = {
-                sidebar: new RB.SidebarView(),
-                sources: new RB.QueryOptionsView($('#sources'), this.collections.sources),
-                images: new RB.ImageView($('#images'), this.collections.images),
-                search: new RB.SearchView(this.collections.images, this.router),
-                user: new RB.UserView(this.views.sidebar, this.collections.images, this.router)
-            };
-
             // Bootstrap data
             this.collections.sources.reset(window.sources);
             this.collections.images.reset(window.startUp);
+
+            // Views
+            this.views = {
+                sidebar: sidebar,
+                sources: new RB.QueryOptionsView($('#sources'), this.collections.sources),
+                images: new RB.ImageView($('#images'), this.collections.images),
+                search: new RB.SearchView(sidebar, this.collections.images, this.router),
+                user: new RB.UserView(sidebar, this.collections.images, this.router)
+            };
 
             // TODO - move this into sources view controller
             this.views.sources.on('update', _.bind(this._handleSourcesUpdate, this));
