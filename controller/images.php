@@ -142,7 +142,18 @@ namespace Controller {
                 Lib\Events::addEventListener(IMGEVT_PROCESSING, function($data) { self::_imageProcessing($data); });
             }
 
-            $retVal = Api\PostData::reverseImageSearch($vars);
+            $retVal->results = Api\PostData::reverseImageSearch($vars);
+            $retVal->preview = Thumb::createThumbFilename($vars['imageUri']);
+            if (count($retVal->results) > 0) {
+                // An match is considered "identical" when the distance, rounded to the hundredths place, is 0
+                $identicals = [];
+                foreach ($retVal->results as $result) {
+                    if ((int) ($result->distance * 100) === 0) {
+                        $identicals[$result->sourceName] = true;
+                    }
+                }
+                $retVal->identical = count($identicals) > 0 ? array_keys($identicals) : false;
+            }
 
             if ($evented) {
                 Lib\Events::sendAjaxEvent('DATA', $retVal);
