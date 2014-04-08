@@ -1,11 +1,11 @@
 <?php
 
 namespace Controller {
-    
+
     use Api;
     use Lib;
     use stdClass;
-    
+
     /**
      * Reddit-Booru
      * Copyright (C) 2012 Matt Hackmann
@@ -18,7 +18,7 @@ namespace Controller {
          * Determines how the page needs to be rendered and passes control off accordingly
          */
         public static function render() {
-            
+
             // Dumb, but instantiate an image class to get the include
             $img = new Api\Image();
             unset($img);
@@ -41,7 +41,7 @@ namespace Controller {
          * Multi-table lookup for images and posts
          */
         public static function getByQuery($vars) {
-            
+
             $sources = Lib\Url::Get('sources', 1, $vars);
             $limit = Lib\Url::GetInt('limit', 30, $vars);
             $afterId = Lib\Url::GetInt('afterId', null, $vars);
@@ -81,7 +81,7 @@ namespace Controller {
                 'q',
                 'ignoreVisible',
                 'keywords' ], $vars);
-            
+
             $retVal = Lib\Cache::Get($cacheKey);
 
             if (!$retVal) {
@@ -115,9 +115,9 @@ namespace Controller {
                     }
 
                     $retVal = Api\PostData::queryReturnAll($query, [ 'dateCreated' => 'desc' ], $limit);
-                    
+
                     Lib\Cache::Set($cacheKey, $retVal);
-                
+
                 }
 
             }
@@ -131,9 +131,7 @@ namespace Controller {
          * Performs a reverse image lookup
          */
         public static function getByImage($vars) {
-            $retVal = [];
-            $vars['getSource'] = true;
-            $vars['getUser'] = true;
+            $retVal = new stdClass;
 
             $evented = Lib\Url::GetBool('evented', $vars);
 
@@ -144,12 +142,7 @@ namespace Controller {
                 Lib\Events::addEventListener(IMGEVT_PROCESSING, function($data) { self::_imageProcessing($data); });
             }
 
-            $images = Api\Post::reverseImageSearch($vars);
-            if (null != $images && count($images->results) > 0) {
-                foreach ($images->results as $image) {
-                    $retVal[] = new JsonDataObject($image);
-                }
-            }
+            $retVal = Api\PostData::reverseImageSearch($vars);
 
             if ($evented) {
                 Lib\Events::sendAjaxEvent('DATA', $retVal);
