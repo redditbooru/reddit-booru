@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="viewport" content="initial-scale=1.0, width=device-width, height=device-height, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <title>redditbooru - a place where cute girls come to meet</title>
+        <link rel="stylesheet" type="text/css" href="/static/scss/styles.css" />
+    </head>
+    <body>
+        <header>
+            <h1>RedditBooru</h1>
+            {{>search}}
+            {{>nav}}
+        </header>
+        <aside id="supporting" {{#if supporting}}class="hasContent"{{/if}}>{{{supporting}}}</aside>
+        <section id="content">
+            <div class="contentTitle">
+                <h2 id="title" class="hidden"></h2>
+                <button id="clearSearch">Cancel Search</button>
+            </div>
+            <section id="images">
+                {{{body}}}
+            </section>
+        </section>
+        <script>var RB = {};</script>
+        <script src="/static/js/RedditBooru.js"></script>
+    </body>
+</html>

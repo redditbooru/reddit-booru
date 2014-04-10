@@ -179,14 +179,32 @@ header {
 
 #content {
     padding: 0 10px;
-}
 
-#title {
-    font: 30px/1 'MG Thin', sans-serif;
-    padding: 15px 0 10px 15px;
-    &.hidden {
-        display: none;
+    .contentTitle {
+        overflow: hidden;
     }
+
+    #title {
+        font: 30px/1 'MG Thin', sans-serif;
+        padding: 15px 0 10px 15px;
+        float: left;
+        &.hidden {
+            display: none;
+        }
+    }
+
+    #clearSearch {
+        border: 0;
+        background: transparent;
+        font: 14px/1 'MG Thin', sans-serif;
+        color: $DARK_GREY;
+        cursor: pointer;
+        display: none;
+        padding-left: 20px;
+        position: relative;
+        top: 24px;
+    }
+
 }
 
 #images {

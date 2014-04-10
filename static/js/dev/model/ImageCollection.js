@@ -63,6 +63,20 @@
 
         },
 
+        clearQueryOptions: function(noRequest) {
+            var oldQueryUrl = this.queryUrl;
+            this.queryOptions = {};
+            this.queryUrl = this._buildQueryUrl();
+
+            // If the query has changed, reset the paging and invalidate the current results
+            if (oldQueryUrl !== this.queryUrl && !noRequest) {
+                this.lastDate = 0;
+                this.reset();
+                this.loadNext();
+                RB.App.router.navigate('search/' + this.queryUrl.replace(API_PATH, ''), { trigger: true });
+            }
+        },
+
         _buildQueryUrl: function() {
             var retVal = [];
             for (var i in this.queryOptions) {
@@ -74,7 +88,6 @@
         },
 
         loadNext: function(filter) {
-            console.log('filter is', filter);
             this.fetch({
                 dataFilter: filter,
                 success: _.bind(function() {

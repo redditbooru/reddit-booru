@@ -5,13 +5,25 @@
 
     RB.SearchView = Backbone.View.extend({
 
+        $clearSearch: $('#clearSearch'),
+        $searchInput: $('input[name="search"]'),
+
         initialize: function(sidebar, imageCollection, router) {
             this.imageCollection = imageCollection;
             this.sidebar = sidebar;
-            $('input[name="search"]').on('keypress', _.bind(this._handleSearch, this));
+            this.$searchInput.on('keypress', _.bind(this._handleSearch, this));
+            this.$clearSearch.on('click', _.bind(this.clearSearch, this));
             router.on('route:querySearch', function(params) {
                 console.log(params);
             });
+        },
+
+        clearSearch: function() {
+            this.sidebar.dismiss();
+            this.imageCollection.clearQueryOptions();
+            RB.App.setTitle('');
+            this.$searchInput.val('');
+            this.$clearSearch.hide();
         },
 
         // Router entry points
@@ -39,6 +51,8 @@
         _reverseImageSearch: function(url) {
             var images = this.imageCollection,
                 self = this;
+            
+            images.clearQueryOptions(true);
             images.setQueryOption('imageUri', url, false);
 
             // We're going to hijack the usual request chain so that reverse image search specific logic can be done
@@ -51,11 +65,13 @@
             });
 
             RB.App.setTitle('Reverse image search');
+            this.$clearSearch.show();
         },
 
         _querySearch: function(query) {
-            this.imageCollection.setQueryOption('q', value);
-            RB.App.setTitle('Search results for "' + evt.target.value + '"');
+            this.imageCollection.setQueryOption('q', query);
+            RB.App.setTitle('Search results for "' + query + '"');
+            this.$clearSearch.show();
         }
 
     });
