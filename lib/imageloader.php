@@ -38,7 +38,7 @@ namespace Lib {
                 $retVal = self::getRedditBooruImages($path);
 
             // DeviantArt images
-            } else if ('deviantart.com' === $domain || 'fave.me' === $domain) {
+            } else if ('deviantart.com' === $domain || 'fav.me' === $domain) {
                 $retVal[] = self::getDeviantArtImage($url);
 
             // Yandere image
