@@ -53,31 +53,45 @@ namespace Controller {
      * Creates a thumbnail of the URL at the specified width and height the saves/displays it
      */
     public static function createThumbnail($url, $width, $height) {
-      $image = new Imagick($url);
+      
+      // Take advantage of the mongo cache by loading through the image loader
+      $image = Lib\ImageLoader::fetchImage($url);
       if ($image) {
 
-          $width = $width > 0 ? $width : false;
-          $height = $height > 0 ? $height : false;
+        $tmpFile = tempnam(sys_get_temp_dir(), 'thumb_');
+        file_put_contents($tmpFile, $image->data);
 
-          // The scheme for URL naming is set so that all the parameters can be inferred from the file name. They are
-          // - URL of file, base64 encoded with trailing == removed
-          // - height and width of thumbnail
-          $encodedUrl = self::createThumbFilename($url);
-          $outFile = $encodedUrl . '_' . $width . '_' . $height . '.jpg';
+        $image = new Imagick($tmpFile);
+        if ($image) {
 
-          if ($image->getNumberImages() > 0) {
-              foreach ($image as $frame) {
-                  $image = $frame;
-                  break;
-              }
-          }
+            $width = $width > 0 ? $width : false;
+            $height = $height > 0 ? $height : false;
 
-          $image->cropThumbnailImage($width, $height);
-          $image->setFormat('JPEG');
-          $image->writeImage('cache/' . $outFile);
-          header('Content-Type: image/jpeg');
-          readfile('cache/' . $outFile);
-          exit;
+            // The scheme for URL naming is set so that all the parameters can be inferred from the file name. They are
+            // - URL of file, base64 encoded with trailing == removed
+            // - height and width of thumbnail
+            $encodedUrl = self::createThumbFilename($url);
+            $outFile = $encodedUrl . '_' . $width . '_' . $height . '.jpg';
+
+            if ($image->getNumberImages() > 0) {
+                foreach ($image as $frame) {
+                    $image = $frame;
+                    break;
+                }
+            }
+
+            $image->cropThumbnailImage($width, $height);
+            $image->setFormat('JPEG');
+            $image->writeImage('cache/' . $outFile);
+            header('Content-Type: image/jpeg');
+            readfile('cache/' . $outFile);
+            exit;
+        }
+
+        unlink($tmpFile);
+
+      } else {
+        // redirect to standard "error" image
       }
     }
 
