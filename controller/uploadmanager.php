@@ -46,10 +46,10 @@ namespace Controller {
         private static function _uploadFromFile() {
             $uploadId = $_POST['uploadId'];
             Lib\Display::setLayout('upload');
-            $out = new stdClass;
-            $out->error = true;
+            $data = new stdClass;
+            $data->error = true;
             if (is_numeric($uploadId)) {
-                $out->uplaodId = $uploadId;
+                $data->uploadId = $uploadId;
                 $file = $_FILES['upload'];
                 $fileName = sys_get_temp_dir() . '/image_' . $uploadId;
 
@@ -57,19 +57,20 @@ namespace Controller {
 
                     // Load the image into cache
                     if (Lib\ImageLoader::fetchImage($fileName)) {
-                        $out->error = false;
-                        $out->thumb = Thumb::createThumbFilename($fileName);
+                        $data->error = false;
+                        $data->thumb = Thumb::createThumbFilename($fileName);
                     } else {
-                        $out->message = 'Invalid image';
+                        $data->message = 'Invalid image';
                     }
 
                 } else {
-                    $out->message = 'Invalid file upload';
+                    $data->message = 'Invalid file upload';
                 }
 
                 Lib\Display::addKey('uploadId', $uploadId);
-                Lib\Display::addKey('data', null);
+                Lib\Display::addKey('data', json_encode($data));
             }
+
             Lib\Display::render();
             exit;
         }
