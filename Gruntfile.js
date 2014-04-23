@@ -14,6 +14,8 @@ module.exports = function(grunt) {
                     'static/js/dev/model/*.js',
                     'static/js/templates.js',
                     'static/js/dev/view/*.js',
+                    'static/js/dev/Uploader.js',
+                    'static/js/dev/Routes.js',
                     'static/js/dev/App.js'
                 ],
                 dest: 'static/js/<%= pkg.name %>.js'

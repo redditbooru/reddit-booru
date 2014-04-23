@@ -1,5 +1,5 @@
 (function(undefined) {
-    
+
     'use strict';
 
     RB.UploadView = Backbone.View.extend({
@@ -11,7 +11,8 @@
             $('body').on('click', '.upload', _.bind(this.handleClick, this));
             this.$upload
                 .on('change', '#imageUrl', _.bind(this.handleUrlChange, this))
-                .on('click', '.close', _.bind(this._hideDialog, this));
+                .on('click', '.close', _.bind(this._hideDialog, this))
+                .on('click', '#imageFileButton', _.bind(this.handleUploadClick, this));
         },
 
         handleClick: function(evt) {
@@ -19,16 +20,22 @@
             this._showDialog();
         },
 
+        handleUploadClick: function(evt) {
+            new RB.Uploader(function(data) {
+                console.log('whoa');
+            });
+        },
+
         handleUrlChange: function(evt) {
             var url = evt.target.value,
                 $upload = this.$upload;
-            
+
             $upload.find('ul').append(RB.Templates.uploading({ id: url }));
             $.ajax({
                 url: '/upload/?action=upload&imageUrl=' + escape(url),
                 dataType: 'json',
                 success: function(data) {
-                    
+
                     $upload.find('[data-id="' + url + '"]').replaceWith(RB.Templates.uploadImageInfo({ id: url, thumb: data.thumb }));
 
                 }
