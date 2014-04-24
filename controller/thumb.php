@@ -10,7 +10,7 @@ namespace Controller {
     public static function render() {
 
       $file = Lib\Url::Get('file', null);
-      
+
       if (!$file) {
         http_response_code(404);
         exit;
@@ -20,9 +20,6 @@ namespace Controller {
 
     }
 
-    // Dummy
-    public static function registerExtension($name, $class, $type) {}
-
     /**
      * Given a thumbnail request, derive the thumbnail attributes and create the thumbnail
      */
@@ -31,6 +28,8 @@ namespace Controller {
       $bits = explode('.', $file);
       $bits = $bits[0];
       $bits = explode('_', $file);
+
+      // If a height and width were passed, resize and such. Otherise, just pass the data through
       if (count($bits) === 3) {
         $url = $bits[0];
         if (substr($url, strlen($url) - 2, 2) === 'EE') {
@@ -38,6 +37,8 @@ namespace Controller {
         }
         $url = base64_decode($url);
         self::createThumbnail($url, (int) $bits[1], (int) $bits[2]);
+      } else {
+        self::passThrough(base64_decode($bits[0]));
       }
     }
 
@@ -53,15 +54,16 @@ namespace Controller {
      * Creates a thumbnail of the URL at the specified width and height the saves/displays it
      */
     public static function createThumbnail($url, $width, $height) {
-      
+
       // Take advantage of the mongo cache by loading through the image loader
       $image = Lib\ImageLoader::fetchImage($url);
       if ($image) {
 
         $tmpFile = tempnam(sys_get_temp_dir(), 'thumb_');
         file_put_contents($tmpFile, $image->data);
-
         $image = new Imagick($tmpFile);
+        unlink($tmpFile);
+
         if ($image) {
 
             $width = $width > 0 ? $width : false;
@@ -88,10 +90,30 @@ namespace Controller {
             exit;
         }
 
-        unlink($tmpFile);
 
       } else {
         // redirect to standard "error" image
+      }
+    }
+
+    public static function passThrough($url) {
+      $image = Lib\ImageLoader::fetchImage($url);
+      if ($image) {
+        $contentType = 'image/';
+        switch ($image->type) {
+          case IMAGE_TYPE_JPEG:
+            $contentType .= 'jpeg';
+            break;
+          case IMAGE_TYPE_GIF:
+          case IMAGE_TYPE_PNG:
+            $contentType .= $image->type;
+        }
+
+        file_put_contents('cache/' . self::createThumbFilename($url) . '.jpg', $image->data);
+
+        header('Content-Type: ' . $contentType);
+        echo $image->data;
+        exit;
       }
     }
 
