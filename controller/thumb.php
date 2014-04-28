@@ -26,16 +26,11 @@ namespace Controller {
     public static function createThumbFromEncodedFilename($file) {
       // Throw away the extension
       $bits = explode('.', $file);
-      $bits = $bits[0];
-      $bits = explode('_', $file);
+      $bits = explode('_', $bits[0]);
 
       // If a height and width were passed, resize and such. Otherise, just pass the data through
       if (count($bits) === 3) {
-        $url = $bits[0];
-        if (substr($url, strlen($url) - 2, 2) === 'EE') {
-          $url = substr($url, 0, strlen($url) - 2) . '==';
-        }
-        $url = base64_decode($url);
+        $url = self::decodeThumbFilename($bits[0]);
         self::createThumbnail($url, (int) $bits[1], (int) $bits[2]);
       } else {
         self::passThrough(base64_decode($bits[0]));
@@ -43,11 +38,17 @@ namespace Controller {
     }
 
     /**
-     * Encodes the URL for the cache filename
+     * Encodes a URL for the cache filename
      */
     public static function createThumbFilename($url) {
-      $url = base64_encode($url);;
-      return str_replace('==', 'EE', $url);
+      return str_replace('=', '-', base64_encode($url));
+    }
+
+    /**
+     * Decodes an encoded thumbnail URL
+     */
+    public static function decodeThumbFilename($url) {
+      return base64_decode(str_replace('-', '=', $url));
     }
 
     /**
