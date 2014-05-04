@@ -1,11 +1,11 @@
 <?php
 
 namespace Api {
-    
+
     use Aws\S3\S3Client;
     use Lib;
     use stdClass;
-    
+
     define('HISTOGRAM_BUCKETS', 4);
     define('HISTORGAM_GRANULARITY', 256 / HISTOGRAM_BUCKETS);
     define('CDN_FOLDER', '');
@@ -27,15 +27,17 @@ namespace Api {
     if (!defined('__INCLUDE__')) {
         define('__INCLUDE__', (strlen($_SERVER['DOCUMENT_ROOT']) > 0 ? $_SERVER['DOCUMENT_ROOT'] : getcwd()) . '/');
     }
-    
+
     class Image extends Lib\Dal {
-        
+
         /**
          * Object property to table map
          */
         protected $_dbMap = array(
             'id' => 'image_id',
             'url' => 'image_url',
+            'caption' => 'image_caption',
+            'sourceUrl' => 'image_source',
             'width' => 'image_width',
             'height' => 'image_height',
             'histR1' => 'image_hist_r1',
@@ -52,97 +54,107 @@ namespace Api {
             'histB4' => 'image_hist_b4',
             'type' => 'image_type'
         );
-        
+
         /**
          * Database table name
          */
         protected $_dbTable = 'images';
-        
+
         /**
          * Table primary key
          */
         protected $_dbPrimaryKey = 'id';
-        
+
         /**
          * Image ID
          */
         public $id = 0;
-        
+
         /**
          * URL of image
          */
         public $url;
-        
+
+        /**
+         * Image caption
+         */
+        public $caption;
+
+        /**
+         * Source URL
+         */
+        public $sourceUrl;
+
         /**
          * Width of image
          */
         public $width;
-        
+
         /**
          * Height of image
          */
         public $height;
-        
+
         /**
          * Red component 1
          */
         public $histR1;
-        
+
         /**
          * Red component 2
          */
         public $histR2;
-        
+
         /**
          * Red component 3
          */
         public $histR3;
-        
+
         /**
          * Red component 4
          */
         public $histR4;
-        
+
         /**
          * Green component 1
          */
         public $histG1;
-        
+
         /**
          * Green component 2
          */
         public $histG2;
-        
+
         /**
          * Green component 3
          */
         public $histG3;
-        
+
         /**
          * Green component 4
          */
         public $histG4;
-        
+
         /**
          * Blue component 1
          */
         public $histB1;
-        
+
         /**
          * Blue component 2
          */
         public $histB2;
-        
+
         /**
          * Blue component 3
          */
         public $histB3;
-        
+
         /**
          * Blue component 4
          */
         public $histB4;
-        
+
         /**
          * Image type
          */
@@ -180,9 +192,9 @@ namespace Api {
 
             Lib\Events::fire(IMGEVT_PROCESSING);
             $image = imagecreatefromstring($buffer);
-            
+
             if (null !== $image) {
-                
+
                 $retVal = new Image();
                 $retVal->width = imagesx($image);
                 $retVal->height = imagesy($image);
@@ -190,7 +202,7 @@ namespace Api {
                 $resampled = imagecreatetruecolor(IMG_RESAMPLE_WIDTH, IMG_RESAMPLE_HEIGHT);
                 imagecopyresampled($resampled, $image, 0, 0, 0, 0, IMG_RESAMPLE_WIDTH, IMG_RESAMPLE_HEIGHT, $retVal->width, $retVal->height);
                 imagedestroy($image);
-            
+
                 $total = IMG_RESAMPLE_WIDTH * IMG_RESAMPLE_HEIGHT;
                 $red = [ 0, 0, 0, 0 ];
                 $green = [ 0, 0, 0, 0 ];
@@ -205,20 +217,20 @@ namespace Api {
                 }
 
                 imagedestroy($resampled);
-                
+
                 for ($i = 0; $i < HISTOGRAM_BUCKETS; $i++) {
                     $prop = 'histR' . ($i + 1);
                     $retVal->$prop = $red[$i] / $total;
-                    
+
                     $prop = 'histG' . ($i + 1);
                     $retVal->$prop = $green[$i] / $total;
-                    
+
                     $prop = 'histB' . ($i + 1);
                     $retVal->$prop = $blue[$i] / $total;
                 }
-                
+
             }
-            
+
             return $retVal;
 
         }
@@ -229,7 +241,7 @@ namespace Api {
         public static function generateFilename($id, $type, $fullUrl = true) {
             return ($fullUrl ? CDN_BASE_URL : '') . base_convert($id, 10, 36) . '.' . $type;
         }
-        
+
         /**
          * Given an image file, finds similar images in the database
          * @param string $file Path or URL to the file to check against
@@ -237,13 +249,13 @@ namespace Api {
          * @return array Array of matched posts, null on error
          */
         public static function findSimilarImages($file, $limit = 5) {
-            
+
             $limit = !is_int($limit) ? 5 : $limit;
             $retVal = null;
-            
+
             $histogram = self::generateHistogram($file);
             if (null !== $histogram) {
-                
+
                 $query = '';
                 $params = array();
                 for ($i = 1; $i <= HISTOGRAM_BUCKETS; $i++) {
@@ -252,11 +264,11 @@ namespace Api {
                     $params[':blue' . $i] = $histogram->blue[$i - 1];
                     $query .= 'ABS(i.image_hist_r' . $i . ' - :red' . $i . ') + ABS(i.image_hist_g' . $i . ' - :green' . $i . ') + ABS(i.image_hist_b' . $i . ' - :blue' . $i . ') + ';
                 }
-                
+
                 // Find the top five most similar images in the database
                 $result = Db::Query('SELECT i.image_id, i.post_id, p.post_title, i.image_url, p.post_date, ' . $query . '0 AS distance FROM images i INNER JOIN posts p ON p.post_id = i.post_id ORDER BY distance LIMIT ' . $limit, $params);
                 if ($result) {
-                
+
                     $retVal = array();
                     while($row = Db::Fetch($result)) {
                         $obj = new stdClass;
@@ -268,13 +280,13 @@ namespace Api {
                         $obj->date = $row->post_date;
                         $retVal[] = $obj;
                     }
-                    
+
                 }
-            
+
             }
-            
+
             return $retVal;
-        
+
         }
 
         /**
@@ -285,7 +297,7 @@ namespace Api {
             $retVal = false;
 
             if ($this->id && $this->url && $this->type) {
-                
+
                 // Fetch the image. Since we're at this point in the show, there should
                 // be data in the mongo cache and performance hit will be minimal
                 $image = Lib\ImageLoader::fetchImage($this->url);
@@ -345,7 +357,7 @@ namespace Api {
         public function sync() {
             $isInsert = $this->id === null || $this->id === 0;
             $retVal = parent::sync();
-            
+
             // On successful image insert, save copies
             if ($retVal && $isInsert) {
                 $this->_saveImage();
