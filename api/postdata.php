@@ -151,6 +151,7 @@ namespace Api {
                 $this->visible = (int) $this->visible === 1;
                 $this->cdnUrl = Image::generateFilename($this->imageId, $this->type);
                 $this->age = time() - $this->dateCreated;
+                $this->sourceName = Source::formatSourceName($this->sourceName);
                 // TODO - models shouldn't be talking to controllers
                 $this->thumb = Controller\Thumb::createThumbFilename($this->cdnUrl);
             }

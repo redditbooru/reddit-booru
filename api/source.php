@@ -1,14 +1,12 @@
 <?php
 
 namespace Api {
-	
+
 	use Lib;
 	use stdClass;
-	
-	define('QS_SOURCES', 'sources');
 
 	class Source extends Lib\Dal {
-	
+
 		/**
 		 * Object property to table map
 		 */
@@ -21,52 +19,52 @@ namespace Api {
 			'subdomain' => 'source_subdomain',
             'contentRating' => 'source_content_rating'
 		);
-		
+
 		/**
 		 * Database table name
 		 */
 		protected $_dbTable = 'sources';
-		
+
 		/**
 		 * Table primary key
 		 */
 		protected $_dbPrimaryKey = 'id';
-		
+
 		/**
 		 * ID of the source
 		 */
 		public $id = 0;
-		
+
 		/**
 		 * Name of the source
 		 */
 		public $name;
-		
+
 		/**
 		 * URL of the source media
 		 */
 		public $baseUrl;
-		
+
 		/**
 		 * Source type
 		 */
 		public $type;
-		
+
 		/**
 		 * Source type
 		 */
 		public $enabled;
-		
+
 		/**
 		 * Associated subdomain
 		 */
 		public $subdomain;
-        
+
         /**
          * Content rating
          */
         public $contentRating;
-        
+
 		/**
 		 * Constructor
 		 * @param $obj mixed Data to construct object around
@@ -78,7 +76,7 @@ namespace Api {
 				$this->copyFromDbRow($obj);
 			}
 		}
-		
+
 		private function __copy($obj) {
 			if ($obj instanceOf Source) {
 				$this->id = $obj->id;
@@ -87,7 +85,7 @@ namespace Api {
 				$this->type = $obj->type;
 			}
 		}
-		
+
 		/**
 		 * XML serializer
 		 */
@@ -98,12 +96,12 @@ namespace Api {
 			$retVal .= '</source>';
 			return $retVal;
 		}
-		
+
 		/**
 		 * Returns all sources
 		 */
 		public static function getAllEnabled() {
-			
+
 			$cacheKey = 'Source_getAllEnabled';
 			$retVal = Lib\Cache::Get($cacheKey);
 			if (false === $retVal) {
@@ -117,14 +115,14 @@ namespace Api {
 				Lib\Cache::Set($cacheKey, $retVal);
 			}
 			return $retVal;
-			
+
 		}
-		
+
 		/**
 		 * Returns a source by subdomain
 		 */
 		public static function getBySubdomain($vars) {
-			
+
 			$domain = Lib\Url::Get('domain', null, $vars);
 			$cacheKey = 'Source::getBySubdomain_' . $domain;
 			$retVal = Lib\Cache::Get($cacheKey);
@@ -136,9 +134,9 @@ namespace Api {
 				}
 				Lib\Cache::Set($cacheKey, $retVal, 3600);
 			}
-			
+
 			return $retVal;
-			
+
 		}
 
 		/**
@@ -159,7 +157,11 @@ namespace Api {
 			return $sources;
 
 		}
-	
+
+		public static function formatSourceName($name) {
+			return strpos($name, 'r/') === 0 ? substr($name, 2) : $name;
+		}
+
 	}
 
 }
