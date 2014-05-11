@@ -167,16 +167,24 @@ namespace Api {
 
             $retVal = null;
 
-            $image = Lib\ImageLoader::fetchImage($url);
-            if (null !== $image) {
-                $retVal = self::createFromBuffer($image->data);
-                if (null !== $retVal) {
-                    $retVal->url = $url;
-                    $retVal->type = $image->type;
-                    unset($image);
-                } else {
-                    $retVal = null;
+            // See if there's a version of this image already in the database
+            $image = Image::query([ 'url' => $url ]);
+            if ($image && $image->count) {
+                $retVal = new Image(Lib\Db::Fetch($image));
+            } else {
+
+                $image = Lib\ImageLoader::fetchImage($url);
+                if (null !== $image) {
+                    $retVal = self::createFromBuffer($image->data);
+                    if (null !== $retVal) {
+                        $retVal->url = $url;
+                        $retVal->type = $image->type;
+                        unset($image);
+                    } else {
+                        $retVal = null;
+                    }
                 }
+
             }
 
             return $retVal;

@@ -97,6 +97,11 @@ namespace Api {
          */
         public $visible = true;
 
+        public function sync() {
+            $this->dateUpdated = time();
+            parent::sync();
+        }
+
         private function __copy($obj) {
             if ($obj instanceOf Post) {
                 $this->id = $obj->id;
@@ -109,44 +114,9 @@ namespace Api {
                 $this->userId = $obj->userId;
                 $this->keywords = $obj->keywords;
                 $this->score = $obj->score;
-                $this->processed = $obj->processed;
-                $this->meta = $obj->meta;
+                $this->nsfw = $obj->nsfw;
+                $this->visible = $obj->visible;
             }
-        }
-
-        /**
-         * Gets a record by its external ID
-         */
-        public static function getByExternalId($id, $sourceId) {
-
-            $retVal = null;
-            $params = [ ':externalId' => $id, ':sourceId' => $sourceId ];
-            $result = Lib\Db::Query('SELECT * FROM `posts` WHERE post_external_id = :externalId AND source_id = :sourceId', $params);
-            if (null != $result && $result->count > 0) {
-                $row = Lib\Db::Fetch($result);
-                $retVal = new Post($row);
-                $retVal->meta = json_decode($retVal->meta);
-            }
-            return $retVal;
-
-        }
-
-        /**
-         * Returns all unprocessed results of a specific type
-         */
-        public static function getUnprocessed($sourceId) {
-
-            $retVal = null;
-            $params = array( ':processed' => false, ':sourceId' => $sourceId );
-            $result = Lib\Db::Query('SELECT * FROM `posts` WHERE post_processed = :processed AND source_id = :sourceId ORDER BY post_date DESC', $params);
-            if (null != $result && $result->count > 0) {
-                $retVal = array();
-                while ($row = Lib\Db::Fetch($result)) {
-                    $retVal[] = new Post($row);
-                }
-            }
-            return $retVal;
-
         }
 
         /**
@@ -174,6 +144,10 @@ namespace Api {
             $retVal->keywords = self::generateKeywords($retVal->title . ' ' . $obj->link_flair_text);
             $retVal->nsfw = $obj->over_18 ? 1 : 0;
             return $retVal;
+        }
+
+        public function setKeywordsFromTitle() {
+            $this->keywords = self::generateKeywords($this->title);
         }
 
         /**
