@@ -2,6 +2,7 @@
 
 namespace Controller {
 
+    use Api;
     use Lib;
     use stdClass;
 
@@ -36,11 +37,7 @@ namespace Controller {
         }
 
         private static function _uploadFromUrl($imageUrl) {
-            $retVal = Lib\ImageLoader::fetchImage($imageUrl);
-            unset($retVal->data);
-            $retVal->thumb = Thumb::createThumbFilename($imageUrl);
-            $retVal->uploadId = $imageUrl;
-            return $retVal;
+            return self::_handleImageUpload($imageUrl);
         }
 
         private static function _uploadFromFile() {
@@ -51,20 +48,12 @@ namespace Controller {
             if (is_numeric($uploadId)) {
                 $data->uploadId = $uploadId;
                 $file = $_FILES['upload'];
-                $fileName = sys_get_temp_dir() . '/image_' . $uploadId;
+                $fileName = self::getUploadedFilePath($uploadId);
 
                 if (is_uploaded_file($file['tmp_name']) && move_uploaded_file($file['tmp_name'], $fileName)) {
-
-                    // Load the image into cache
-                    if (Lib\ImageLoader::fetchImage($fileName)) {
-                        $data->error = false;
-                        $data->thumb = Thumb::createThumbFilename($fileName);
-                    } else {
-                        $data->message = 'Invalid image';
-                    }
-
+                    $data = self::_handleImageUpload($fileName, $uploadId);
                 } else {
-                    $data->message = 'Invalid file upload';
+                    $data->message = 'Unable to upload file';
                 }
 
                 Lib\Display::addKey('uploadId', $uploadId);
@@ -75,9 +64,53 @@ namespace Controller {
             exit;
         }
 
+        /**
+         * Does a repost check on the image and/or creates a database entry and saves it
+         */
+        private static function _handleImageUpload($imageUrl, $uploadId = null) {
+            $retVal = new stdClass;
+
+            $force = Lib\Url::GetBool('force');
+            $retVal->uploadId = $uploadId ?: $imageUrl;
+            $image = Api\Image::createFromUrl($imageUrl);
+            if (null !== $image) {
+
+                // Do a quick repost check
+                if (!$force) {
+                    $reposts = Images::getByImage([ 'image' => $image, 'imageUri' => $imageUrl ]);
+                    if ($reposts && $reposts->identical) {
+                        $retVal->identical = $reposts->identical;
+                    }
+                }
+
+                if (!isset($retVal->identical) || $force) {
+                    // Sync to the database and save
+                    if ($image->sync()) {
+                        $retVal->imageId = $image->id;
+                        $retVal->thumb = Thumb::createThumbFilename($image->getFilename(true));
+                    } else {
+                        $retVal->error = true;
+                        $retVal->message = 'Error syncing image to database';
+                    }
+                } else {
+                    $retVal->thumb = Thumb::createThumbFilename($imageUrl);
+                }
+
+            } else {
+                $retVal->error = true;
+                $retVal->message = 'Error reading image';
+            }
+
+            return $retVal;
+        }
+
         private static function _checkUploadStatus() {
             $retVal = Lib\Http::getActiveDownloads();
             return count($retVal) > 0 ? $retVal : null;
+        }
+
+        public static function getUploadedFilePath($uploadId) {
+            return sys_get_temp_dir() . '/image_' . $_SERVER['REMOTE_ADDR'] . '_' . $uploadId;
         }
 
     }
