@@ -4,6 +4,10 @@
         "replace": "page=images"
     },
     {
+        "rule": "^search/$",
+        "replace": "page=redditbooru"
+    },
+    {
         "redirect": true,
         "rule": "^u/([^/.]+)$",
         "replace": "/user/$1/"
@@ -36,6 +40,15 @@
         "replace": "action=gallery&post=$1"
     },
     {
+        "redirect": true,
+        "rule": "^gallery/([\\w]+)/([\\w]+)$",
+        "replace": "/gallery/$1/$2/"
+    },
+    {
+        "rule": "^gallery/([\\w]+)/([\\w]+)/$",
+        "replace": "page=gallery&post=$1&new=true"
+    },
+    {
         "rule": "^images/$",
         "replace": "page=images"
     },
@@ -50,5 +63,9 @@
     {
         "rule": "^single/([\\w]+)$",
         "replace": "action=single&file=$1"
+    },
+    {
+        "rule": "^upload/$",
+        "replace": "page=uploadmanager"
     }
 ]
