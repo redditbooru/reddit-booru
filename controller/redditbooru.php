@@ -13,29 +13,18 @@ namespace Controller {
      * GPLv3
      */
 
-    class RedditBooru implements Page {
+    class RedditBooru extends BasePage {
 
         /**
          * Determines how the page needs to be rendered and passes control off accordingly
          */
         public static function render() {
 
-            $sources = QueryOption::getSources();
-            $enabledSources = [];
-
-            // If there were sources passed on the query string, use those for image fetchery. Fall back on cookies
-            $qsSources = Lib\Url::Get('sources', null);
-            if ($qsSources) {
-                $enabledSources = explode(',', $qsSources);
-            } else {
-                foreach ($sources as $source) {
-                    if ($source->checked) {
-                        $enabledSources[] = $source->value;
-                    }
-                }
-            }
+            parent::render();
 
             $action = Lib\Url::Get('action', false);
+
+            Lib\Display::addClientData('upload_name', ini_get('session.upload_progress.name'));
 
             // Check to see if we got a specific subdomain
             if (preg_match('/([\w]+)\.redditbooru\.com/is', $_SERVER['HTTP_HOST'], $matches)) {
@@ -70,7 +59,7 @@ namespace Controller {
                     break;
                 case 'user':
                     $user = Lib\Url::Get('user');
-                    $jsonOut = Images::getByQuery([ 'user' => $user, 'sources' => $enabledSources ]);
+                    $jsonOut = Images::getByQuery([ 'user' => $user, 'sources' => self::$enabledSources ]);
                     $userData = Api\PostData::getUserProfile($user);
                     Lib\Display::renderAndAddKey('supporting', 'userProfile', $userData);
 
@@ -96,7 +85,8 @@ namespace Controller {
                     $display = 'images';
                     break;
                 default:
-                    $jsonOut = Images::getByQuery([ 'sources' => $enabledSources ]);
+                    $_GET['sources'] = isset($_GET['sources']) ? $_GET['sources'] : self::$enabledSources;
+                    $jsonOut = Images::getByQuery($_GET);
                     break;
             }
 
@@ -108,11 +98,8 @@ namespace Controller {
 
             $urlOut .= isset($_GET['flushCache']) ? '&flushCache' : '';
 
-            $out = [
-                'sources' => json_encode($sources),
-                'images' => json_encode($jsonOut)
-            ];
-            Lib\Display::renderAndAddKey('body', 'index', $out);
+            self::$renderKeys['images'] = json_encode($jsonOut);
+            Lib\Display::renderAndAddKey('body', 'index', self::$renderKeys);
 
         }
 
