@@ -204,7 +204,6 @@ namespace Api {
 
             // Update the parent first
             $post->id = $post->id ?: $this->postId;
-            $post->dateUpdated = time();
             if ($post->sync()) {
                 $set = [];
                 $params = [ ':postId' => $this->postId ];
@@ -411,6 +410,52 @@ namespace Api {
             }
 
             return $retVal;
+        }
+
+
+        /**
+         *
+         */
+        public static function getGallery($id) {
+
+            $cacheKey = 'Api:PostData:getGallery_' . $id;
+            $retVal = Lib\Cache::Get($cacheKey);
+
+            if (false === $retVal) {
+
+                // Get the post record
+                $post = Post::getById($id);
+                $retVal = [];
+                if ($post) {
+
+                    // If this post is linking to a different gallery, do a redirect to the original
+                    if (preg_match('/redditbooru\.com\/gallery\/([\w]+)\/?([\w]+)?/', $post->link, $match)) {
+                        $urlId = $match[1];
+                        $new = isset($match[2]);
+                        $urlId = $new ? base_convert($urlId, 36, 10) : $urlId;
+
+                        if ($id !== $urlId) {
+                            header('Location: ' . $post->link);
+                            exit;
+                        }
+                    }
+
+                    // Get the post images
+                    $images = PostData::query([ 'postId' => $id ]);
+                    if ($images && $images->count) {
+                        while ($row = Lib\Db::Fetch($images)) {
+                            $retVal[] = new PostData($row);
+                        }
+                    }
+
+                }
+
+                Lib\Cache::Set($cacheKey, $retVal);
+
+            }
+
+            return $retVal;
+
         }
 
     }
