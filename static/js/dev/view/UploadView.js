@@ -5,28 +5,31 @@
     var SAVE_KEY = 'RB_Uploads',
         THUMB_LOCATION = 'http://beta.redditbooru.com/cache/',
         SAVE_DELAY = 500,
-        CLICK = 'click',
-        CHANGE = 'change';
+        KEY_ENTER = 13;
 
     RB.UploadView = Backbone.View.extend({
 
-        $upload: $('#upload'),
+        $el: null,
         $albumTitle: null,
+
         progressTimer: null,
         delayTimer: null,
 
-        initialize: function() {
-            $('body').on('click', '.upload', _.bind(this.handleClick, this));
-            this.$upload
-                .on(CHANGE, '#imageUrl', _.bind(this.handleUrlChange, this))
-                .on(CHANGE, 'input', _.bind(this.handleTextChange, this))
-                .on(CLICK, '.close', _.bind(this._hideDialog, this))
-                .on(CLICK, '#imageFileButton', _.bind(this.handleUploadClick, this))
-                .on(CLICK, '.remove', _.bind(this.handleRemoveClick, this))
-                .on(CLICK, '.repostImage', _.bind(this.handleRepostClick, this))
-                .on('submit', 'form', _.bind(this.handleSubmit, this));
+        events: {
+            'paste #imageUrl': 'handlePaste',
+            'keyup input': 'handleTextChange',
+            'click .close': '_hideDialog',
+            'click #imageFileButton': 'handleUploadClick',
+            'click .remove': 'handleRemoveClick',
+            'click .repostImage': 'handleRepostClick',
+            'submit form': 'handleSubmit'
+        },
 
-            this.$albumTitle = this.$upload.find('.albumTitle');
+        initialize: function() {
+            $('body').on('click', '.upload', _.bind(this.handleNavClick, this));
+
+            this.$el = $('#upload');
+            this.$albumTitle = this.$el.find('.albumTitle');
 
             this._loadForm();
 
@@ -36,7 +39,7 @@
             evt.preventDefault();
             $.ajax({
                 url: '/images/',
-                data: this.$upload.find('form').serialize(),
+                data: this.$el.find('form').serialize(),
                 dataType: 'json',
                 type: 'POST',
                 success: _.bind(this.submitSuccess, this)
@@ -44,8 +47,15 @@
         },
 
         handleTextChange: function(evt) {
-            clearTimeout(this.delayTimer);
-            this.delayTimer = setTimeout(_.bind(this._saveForm, this), SAVE_DELAY);
+            var keyCode = evt.keyCode || evt.charCode;
+            if (evt.target.getAttribute('id') === 'imageUrl') {
+                if (keyCode === KEY_ENTER) {
+                    this._urlUpload(evt.target.value, false, evt.target);
+                }
+            } else {
+                clearTimeout(this.delayTimer);
+                this.delayTimer = setTimeout(_.bind(this._saveForm, this), SAVE_DELAY);
+            }
         },
 
         handleRemoveClick: function(evt) {
@@ -53,7 +63,7 @@
             this._saveForm();
         },
 
-        handleClick: function(evt) {
+        handleNavClick: function(evt) {
             evt.preventDefault();
             this._showDialog();
         },
@@ -61,13 +71,17 @@
         handleUploadClick: function(evt) {
             var self = this;
             new RB.Uploader(function(uploadId) {
-                self.$upload.find('ul').append(RB.Templates.uploading({ id: uploadId }));
-                console.log(self);
+                self.$el.find('ul').append(RB.Templates.uploading({ id: uploadId }));
             }, _.bind(this._uploadComplete, this));
         },
 
-        handleUrlChange: function(evt) {
-            this._urlUpload(evt.target.value);
+        handlePaste: function(evt) {
+            // I'm feeling too lazy to write browser detection support for clipboard data,
+            // so just wait for the value to update in textbox and then handle stuff
+            var self = this;
+            setTimeout(function() {
+                self._urlUpload(evt.target.value, false, evt.target);
+            }, 10);
         },
 
         handleRepostClick: function(evt) {
@@ -82,15 +96,22 @@
             }
         },
 
-        _urlUpload: function(url, force) {
-            this.$upload.find('ul').append(RB.Templates.uploading({ id: url }));
-            $.ajax({
-                url: '/upload/?action=upload&imageUrl=' + escape(url) + (force ? '&force=true' : ''),
-                dataType: 'json',
-                success: _.bind(this._uploadComplete, this)
-            });
-
-            setTimeout(_.bind(this._checkProgress, this), 250);
+        /**
+         * If the URL is valid, begins a server side download.
+         */
+        _urlUpload: function(url, force, target) {
+            // QnD URL validation
+            var $target = target instanceof jQuery ? target : $(target);
+            if (url.indexOf('http://') === 0 || url.indexOf('https://')) {
+                this.$el.find('ul').append(RB.Templates.uploading({ id: url }));
+                $.ajax({
+                    url: '/upload/?action=upload&imageUrl=' + escape(url) + (force ? '&force=true' : ''),
+                    dataType: 'json',
+                    success: _.bind(this._uploadComplete, this)
+                });
+                setTimeout(_.bind(this._checkProgress, this), 250);
+                $target.val('').blur();
+            }
         },
 
         _updateForm: function(titleOverride) {
@@ -98,7 +119,7 @@
                 this.$albumTitle.val(titleOverride);
             }
 
-            if (this.$upload.find('li').length > 1) {
+            if (this.$el.find('li').length > 1) {
                 this.$albumTitle.show();
             } else {
                 this.$albumTitle.hide();
@@ -108,7 +129,7 @@
         _uploadComplete: function(data) {
             var out = '';
 
-            if (!data.error) {
+            if (data && !data.error) {
                 data.thumb = THUMB_LOCATION + data.thumb;
                 console.log(data);
                 if (!data.identical) {
@@ -117,20 +138,20 @@
                     out = RB.Templates.uploadRepost(data);
                 }
             } else {
-
+                // error handling here
             }
 
-            this.$upload.find('[data-id="' + data.uploadId + '"]').replaceWith(out);
+            this.$el.find('[data-id="' + data.uploadId + '"]').replaceWith(out);
             this._saveForm();
 
         },
 
         _showDialog: function() {
-            this.$upload.fadeIn();
+            this.$el.fadeIn();
         },
 
         _hideDialog: function() {
-            this.$upload.fadeOut();
+            this.$el.fadeOut();
         },
 
         _checkProgress: function() {
@@ -148,7 +169,7 @@
             if (null !== data) {
 
                 for (i in data) {
-                    $item = this.$upload.find('[data-id="' + i + '"] span').text(Math.round(data[i] * 100));
+                    $item = this.$el.find('[data-id="' + i + '"] span').text(Math.round(data[i] * 100));
                 }
 
                 setTimeout(_.bind(this._checkProgress, this), 1000);
@@ -165,7 +186,7 @@
                 title: this.$albumTitle.val()
             };
 
-            this.$upload.find('li').each(function() {
+            this.$el.find('li').each(function() {
                 var $this = $(this),
                     item = {
                         id: $this.data('id'),
@@ -187,7 +208,7 @@
 
         _loadForm: function() {
             var data = window.localStorage[SAVE_KEY],
-                $list = this.$upload.find('ul');
+                $list = this.$el.find('ul');
 
             if (data) {
                 data = JSON.parse(data);
