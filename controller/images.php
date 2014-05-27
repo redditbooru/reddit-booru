@@ -23,8 +23,13 @@ namespace Controller {
             $img = new Api\Image();
             unset($img);
 
-            $url = Lib\Url::Get('imageUri', null);
-            $images = $url ? self::getByImage($_GET) : self::getByQuery($_GET);
+            // Post means we're uploading an image or otherwise creating an album
+            if (count($_POST)) {
+                $images = self::_postImages();
+            } else {
+                $url = Lib\Url::Get('imageUri', null);
+                $images = $url ? self::getByImage($_GET) : self::getByQuery($_GET);
+            }
 
             // CORS support for RES
             if (isset($_SERVER['HTTP_ORIGIN'])) {
@@ -145,7 +150,7 @@ namespace Controller {
             $retVal->results = Api\PostData::reverseImageSearch($vars);
             $retVal->preview = Thumb::createThumbFilename($vars['imageUri']);
             if (count($retVal->results) > 0) {
-                // An match is considered "identical" when the distance, rounded to the hundredths place, is 0
+                // A match is considered "identical" when the distance, rounded to the hundredths place, is 0
                 $identicals = [];
                 foreach ($retVal->results as $result) {
                     if ((int) ($result->distance * 100) === 0) {
@@ -155,12 +160,12 @@ namespace Controller {
                 $retVal->identical = count($identicals) > 0 ? array_keys($identicals) : false;
             }
 
+            self::_log('getByImage', $vars, $retVal);
+
             if ($evented) {
                 Lib\Events::sendAjaxEvent('DATA', $retVal);
                 Lib\Events::endAjaxEvent();
             }
-
-            self::_log('getByImage', $vars, $retVal);
 
             return $retVal;
         }
@@ -176,10 +181,54 @@ namespace Controller {
         }
 
         /**
-         * Handles registering extensions
+         * Creates image/post entries for uploaded images
          */
-        public static function registerExtension($class, $module, $type) {
+        private static function _postImages() {
+            $retVal = new stdClass;
+            $retVal->images = [];
 
+            for ($i = 0, $count = count($_POST['imageId']); $i < $count; $i++) {
+                $id = $_POST['imageId'][$i];
+
+                $image = Api\Image::getById($id);
+                if ($image) {
+                    $image->caption = $_POST['caption'][$i];
+                    $image->sourceUrl = $_POST['source'][$i];
+
+                    if ($image->sync()) {
+                        $retVal->images[] = $image;
+                    }
+                }
+            }
+
+            // If there's more than one image, setup an album
+            if (count($retVal->images) > 1) {
+                $post = new Api\Post();
+                $post->title = Lib\Url::Post('albumTitle');
+                $post->setKeywordsFromTitle();
+                $post->dateCreated = time();
+                $post->link = 'http://' . $_SERVER['HTTP_HOST'];
+
+                // TODO - if the user is logged in, set userId here
+
+                // TODO - come up with a way of doing all this without four round trips to the database. Stored proc, maybe?
+                if ($post->sync()) {
+                    $path = '/gallery/' . base_convert($post->id, 10, 36) . '/' . str_replace(' ', '-', $post->keywords);
+                    $post->link = 'http://' . $_SERVER['HTTP_HOST'] . $path;
+
+                    // Perform image assignment and data denormalization
+                    if (Api\PostImages::assignImagesToPost($retVal->images, $post) && Api\PostData::denormalizeForPost($post->id)) {
+                        // Update the link. This is technically non-critical, so we won't error if something goes wrong here
+                        $post->sync();
+                        $retVal->redirect = $path;
+                    }
+
+                }
+            } else if (count($retVal->images) === 1) {
+                $retVal->redirect = $retVal->images[0]->getFilename(true);
+            }
+
+            return $retVal;
         }
 
         /**
