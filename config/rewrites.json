@@ -28,7 +28,7 @@
     },
     {
 		"rule": "^r/([^/.]+)/comments/([^/.]+)/(.+)?$",
-        "replace": "action=post&post=$2"
+        "replace": "page=gallery&post=$2&from=reddit"
     },
     {
 		"redirect": true,
@@ -37,15 +37,15 @@
     },
     {
 		"rule": "^gallery/([\\d]+)/$",
-        "replace": "action=gallery&post=$1"
+        "replace": "page=gallery&post=$1"
     },
     {
         "redirect": true,
-        "rule": "^gallery/([\\w]+)/([\\w]+)$",
+        "rule": "^gallery/([\\w]+)/([\\w-]+)$",
         "replace": "/gallery/$1/$2/"
     },
     {
-        "rule": "^gallery/([\\w]+)/([\\w]+)/$",
+        "rule": "^gallery/([\\w]+)/([\\w-]+)/$",
         "replace": "page=gallery&post=$1&new=true"
     },
     {
