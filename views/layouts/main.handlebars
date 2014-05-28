@@ -3,7 +3,9 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <meta name="viewport" content="initial-scale=1.0, width=device-width, height=device-height, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-        <title>redditbooru - a place where cute girls come to meet</title>
+        <title>
+            {{#if pageTitle}}{{pageTitle}}{{else}}redditbooru - a place where cute girls come to meet{{/if}}
+        </title>
         <link rel="stylesheet" type="text/css" href="/static/scss/styles.css" />
     </head>
     <body>
@@ -15,10 +17,10 @@
         <aside id="supporting" {{#if supporting}}class="hasContent"{{/if}}>{{{supporting}}}</aside>
         <section id="content">
             <div class="contentTitle">
-                <h2 id="title" class="hidden"></h2>
+                <h2 id="title"{{#unless title}} class="hidden"{{/unless}}>{{title}}</h2>
                 <button id="clearSearch">Cancel Search</button>
             </div>
-            <section id="images">
+            <section id="images"{{#if imagesDisplay}} class="{{imagesDisplay}}"{{/if}}>
                 {{{body}}}
             </section>
         </section>
@@ -27,7 +29,10 @@
         {{>upload}}
         {{>globalUploader}}
 
-        <script>var RB = {};</script>
+        <script>
+            var RB = {};
+            window.sources = {{{sources}}};
+        </script>
         <script src="/static/js/RedditBooru.js"></script>
     </body>
 </html>
