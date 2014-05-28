@@ -195,6 +195,13 @@ namespace Api {
         }
 
         /**
+         * Updates denormalized data for a post based upon source of truth tables
+         */
+        public static function updateDenormalizedPostData($id) {
+            return null !== Lib\Db::Query('CALL `proc_UpdateDenormalizedPostData` (:id)', [ ':id' => $id ]);
+        }
+
+        /**
          * Updates all denormalized posts and the parent post with new data
          * @return boolean Success of update operation
          */
