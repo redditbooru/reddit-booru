@@ -27,6 +27,14 @@
         "replace": "action=user&user=$1"
     },
     {
+        "rule": "^login/$",
+        "replace": "page=uas&action=login"
+    },
+    {
+        "rule": "^authenticate/$",
+        "replace": "page=uas&action=authenticate"
+    },
+    {
 		"rule": "^r/([^/.]+)/comments/([^/.]+)/(.+)?$",
         "replace": "page=gallery&post=$2&from=reddit"
     },

@@ -13,6 +13,9 @@ require_once('./lib/aal.php');
 // Set the time zone
 date_default_timezone_set('America/Chicago');
 
+// Set the session life to one week
+ini_set('session.cookie_lifetime', 86400 * 7);
+
 // Define our globals
 $GLOBALS['_content'] = null;
 $GLOBALS['_sidebars'] = null;
