@@ -4,6 +4,7 @@ namespace Controller {
 
     use OAuth2;
     use Lib;
+    use Api;
 
     class UAS extends BasePage {
 
@@ -15,7 +16,16 @@ namespace Controller {
 
             switch ($action) {
                 case 'login':
+                    // Redirect to the reddit OAuth2 login endpoint
+                    header('Location: ' . Api\User::getLoginUrl());
+                    exit;
                 case 'authenticate':
+                    $code = Lib\Url::Get('code');
+                    if (false !== $code) {
+                        Api\User::authenticateUser($code);
+                        header('Location: /');
+                        exit;
+                    }
                     break;
             }
 

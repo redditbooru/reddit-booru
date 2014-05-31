@@ -4,6 +4,7 @@ namespace Api {
 
     use Lib;
     use stdClass;
+    use OAuth2;
 
     class User extends Lib\Dal {
 
@@ -65,8 +66,10 @@ namespace Api {
 
         /**
          * Attempts to retrieve the user from the database and, failing that, reddit
+         * @param String $userName The user name to get
+         * @param String $data Data to use to create the user if it doesn't exist. Otherwise, a call to the reddit API is used
          */
-        public function getByName($userName) {
+        public function getByName($userName, $data = null) {
             $cacheKey = 'User::GetByName_' . $userName;
             $retVal = Lib\Cache::Get($cacheKey);
 
@@ -75,24 +78,25 @@ namespace Api {
                 if ($result->count > 0) {
                     $retVal = new User(Lib\Db::Fetch($result));
                 } else {
-                    $file = @file_get_contents('http://www.reddit.com/user/' . $userName . '/about.json');
-                    if ($file) {
-
-                        $user = json_decode($file);
-                        if (isset($user->data)) {
-                            $retVal = new User();
-                            $retVal->name = $user->data->name;
-                            $retVal->redditId = $user->data->id;
-                            $retVal->dateCreated = (int) $user->data->created_utc;
-                            $retVal->linkKarma = (int) $user->data->link_karma;
-                            $retVal->commentKarma = (int) $user->data->comment_karma;
-                            $retVal->sync();
-                            if (!$retVal->id) {
-                                $retVal = null;
+                    if (!$data) {
+                        $file = @file_get_contents('http://www.reddit.com/user/' . $userName . '/about.json');
+                        if ($file) {
+                            $user = json_decode($file);
+                            if (isset($user->data)) {
+                                $retVal = self::_createUserFromRedditData($user->data);
                             }
-                        }
 
+                        }
+                    } else {
+                        $retVal = self::_createUserFromRedditData($data);
                     }
+
+                    if ($retVal) {
+                        if (!$retVal->sync()) {
+                            $retVal = null;
+                        }
+                    }
+
                 }
                 Lib\Cache::Set($cacheKey, $retVal);
             }
@@ -108,6 +112,69 @@ namespace Api {
             $retVal = Lib\Url::Get('sources', 1, $_COOKIE);
             return explode(',', $retVal);
         }
+
+        /**
+         * Returns the login URL for OAuth2 authentication
+         */
+        public static function getLoginUrl($redirect = '') {
+            $client = self::_createOAuth2();
+            $auth = new OAuth2\Strategy\AuthCode($client);
+            return $auth->authorizeUrl([
+                'scope' => 'identity',
+                'state' => md5(rand()),
+                'redirect_uri' => REDDIT_OAUTH_HANDLER
+            ]);
+        }
+
+        /**
+         * OAuth2 response handler
+         */
+        public static function authenticateUser($code) {
+            $retVal = false;
+            $client = self::_createOAuth2();
+            $auth = new OAuth2\Strategy\AuthCode($client);
+
+            try {
+                $token = $auth->getToken($code, [ 'redirect_uri' => REDDIT_OAUTH_HANDLER ]);
+                if ($token) {
+                    $response = $token->get('https://oauth.reddit.com/api/v1/me.json');
+                    if ($response) {
+                        $data = json_decode($response->body());
+
+                        if (isset($data->name)) {
+                            $user = self::getByName($data->name);
+                            if ($user) {
+                                $retVal = true;
+                                $_SESSION['user'] = $retVal ? $user : null;
+                            }
+                        }
+
+                    }
+                }
+            } catch (Exception $e) {
+
+            }
+
+            return $retVal;
+        }
+
+        private static function _createOAuth2() {
+            return new OAuth2\Client(REDDIT_TOKEN, REDDIT_SECRET, [
+                'site' => 'https://ssl.reddit.com/api/v1',
+                'authorize_url' => '/authorize',
+                'token_url' => '/access_token'
+            ]);
+        }
+
+        private static function _createUserFromRedditData($data) {
+            $retVal = new User();
+            $retVal->name = $data->name;
+            $retVal->redditId = $data->id;
+            $retVal->dateCreated = (int) $data->created_utc;
+            $retVal->linkKarma = (int) $data->link_karma;
+            $retVal->commentKarma = (int) $data->comment_karma;
+        }
+
 
     }
 
