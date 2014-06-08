@@ -436,15 +436,10 @@ namespace Api {
                 if ($post) {
 
                     // If this post is linking to a different gallery, do a redirect to the original
-                    if (preg_match('/redditbooru\.com\/gallery\/([\w]+)\/?([\w]+)?/', $post->link, $match)) {
-                        $urlId = $match[1];
-                        $new = isset($match[2]);
-                        $urlId = $new ? base_convert($urlId, 36, 10) : $urlId;
-
-                        if ($id !== $urlId) {
-                            header('Location: ' . $post->link);
-                            exit;
-                        }
+                    $urlId = Post::getPostIdFromUrl($post->link);
+                    if ($id !== $urlId) {
+                        header('Location: ' . $post->link);
+                        exit;
                     }
 
                     // Get the post images
@@ -455,6 +450,35 @@ namespace Api {
                         }
                     }
 
+                }
+
+                Lib\Cache::Set($cacheKey, $retVal);
+
+            }
+
+            return $retVal;
+
+        }
+
+        /**
+         * Returns a list of galleries (and their images) created by a user
+         */
+        public static function getUserGalleries($userId) {
+
+            $cacheKey = 'Api:PostData:getUserGalleries_' . $userId;
+            $retVal = Lib\Cache::get($cacheKey);
+
+            if (false === $retVal) {
+                $query = 'SELECT * FROM `post_data` WHERE `post_id` IN (';
+                $query .= 'SELECT post_id, COUNT(1) AS total FROM `post_data` WHERE `user_id` = :userId';
+                $query .= ' AND `post_link` LIKE "%redditbooru.com%" GROUP BY post_id HAVING total > 1)';
+
+                $result = Lib\Db::Query($query);
+                $retVal = [];
+                if ($result && $result->count) {
+                    while ($row = Lib\Db::Fetch($result)) {
+                        $retVal[] = new PostData($row);
+                    }
                 }
 
                 Lib\Cache::Set($cacheKey, $retVal);
