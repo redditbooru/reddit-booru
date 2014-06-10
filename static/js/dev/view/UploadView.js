@@ -14,6 +14,7 @@
 
         progressTimer: null,
         delayTimer: null,
+        editingPostId: null,
 
         events: {
             'paste #imageUrl': 'handlePaste',
@@ -33,6 +34,20 @@
 
             this._loadForm();
 
+        },
+
+        loadGallery: function(post) {
+            var $list = this.$el.find('ul');
+            this._pushForm();
+            this.editingPostId = post.id;
+
+            this.$albumTitle.val(post.title).show();
+
+            _.each(post.images, function(item) {
+                $list.append(RB.Templates.uploadImageInfo(item));
+            });
+
+            this._showDialog();
         },
 
         handleSubmit: function(evt) {
@@ -90,8 +105,9 @@
         },
 
         submitSuccess: function(data) {
-            console.log(data);
             if (data.redirect) {
+                this._clearForm();
+                this._hideDialog();
                 RB.App.router.navigate(data.redirect);
             }
         },
@@ -131,7 +147,6 @@
 
             if (data && !data.error) {
                 data.thumb = THUMB_LOCATION + data.thumb;
-                console.log(data);
                 if (!data.identical) {
                     out = RB.Templates.uploadImageInfo(data);
                 } else {
@@ -152,6 +167,32 @@
 
         _hideDialog: function() {
             this.$el.fadeOut();
+
+            // If editing, revert back to the previous state
+            if (this.editingPostId) {
+                this._clearForm();
+                this._loadForm();
+                this.editingPostId = null;
+            }
+
+        },
+
+        /**
+         * Clears all upload data from the form
+         */
+        _clearForm: function() {
+            this.$albumTitle.val('').hide();
+            this.$el.find('li').remove();
+            this._saveForm();
+        },
+
+        /**
+         * Pushes the form state to before clearing it
+         */
+        _pushForm: function() {
+            this._saveForm();
+            this.$albumTitle.val('').hide();
+            this.$el.find('li').remove();
         },
 
         _checkProgress: function() {

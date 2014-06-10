@@ -21,7 +21,8 @@
 
         initialize: function() {
 
-            var sidebar = new RB.SidebarView();
+            var sidebar = new RB.SidebarView(),
+                upload = new RB.UploadView();
 
             // Global collections
             this.collections = {
@@ -39,7 +40,11 @@
                 sources: new RB.QueryOptionsView($('#sources'), this.collections.sources),
                 images: new RB.ImageView($('#images'), this.collections.images),
                 search: new RB.SearchView(sidebar, this.collections.images, this.router),
-                user: new RB.UserView(sidebar, this.collections.images, this.router)
+                user: new RB.UserView(sidebar, this.collections.images, this.router),
+                dragdrop: new RB.DragDropView(),
+                upload: upload,
+                gallery: new RB.GalleryView(this.router, sidebar),
+                myGalleries: new RB.MyGalleriesView(this.router, upload)
             };
 
             // TODO - move this into sources view controller
