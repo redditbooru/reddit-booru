@@ -17,6 +17,7 @@ define('AWS_EXPIRATION', 630720000);
 
 define('CDN_BASE_URL', 'http://BASE_URL/');
 define('LOCAL_IMAGE_PATH', 'PATH_TO_IMAGES/');
+define('THUMBNAIL_PATH', '/cache/');
 
 define('REDDIT_TOKEN', 'TOKEN');
 define('REDDIT_SECRET', 'SECRET');
@@ -30,3 +31,5 @@ define('VIEW_PATH', './view/');
 define('MONGO_DATABASE', 'redditbooru');
 
 define('HTTP_UA', 'moe downloader by /u/dxprog');
+
+define('SAUCENAO_KEY', 'SAUCENAO_API_KEY');

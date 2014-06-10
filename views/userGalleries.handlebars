@@ -1,0 +1,20 @@
+<script>
+    window.galleries = {};
+</script>
+<ul class="user-galleries">
+    {{#galleries}}
+        <li data-id="{{id}}">
+            <img src="{{images.1.thumb}}_300_300.jpg" alt="{{title}}" />
+            <h3>
+                {{title}}
+                <button class="edit-album">Edit Album</button>
+            </h3>
+            {{#if sourceName}}
+                <p>Posted to <a href="http://redd.it/{{externalId}}" target="_blank">{{sourceName}}</a> {{relativeTime dateCreated}} ago</p>
+            {{/if}}
+        </li>
+        <script>
+            window.galleries['{{id}}'] = {{{jsonBlob .}}};
+        </script>
+    {{/galleries}}
+</ul>

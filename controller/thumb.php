@@ -41,14 +41,15 @@ namespace Controller {
      * Encodes a URL for the cache filename
      */
     public static function createThumbFilename($url) {
-      return str_replace('=', '-', base64_encode($url));
+      return THUMBNAIL_PATH . str_replace([ '=', '/' ], [ '-', '_' ], base64_encode($url));
     }
 
     /**
      * Decodes an encoded thumbnail URL
      */
     public static function decodeThumbFilename($url) {
-      return base64_decode(str_replace('-', '=', $url));
+      $url = str_replace(THUMBNAIL_PATH, '', $url);
+      return base64_decode(str_replace([ '-', '_' ], [ '=', '/' ], $url));
     }
 
     /**
@@ -74,7 +75,7 @@ namespace Controller {
             // - URL of file, base64 encoded with trailing == removed
             // - height and width of thumbnail
             $encodedUrl = self::createThumbFilename($url);
-            $outFile = $encodedUrl . '_' . $width . '_' . $height . '.jpg';
+            $outFile = '.' . $encodedUrl . '_' . $width . '_' . $height . '.jpg';
 
             if ($image->getNumberImages() > 0) {
                 foreach ($image as $frame) {
@@ -85,9 +86,9 @@ namespace Controller {
 
             $image->cropThumbnailImage($width, $height);
             $image->setFormat('JPEG');
-            $image->writeImage('cache/' . $outFile);
+            $image->writeImage($outFile);
             header('Content-Type: image/jpeg');
-            readfile('cache/' . $outFile);
+            readfile($outFile);
             exit;
         }
 
@@ -110,7 +111,7 @@ namespace Controller {
             $contentType .= $image->type;
         }
 
-        file_put_contents('cache/' . self::createThumbFilename($url) . '.jpg', $image->data);
+        file_put_contents(self::createThumbFilename($url) . '.jpg', $image->data);
 
         header('Content-Type: ' . $contentType);
         echo $image->data;
