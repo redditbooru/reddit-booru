@@ -181,9 +181,21 @@ namespace Controller {
         }
 
         /**
-         * Creates image/post entries for uploaded images
+         * Handle gallery POST
          */
         private static function _postImages() {
+            $postId = Lib\Url::GetInt('postId', null);
+            if ($postId) {
+                return self::_editGallery($postId);
+            } else {
+                return self::_createGallery();
+            }
+        }
+
+        /**
+         * Creates a gallery
+         */
+        private static function _createGallery() {
             $retVal = new stdClass;
             $retVal->images = [];
 
@@ -209,7 +221,10 @@ namespace Controller {
                 $post->dateCreated = time();
                 $post->link = 'http://' . $_SERVER['HTTP_HOST'];
 
-                // TODO - if the user is logged in, set userId here
+                $user = Api\User::getCurrentUser();
+                if ($user) {
+                    $post->userId = $user->id;
+                }
 
                 // TODO - come up with a way of doing all this without four round trips to the database. Stored proc, maybe?
                 if ($post->sync()) {
@@ -228,6 +243,83 @@ namespace Controller {
                 $retVal->redirect = $retVal->images[0]->getFilename(true);
             }
 
+            return $retVal;
+        }
+
+        /**
+         * Edits a gallery
+         */
+        private static function _editGallery($postId) {
+
+            $user = Api\User::getCurrentUser();
+            if (!$user) {
+                return self::_generateErrorResponse('You must be logged in to edit galleries.');
+            }
+
+            $post = Api\Post::getById($postId);
+            if (!$post) {
+                return self::_generateErrorResponse('Unable to retrieve post information.');
+            }
+
+            if ($post->userId !== $user->id) {
+                // Log this attempt
+                self::_log('editGallery', [ 'postId' => $postId, 'userId' => $user->id, 'userIp' => $_SERVER['REMOTE_ADDR'] ], null);
+                return self::_generateErrorResponse('You can only edit galleries you have created.');
+            }
+
+            $post->title = Lib\Url::Post('albumTitle');
+            $post->setKeywordsFromTitle();
+            $post->dateUpdated = time();
+
+            if (!$post->sync()) {
+                return self::_generateErrorResponse('Error saving post details');
+            }
+
+            $imageIds = Lib\Url::Post('imageId');
+            $captions = Lib\Url::Post('caption');
+            $sources = Lib\Url::Post('source');
+            $images = [];
+            $result = Api\Image::query([ 'id' => [ 'in' => $imageIds ] ]);
+
+            if ($result && $result->count) {
+                while ($row = Lib\Db::Fetch($result)) {
+                    $image = new Api\Image($row);
+                    $index = array_search($image->id, $imageIds);
+                    if (false !== $index) {
+                        $image->caption = $captions[$index];
+                        $image->source = $captions[$index];
+                        if ($image->sync()) {
+                            $images[] = $image;
+                        }
+                    }
+                }
+
+                Api\PostImages::rebuildPostAssociations($images, $post);
+                Api\PostData::denormalizeForPost($post->id);
+
+            }
+
+            return true;
+
+        }
+
+        private static function _getImageFromArray($imageId, $images) {
+            $retVal = null;
+
+            foreach ($images as $image) {
+                if ($image->id === $imageId) {
+                    $retVal = $image;
+                    break;
+                }
+            }
+
+            return $retVal;
+        }
+
+        private static function _generateErrorResponse($message) {
+            $retVal = new stdClass;
+            $retVal->error = true;
+            $retVal->message = $message;
             return $retVal;
         }
 
