@@ -208,8 +208,8 @@ namespace Api {
          */
         public static function createGalleryUrl($postId, $title) {
             $title = preg_replace('/[\W]/', ' ', $title);
-            $title = preg_replace('/[\s]+/', '-', $title);
-            return '/gallery/' . base_convert($postId, 10, 36) . '/' . $title;
+            $title = preg_replace('/[\s]+/', '-', trim($title));
+            return '/gallery/' . base_convert($postId, 10, 36) . '/' . strtolower($title);
         }
 
     }
