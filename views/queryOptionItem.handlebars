@@ -1,0 +1,8 @@
+{{#each items}}
+    <li>
+        <label for="{{name}}-{{value}}">
+            <input class="queryOption" type="checkbox" id="{{name}}-{{value}}" value="{{value}}" name="{{name}}" {{#if checked}}checked{{/if}} />
+            {{title}}
+        </label>
+    </li>
+{{/each}}
