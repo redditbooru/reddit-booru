@@ -250,6 +250,10 @@ namespace Api {
             return ($fullUrl ? CDN_BASE_URL : '') . base_convert($id, 10, 36) . '.' . $type;
         }
 
+        public function getFilename($fullUrl = true) {
+            return self::generateFilename($this->id, $this->type, $fullUrl);
+        }
+
         /**
          * Given an image file, finds similar images in the database
          * @param string $file Path or URL to the file to check against
@@ -310,7 +314,7 @@ namespace Api {
                 // be data in the mongo cache and performance hit will be minimal
                 $image = Lib\ImageLoader::fetchImage($this->url);
                 if ($image) {
-                    $fileName = $this->_generateFilename(false);
+                    $fileName = $this->getFilename(false);
                     $localPath = LOCAL_IMAGE_PATH . $fileName;
 
                     if (file_put_contents($localPath, $image->data)) {
@@ -372,10 +376,6 @@ namespace Api {
             }
 
             return $retVal;
-        }
-
-        private function _generateFilename($fullUrl = true) {
-            return self::generateFilename($this->id, $this->type, $fullUrl);
         }
 
         private static function _log($name, $data) {

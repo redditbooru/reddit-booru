@@ -99,7 +99,7 @@ namespace Api {
 
         public function sync() {
             $this->dateUpdated = time();
-            parent::sync();
+            return parent::sync();
         }
 
         private function __copy($obj) {
@@ -184,6 +184,32 @@ namespace Api {
 
             return implode(' ', $retVal);
 
+        }
+
+        /**
+         * Extracts the post ID from a redditbooru link
+         */
+        public static function getPostIdFromUrl($url) {
+            $retVal = null;
+
+            if (preg_match('/^http[s]?:\/\/[\w\.]+?\.redditbooru\.com\/gallery\/([\w]+)(\/[\w-]+)?/is', $url, $matches)) {
+                if (count($matches) === 3) {
+                    $retVal = base_convert($matches[1], 36, 10);
+                } else {
+                    $retVal = (int) $matches[1];
+                }
+            }
+
+            return $retVal;
+        }
+
+        /**
+         * Creates a gallery URL
+         */
+        public static function createGalleryUrl($postId, $title) {
+            $title = preg_replace('/[\W]/', ' ', $title);
+            $title = preg_replace('/[\s]+/', '-', $title);
+            return '/gallery/' . base_convert($postId, 10, 36) . '/' . $title;
         }
 
     }
