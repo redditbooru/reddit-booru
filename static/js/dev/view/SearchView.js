@@ -7,15 +7,30 @@
 
         $clearSearch: $('#clearSearch'),
         $searchInput: $('input[name="search"]'),
+        currentParams: {},
 
-        initialize: function(sidebar, imageCollection, router) {
+        initialize: function(sidebar, imageCollection, sources, router) {
             this.imageCollection = imageCollection;
             this.sidebar = sidebar;
+            this.router = router;
             this.$searchInput.on('keypress', _.bind(this._handleSearch, this));
             this.$clearSearch.on('click', _.bind(this.clearSearch, this));
-            router.on('route:querySearch', function(params) {
-                console.log(params);
-            });
+
+            // Global catch for source select links
+            $('body').on('click', '.singleSourceSearch', _.bind(this.singleSourceSearch, this));
+            router.addRoute('search', '/search/', _.bind(this.routeSearch, this));
+
+            this.sources = sources;
+            sources.on('update', _.bind(this._handleSourcesUpdate, this));
+
+        },
+
+        routeSearch: function(params) {
+            params = _.defaults(params, this.currentParams);
+            this.imageCollection.setQueryOption(params);
+            this.currentParams = params;
+            this.sidebar.dismiss();
+            return this.currentParams;
         },
 
         clearSearch: function() {
@@ -24,6 +39,27 @@
             RB.App.setTitle('');
             this.$searchInput.val('');
             this.$clearSearch.hide();
+        },
+
+        singleSourceSearch: function(evt) {
+            this.imageCollection.setQueryOption('sources', evt.currentTarget.dataset['id']);
+        },
+
+        _handleSourcesUpdate: function(item) {
+            var collections = this.imageCollection,
+                self = this;
+            clearTimeout(this._delayTimer);
+            this._delayTimer = setTimeout(function() {
+                var sources = self.sources.collection.where({ checked: true }),
+                    updated = [];
+
+                _.each(sources, function(item) {
+                    updated.push(item.attributes.value);
+                });
+
+                self.router.go('search', { sources: updated.join(',') });
+
+            }, UPDATE_DELAY);
         },
 
         // Router entry points
@@ -35,7 +71,8 @@
                     if (value.indexOf('http') === 0) {
                         self._reverseImageSearch(value);
                     } else {
-                        self._querySearch(value);
+                        // self._querySearch(value);
+                        self.router.go('search', { q: value });
                     }
                 };
 
@@ -51,7 +88,7 @@
         _reverseImageSearch: function(url) {
             var images = this.imageCollection,
                 self = this;
-            
+
             images.clearQueryOptions(true);
             images.setQueryOption('imageUri', url, false);
 
@@ -68,8 +105,8 @@
             this.$clearSearch.show();
         },
 
-        _querySearch: function(query) {
-            this.imageCollection.setQueryOption('q', query);
+        _querySearch: function(query, bypassRequest) {
+            this.imageCollection.setQueryOption('q', query, bypassRequest);
             RB.App.setTitle('Search results for "' + query + '"');
             this.$clearSearch.show();
         }

@@ -21,9 +21,6 @@
 
         initialize: function() {
 
-            var sidebar = new RB.SidebarView(),
-                upload = new RB.UploadView();
-
             // Global collections
             this.collections = {
                 sources: new RB.QueryOptionCollection(),
@@ -34,12 +31,16 @@
             this.collections.sources.reset(window.sources);
             this.collections.images.reset(window.startUp);
 
+            var sidebar = new RB.SidebarView(),
+                upload = new RB.UploadView(),
+                sources = new RB.QueryOptionsView($('#sources'), this.collections.sources);
+
             // Views
             this.views = {
                 sidebar: sidebar,
-                sources: new RB.QueryOptionsView($('#sources'), this.collections.sources),
+                sources: sources,
                 images: new RB.ImageView($('#images'), this.collections.images),
-                search: new RB.SearchView(sidebar, this.collections.images, this.router),
+                search: new RB.SearchView(sidebar, this.collections.images, sources, this.router),
                 user: new RB.UserView(sidebar, this.collections.images, this.router),
                 dragdrop: new RB.DragDropView(),
                 upload: upload,
@@ -47,29 +48,12 @@
                 myGalleries: new RB.MyGalleriesView(this.router, upload)
             };
 
-            // TODO - move this into sources view controller
-            this.views.sources.on('update', _.bind(this._handleSourcesUpdate, this));
-
             // Start the router
             Backbone.history.start({
-                pushState: true
+                pushState: true,
+                silent: true
             });
 
-        },
-
-        _handleSourcesUpdate: function(item) {
-            var collections = this.collections;
-            clearTimeout(this._delayTimer);
-            this._delayTimer = setTimeout(function() {
-                var sources = collections.sources.where({ checked: true }),
-                    updated = [];
-
-                _.each(sources, function(item) {
-                    updated.push(item.attributes.value);
-                });
-
-                collections.images.setQueryOption('sources', updated.join(','));
-            }, UPDATE_DELAY);
         },
 
         setTitle: function(title) {
