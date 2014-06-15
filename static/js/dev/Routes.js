@@ -2,6 +2,14 @@
  * RedditBooru routes
  */
 (function(undefined) {
+
+    var PATH_DELIMITER = '/',
+        PARAM_MARKER = ':',
+        QS_MARKER = '?',
+        MODE_STANDARD = 0,
+        MODE_PARAM = 1;
+
+
     RB.Router = function(handleCurrentState) {
 
         this._routes = {};
@@ -22,9 +30,12 @@
             callbacks: []
         };
 
+        _.defaults(this._routes[name], this._compilePath(path));
+
         if (typeof callback === 'function') {
             this._routes[name].callbacks.push(callback);
         }
+
 
     };
 
@@ -35,11 +46,16 @@
     };
 
     RB.Router.prototype.go = function(route, params) {
+
+        var url,
+            oldUrl,
+            qs = [];
+
+        // Look for the route by name in the list
         if (route in this._routes) {
 
-            var url = this._routes[route].path,
-                oldUrl = url,
-                qs = [];
+            url = this._routes[route].path;
+            oldUrl = url;
 
             _.each(this._routes[route].callbacks, function(callback) {
                 var addParams = callback(params);
@@ -70,7 +86,99 @@
                 }, null, url);
             }
 
+        } else {
+
+            // Otherwise, match against a path
+            route = this._getRouteFromPath(route);
+
         }
+    };
+
+    RB.Router.prototype._getRouteFromPath = function(path) {
+
+        var i, result, route,
+            params = {};
+
+        for (var i in this._routes) {
+            if (this._routes.hasOwnProperty(i)) {
+                route = this._routes[i];
+                result = route.regEx.exec(path);
+                if (result) {
+                    _.each(route.map, function(name, index) {
+                        params[name] = result[index];
+                    });
+
+                    this.go(i, params);
+                }
+            }
+        }
+
+    };
+
+    /**
+     * Generates a regular expression so that a path can be tracked back to its route
+     */
+    RB.Router.prototype._compilePath = function(path) {
+        var regEx = '^',
+            paramName = '',
+            mode = MODE_STANDARD,
+            i = 0,
+            count = path.length,
+            character,
+            paramCount = 1,
+            paramMap = {},
+            hasQueryString = false;
+
+        for (; i < count; i++) {
+
+            // If this route has already parsed a querystring placeholder, throw an error
+            // because that must be the last part of a route if it's present
+            if (hasQueryString) {
+                throw 'Cannot have additional path/parameters after a query string marker';
+                return;
+            }
+
+            character = path.charAt(i);
+
+            if (MODE_PARAM === mode) {
+                // A parameter marker in a character is invalid
+                if (PARAM_MARKER === character) {
+                    throw 'Invalid character in route path';
+                    return;
+                } else if (PATH_DELIMITER === character) {
+                    regEx = regEx.concat('([^\\/]+)\\/');
+                    paramMap[paramCount] = paramName;
+                    paramName = '';
+                    mode = MODE_STANDARD;
+                    paramCount++;
+                } else {
+                    paramName = paramName.concat(character);
+                }
+            } else {
+                if (PARAM_MARKER === character) {
+                    mode = MODE_PARAM;
+                } else if (QS_MARKER === character) {
+                    hasQueryString = true;
+                    regEx = regEx.concat('([\w]+)');
+                } else {
+                    regEx = regEx.concat(character);
+                }
+            }
+        }
+
+        // If the route ended on a parameter, handle it
+        if (paramName.length > 0) {
+            regEx = regEx.concat('([^\\/]+)');
+            paramMap[paramCount] = paramName;
+        }
+
+        regEx = new RegExp(regEx.concat('$'), 'ig');
+
+        return {
+            regEx: regEx,
+            map: paramMap
+        };
+
     };
 
 }());
