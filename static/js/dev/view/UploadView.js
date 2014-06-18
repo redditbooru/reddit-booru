@@ -3,9 +3,10 @@
     'use strict';
 
     var SAVE_KEY = 'RB_Uploads',
-        THUMB_LOCATION = 'http://beta.redditbooru.com/cache/',
         SAVE_DELAY = 500,
-        KEY_ENTER = 13;
+        KEY_ENTER = 13,
+
+        PROGRESS_BAR_THICKNESS = 20;
 
     RB.UploadView = Backbone.View.extend({
 
@@ -26,12 +27,13 @@
             'submit form': 'handleSubmit'
         },
 
-        initialize: function() {
+        initialize: function(router) {
             $('body').on('click', '.upload', _.bind(this.handleNavClick, this));
 
             this.$el = $('#upload');
             this.$albumTitle = this.$el.find('.albumTitle');
 
+            this.router = router;
             this._loadForm();
 
         },
@@ -51,9 +53,10 @@
         },
 
         handleSubmit: function(evt) {
+            var postId = this.editingPostId ? '?postId=' + this.editingPostId : '';
             evt.preventDefault();
             $.ajax({
-                url: '/images/',
+                url: '/images/' + postId,
                 data: this.$el.find('form').serialize(),
                 dataType: 'json',
                 type: 'POST',
@@ -85,8 +88,8 @@
 
         handleUploadClick: function(evt) {
             var self = this;
-            new RB.Uploader(function(uploadId) {
-                self.$el.find('ul').append(RB.Templates.uploading({ id: uploadId }));
+            new RB.Uploader(function(uploadId, fileName) {
+                self._renderUploader(uploadId, fileName);
             }, _.bind(this._uploadComplete, this));
         },
 
@@ -102,14 +105,18 @@
         handleRepostClick: function(evt) {
             var $parent = $(evt.currentTarget).closest('li');
             this._urlUpload($parent.attr('data-id'), true);
+            $parent.remove();
         },
 
         submitSuccess: function(data) {
-            if (data.redirect) {
-                this._clearForm();
-                this._hideDialog();
-                RB.App.router.navigate(data.redirect);
+            if ('route' in data) {
+                console.log('going to ' + data.route);
+                this.router.go(data.route);
+            } else if ('redirect' in data) {
+                window.open(data.redirect);
             }
+            // this._clearForm();
+            this._hideDialog();
         },
 
         /**
@@ -119,13 +126,16 @@
             // QnD URL validation
             var $target = target instanceof jQuery ? target : $(target);
             if (url.indexOf('http://') === 0 || url.indexOf('https://')) {
-                this.$el.find('ul').append(RB.Templates.uploading({ id: url }));
+
+                this._renderUploader(url, url);
+
                 $.ajax({
                     url: '/upload/?action=upload&imageUrl=' + escape(url) + (force ? '&force=true' : ''),
                     dataType: 'json',
                     success: _.bind(this._uploadComplete, this)
                 });
-                setTimeout(_.bind(this._checkProgress, this), 250);
+
+                setTimeout(_.bind(this._checkProgress, this), 500);
                 $target.val('').blur();
             }
         },
@@ -146,7 +156,7 @@
             var out = '';
 
             if (data && !data.error) {
-                data.thumb = THUMB_LOCATION + data.thumb;
+                data.thumb = data.thumb;
                 if (!data.identical) {
                     out = RB.Templates.uploadImageInfo(data);
                 } else {
@@ -157,6 +167,7 @@
             }
 
             this.$el.find('[data-id="' + data.uploadId + '"]').replaceWith(out);
+            this._updateForm();
             this._saveForm();
 
         },
@@ -206,11 +217,11 @@
         _progressCallback: function(data) {
             var i,
                 $item = null;
-
+console.log(data);
             if (null !== data) {
 
                 for (i in data) {
-                    $item = this.$el.find('[data-id="' + i + '"] span').text(Math.round(data[i] * 100));
+                    $item = this.$el.find('[data-id="' + i + '"]').get(0).progress.progress(Math.round(data[i] * 100));
                 }
 
                 setTimeout(_.bind(this._checkProgress, this), 1000);
@@ -261,6 +272,12 @@
 
             }
 
+        },
+
+        _renderUploader: function(id, url) {
+            var $upload = $(RB.Templates.uploading({ id: id, url: url }));
+            this.$el.find('ul').append($upload);
+            $upload[0].progress = new RB.ProgressCircle($upload.find('.donut-loader'), 100, 150, '#e94e77', PROGRESS_BAR_THICKNESS);
         }
 
     });

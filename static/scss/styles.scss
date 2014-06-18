@@ -29,6 +29,8 @@ $PINK: #e94e77;
 $YELLOW: #ffed77;
 $DARK_YELLOW: #736400;
 
+$NAV_INDEX: 100;
+
 // Itty bitty reset
 * {
     margin: 0;
@@ -37,6 +39,44 @@ $DARK_YELLOW: #736400;
 
 body {
     padding-top: 86px;
+}
+
+input {
+
+    &[type="text"] {
+        font: 18px/1 'MG Thin', sans-serif;
+        padding: 10px 10px 5px;
+        border: 1px solid $GREY;
+        border-radius: 2px;
+        width: 250px;
+    }
+
+    &[type="file"] {
+        position: absolute;
+        left: -9999px;
+        top: -9999px;
+    }
+
+}
+
+button {
+    border-radius: 2px;
+    border: 1px solid $GREY;
+    background: $LIGHT_GREY;
+    color: $DARK_GREY;
+    padding: 10px 10px 5px;
+    font: 18px/1 'MG Thin', sans-serif;
+    cursor: pointer;
+}
+
+a {
+    color: $PINK;
+    text-decoration: none;
+
+    &:hover {
+        text-decoration: underline;
+    }
+
 }
 
 header {
@@ -50,11 +90,18 @@ header {
     padding: 20px 20px 15px;
     border-bottom: 1px solid $GREY;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-    z-index: 1000;
+    z-index: $NAV_INDEX;
 
     h1 {
         font: 36px/1 'MG Thin', sans-serif;
         float: left;
+        a {
+            text-decoration: none;
+            color: #000;
+            &:hover {
+                text-decoration: none;
+            }
+        }
     }
 
     .search {
@@ -62,13 +109,6 @@ header {
         .textSearch {
             position: relative;
             padding-right: 25px;
-            input {
-                font: 18px/1 'MG Thin', sans-serif;
-                padding: 10px 10px 5px;
-                border: 1px solid $GREY;
-                border-radius: 2px;
-                width: 250px;
-            }
             &:after {
                 font: bold 24px sans-serif;
                 content: '\00b7';
@@ -78,22 +118,6 @@ header {
                 top: -7px;
                 color: $DARK_GREY;
             }
-        }
-
-        [type="file"] {
-            position: absolute;
-            left: -9999px;
-            top: -9999px;
-        }
-
-        button {
-            border-radius: 2px;
-            border: 1px solid $GREY;
-            background: $LIGHT_GREY;
-            color: $DARK_GREY;
-            padding: 10px 10px 5px;
-            font: 18px/1 'MG Thin', sans-serif;
-            cursor: pointer;
         }
 
     }
@@ -151,6 +175,7 @@ header {
 
 
             &.has-secondary-nav:hover {
+                cursor: pointer;
                 &:before {
                     display: block;
                     position: absolute;
@@ -237,6 +262,7 @@ header {
                 display: block;
                 position: absolute;
                 min-width: 125%;
+                min-height: 125%;
                 top: -30px;
                 left: -30px;
                 bottom: -30px;
@@ -312,6 +338,29 @@ header {
         }
     }
 
+    // Galleries
+    &.gallery {
+        img {
+            max-width: 100%;
+            display: block;
+            margin: 0 auto 25px;
+            @include image-shadow();
+        }
+    }
+
+}
+
+button.singleSourceSearch {
+    background: 0;
+    border: 0;
+    font: 18px/1 'MG Thin', sans-serif;
+    color: $PINK;
+    display: inline;
+    cursor: pointer;
+    padding: 0;
+    &:hover {
+        text-decoration: underline;
+    }
 }
 
 #supporting {
@@ -409,4 +458,254 @@ header {
             padding: 10px;
         }
     }
+}
+
+#dragdrop {
+
+    @include modal();
+    border: 5px dashed $DARK_GREY;
+    background: $GREY;
+    opacity: 0.9;
+    border-radius: 5px;
+    z-index: $NAV_INDEX + 1;
+
+    div {
+        font: 30px/1 'MG Regular', sans-serif;
+        box-sizing: border-box;
+        width: 50%;
+        height: 100%;
+        float: left;
+
+        &:first-child {
+            border-right: 5px dashed $DARK_GREY;
+        }
+
+        &.hover {
+            background: $PINK;
+        }
+
+        p {
+            text-align: center;
+            position: relative;
+            top: 50%;
+            margin-top: -12px;
+        }
+
+    }
+
+}
+
+.loading {
+    position: relative;
+    &:after {
+        content: '';
+        display: block;
+        position: absolute;
+        left: 0;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        background: #fff url(http://redditbooru.com/view/reddit-booru/images/ajax.gif) no-repeat center center;
+        opacity: 0.5;
+    }
+}
+
+#upload {
+    @include modal();
+    @include image-shadow();
+    background: #fff;
+    z-index: $NAV_INDEX + 1;
+
+    h2 {
+        padding: 20px;
+        background: $PINK;
+        color: #fff;
+        font: 30px/1 'MG Thin', sans-serif;
+    }
+
+    .form {
+        padding: 10px 20px;
+        background: $GREY;
+
+        fieldset {
+            display: inline;
+            border: 0;
+            position: relative;
+        }
+
+        legend {
+            display: none;
+        }
+
+        .finalize {
+            padding-left: 20px;
+            &:before {
+                content: '';
+                display: block;
+                position: absolute;
+                top: 5px;
+                bottom: 5px;
+                left: 8px;
+                border-left: 1px solid $DARK_GREY;
+            }
+        }
+
+    }
+
+    .urlUpload {
+        position: relative;
+        padding-right: 25px;
+        &:after {
+            font: bold 24px sans-serif;
+            content: '\00b7';
+            display: block;
+            position: absolute;
+            right: 10px;
+            top: -7px;
+            color: $DARK_GREY;
+        }
+    }
+
+    .repost {
+        p {
+            font: 18px/1 'MG Thin', sans-serif;
+            margin-bottom: 10px;
+        }
+
+        button {
+            display: inline-block;
+            margin-right: 10px;
+        }
+    }
+
+    ul {
+        list-style: none;
+        position: absolute;
+        left: 20px;
+        right: 20px;
+        top: 130px;
+        bottom: 20px;
+        overflow: scroll;
+        overflow-x: hidden;
+
+        li {
+            position: relative;
+            padding: 20px 0;
+            border-top: 1px dotted $GREY;
+            overflow: hidden;
+            &:first-child {
+                border-top: 0;
+            }
+
+            &.uploading {
+                font: 18px/1 'MG Thin', sans-serif;
+                overflow: hidden;
+                canvas {
+                    float: left;
+                }
+            }
+
+        }
+
+        img {
+            @include image-shadow();
+            float: left;
+            margin-right: 20px;
+            width: 150px;
+            height: 150px;
+        }
+    }
+
+    .caption {
+        display: block;
+        margin-bottom: 10px;
+    }
+
+    .remove {
+        display: block;
+        border: 0;
+        background: transparent;
+        padding-left: 0;
+        margin-top: 10px;
+        color: $PINK;
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+
+    .close {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        font-size: 36px;
+        padding: 0 10px;
+        height: 34px;
+    }
+
+    .albumTitle {
+        display: none;
+    }
+
+}
+
+.user-galleries {
+
+    list-style: none;
+
+    li {
+        overflow: hidden;
+        margin-bottom: 20px;
+    }
+
+    img {
+        float: left;
+        @include image-shadow();
+        margin-right: 20px;
+    }
+
+    h3 {
+        font: 24px/1 'MG Thin', sans-serif;
+        padding-top: 3px;
+        margin-bottom: 5px;
+    }
+
+    p {
+        font: 16px/1 'MG Regular', sans-serif;
+    }
+
+    .edit-album {
+        border: 0;
+        height: 22px;
+        width: 0;
+        overflow: hidden;
+        color: #fff;
+        background: none;
+        position: relative;
+        &:before {
+            display: block;
+            content: '';
+            height: 20px;
+            width: 20px;
+            background: url(/static/images/edit.png) no-repeat center center;
+            position: absolute;
+            top: 6px;
+            left: 0;
+        }
+    }
+
+    .view-gallery {
+        font: 18px 'MG Thin', sans-serif;
+        padding: 10px 10px 10px 0;
+        position: relative;
+        &:after {
+            content: '';
+            display: block;
+            position: absolute;
+            border: 5px solid transparent;
+            border-left: 5px solid $PINK;
+            top: 16px;
+            right: -5px;
+        }
+    }
+
 }
