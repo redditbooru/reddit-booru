@@ -14,7 +14,15 @@ require_once('./lib/aal.php');
 date_default_timezone_set('America/Chicago');
 
 // Set the session life to one week
-ini_set('session.cookie_lifetime', 86400 * 7);
+define('SESSION_DURATION', 86400 * 7);
+ini_set('session.cookie_lifetime', SESSION_DURATION);
+ini_set('session.gc_maxlifetime', SESSION_DURATION);
+session_set_cookie_params(SESSION_DURATION);
+
+// Start and immediately close the session to prevent concurrent request locking
+// If anything needs to write to the session, it will need to call session_start again
+session_start();
+session_write_close();
 
 // Define our globals
 $GLOBALS['_content'] = null;
@@ -61,6 +69,6 @@ Lib\Display::render();
 
 // Calculate the amount of time it took to generate the page
 $genTime = microtime (true) - $GLOBALS['_begin'];
-echo "<!--\n\tGenerated in ", $genTime, " seconds.\n\tAPI hits - ", $_apiHits, ".\n\tMax memory used - ", memory_get_peak_usage(), "\n-->";
+echo "<!--\n\tGenerated in ", $genTime, " seconds.\n\tDB hits - ", Lib\Db::$callCount, ".\n\tMax memory used - ", memory_get_peak_usage(), "\n-->";
 
 Api\DxApi::clean();

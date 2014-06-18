@@ -10,6 +10,8 @@ namespace Controller {
 
         public static function render() {
 
+            session_start();
+
             parent::render();
 
             $action = Lib\Url::Get('action', null);
@@ -28,6 +30,8 @@ namespace Controller {
                     }
                     break;
             }
+
+            session_write_close();
 
         }
 
