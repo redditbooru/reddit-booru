@@ -1,18 +1,37 @@
 <nav>
     <ul class="primary-nav">
+        {{#if user}}
+            <li>
+                Welcome, <a href="/user/{{user.name}}/" class="user-profile">{{user.name}}</a>!
+            </li>
+            <li>
+                <a href="/gallery/mine/">My Galleries</a>
+            </li>
+            <li>|</li>
+        {{/if}}
+        {{#unless user}}
+            <li>
+                <a href="/login/">Login</a>
+            </li>
+        {{/unless}}
         <li>
-            <a href="/login/">Login</a>
+            <a href="/upload/" class="upload">Upload</a>
         </li>
-        <li>
-            <a href="/upload/">Upload</a>
-        </li>
+        <!--
         <li>
             <a href="/screensaver/">Screensaver</a>
         </li>
+        -->
         <li class="has-secondary-nav">
             Show Posts From
             <ul id="sources" class="secondary-nav source-list"></ul>
         </li>
+        <li>
+            <label for="showNsfw">
+                <input type="checkbox" id="showNsfw"{{#if showNsfw}} checked="checked"{{/if}}/> Show NSFW
+            </label>
+        </li>
+        <!--
         <li class="has-secondary-nav">
             Sort by
             <ul id="sorting" class="secondary-nav">
@@ -21,5 +40,6 @@
                 <li data-sort="top">Top</li>
             </ul>
         </li>
+        -->
     </ul>
 </nav>

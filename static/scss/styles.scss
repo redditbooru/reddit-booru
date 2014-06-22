@@ -142,6 +142,9 @@ header {
             a {
                 color: #000;
                 text-decoration: none;
+                &.user-profile {
+                    color: $PINK;
+                }
             }
 
             .secondary-nav {
@@ -250,14 +253,14 @@ header {
             background-position: center center;
             overflow: hidden;
 
-            &.nsfw {
+            .hideNsfw &.nsfw {
                 @include image-label('NSFW');
                 &:hover .nsfw {
                     display: none;
                 }
             }
 
-            .nsfw,
+            .hideNsfw & .nsfw,
             .hidden {
                 display: block;
                 position: absolute;

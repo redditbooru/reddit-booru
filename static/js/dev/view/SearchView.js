@@ -1,20 +1,40 @@
 (function(undefined) {
 
     var KEY_ENTER = 13,
-        UPDATE_DELAY = 1000;
+        UPDATE_DELAY = 1000,
+
+        NSFW_TOGGLE = 'hideNsfw',
+        NSFW_EXPIRES = 365, // cookie is good for a year
+        NSFW_DISABLE = 'false',
+        NSFW_ENABLE = 'true';
 
     RB.SearchView = Backbone.View.extend({
 
         $clearSearch: $('#clearSearch'),
         $searchInput: $('input[name="search"]'),
+        $body: $('body'),
         currentParams: {},
 
         initialize: function(sidebar, imageCollection, sources, router) {
+            var self = this;
+
             this.imageCollection = imageCollection;
             this.sidebar = sidebar;
             this.router = router;
             this.$searchInput.on('keypress', _.bind(this._handleSearch, this));
             this.$clearSearch.on('click', _.bind(this.clearSearch, this));
+
+            // TODO - think about whether this really belongs here. Might need a NavView at some point
+            $('#showNsfw').on('change', _.bind(this._handleNsfwChange, this));
+
+            if (typeof window.filters === 'object') {
+                this.currentParams = window.filters;
+
+                // Use a timeout because the app may still be loading
+                setTimeout(function() {
+                    self._buildBreadCrumb();
+                }, 10);
+            }
 
             // Global catch for source select links
             $('body').on('click', '.singleSourceSearch', _.bind(this.singleSourceSearch, this));
@@ -29,7 +49,10 @@
             params = _.defaults(params, this.currentParams);
             this.imageCollection.setQueryOption(params);
             this.currentParams = params;
-            this.sidebar.dismiss();
+            if (!params.user) {
+                this.sidebar.dismiss();
+            }
+            this._buildBreadCrumb();
             return this.currentParams;
         },
 
@@ -43,6 +66,16 @@
 
         singleSourceSearch: function(evt) {
             this.imageCollection.setQueryOption('sources', evt.currentTarget.dataset['id']);
+        },
+
+        _handleNsfwChange: function(evt) {
+            if (evt.currentTarget.checked) {
+                this.$body.removeClass(NSFW_TOGGLE);
+                RB.Cookie.bake('showNsfw', NSFW_ENABLE, NSFW_EXPIRES, '/');
+            } else {
+                this.$body.addClass(NSFW_TOGGLE);
+                RB.Cookie.bake('showNsfw', NSFW_DISABLE, NSFW_EXPIRES, '/');
+            }
         },
 
         _handleSourcesUpdate: function(item) {
@@ -105,10 +138,12 @@
             this.$clearSearch.show();
         },
 
-        _querySearch: function(query, bypassRequest) {
-            this.imageCollection.setQueryOption('q', query, bypassRequest);
-            RB.App.setTitle('Search results for "' + query + '"');
-            this.$clearSearch.show();
+        // not really a bread crumb, but naming things is hard
+        _buildBreadCrumb: function() {
+            if ('q' in this.currentParams || 'user' in this.currentParams) {
+                RB.App.setTitle(RB.Templates.breadcrumb(this.currentParams));
+                this.$clearSearch.show();
+            }
         }
 
     });

@@ -8,11 +8,11 @@
         </title>
         <link rel="stylesheet" type="text/css" href="/static/scss/styles.css" />
     </head>
-    <body>
+    <body{{#unless showNsfw}} class="hideNsfw"{{/unless}}>
         <header>
-            <h1>RedditBooru</h1>
+            <h1><a href="/">RedditBooru</a></h1>
             {{>search}}
-            {{>nav}}
+            {{>nav this}}
         </header>
         <aside id="supporting" {{#if supporting}}class="hasContent"{{/if}}>{{{supporting}}}</aside>
         <section id="content">
@@ -32,6 +32,7 @@
         <script>
             var RB = {};
             window.sources = {{{sources}}};
+            window.filters = {{{jsonBlob filters}}};
         </script>
         <script src="/static/js/RedditBooru.js"></script>
     </body>

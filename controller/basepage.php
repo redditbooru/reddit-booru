@@ -7,16 +7,20 @@ namespace Controller {
 
     class BasePage implements Page {
 
-        protected static $renderKeys;
+        protected static $renderKeys = [];
         protected static $enabledSources;
 
         public static function render() {
 
-            self::$renderKeys = [];
+            Lib\Display::addKey('user', Api\User::getCurrentUser());
+            Lib\Display::addKey('phpSessionUpload', ini_get("session.upload_progress.name"));
 
             // Get sources
             $sources = QueryOption::getSources();
             $enabledSources = [];
+
+            // nsfw display flag
+            Lib\Display::addKey('showNsfw', Lib\Url::GetBool('showNsfw', $_COOKIE));
 
             // If there were sources passed on the query string, use those for image fetchery. Fall back on cookies
             $qsSources = Lib\Url::Get('sources', null);
@@ -31,7 +35,7 @@ namespace Controller {
             }
             self::$enabledSources = $enabledSources;
 
-            self::$renderKeys['sources'] = json_encode($sources);
+            Lib\Display::addKey('sources', json_encode($sources));
 
         }
 
