@@ -1,8 +1,16 @@
 <?php
 
 namespace Lib {
-    
+
     class Http {
+
+        /**
+         * Holds the error message returned by cURL for the last transaction
+         */
+        private static $_lastError;
+        public static function getLastError() {
+            return self::$_lastError;
+        }
 
         public static function get($url) {
             return self::curl_get_contents($url);
@@ -17,20 +25,25 @@ namespace Lib {
             $c = curl_init($url);
             curl_setopt($c, CURLOPT_USERAGENT, HTTP_UA);
             curl_setopt($c, CURLOPT_FOLLOWLOCATION, true);
-            
+
             // Not the most ethical thing, but fake a referer for pixiv to get around the 403
             if (strpos($url, 'pixiv.net')) {
                 curl_setopt($c, CURLOPT_REFERER, 'http://pixiv.net');
             }
-            
+
             curl_setopt($c, CURLOPT_PROGRESSFUNCTION, 'self::_progress');
             curl_setopt($c, CURLOPT_NOPROGRESS, false);
 
             curl_setopt($c, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($c, CURLOPT_TIMEOUT, 15);
+            curl_setopt($c, CURLOPT_TIMEOUT, 60);
             curl_setopt($c, CURLOPT_ENCODING, 'gzip');
             $retVal = curl_exec($c);
             $effectiveUrl = curl_getinfo($c, CURLINFO_EFFECTIVE_URL);
+
+            if (null == $retVal) {
+                self::$_lastError = curl_error($c);
+            }
+
             curl_close($c);
 
             self::_requestComplete($effectiveUrl);
@@ -57,7 +70,7 @@ namespace Lib {
         }
 
         /**
-         * A callback function to monitor cURLs download progress for a client
+         * A callback function to monitor cURL's download progress for a client
          */
         private static function _progress($c, $totalBytesDown, $bytesDownloaded, $totalBytesUp, $bytesUploaded) {
             $urls = self::getActiveDownloads();
