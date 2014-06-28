@@ -204,6 +204,14 @@ namespace Api {
         }
 
         /**
+         * Whether or not this post links to itself
+         */
+        public function isSelfLinked() {
+            $id = self::getPostIdFromUrl($this->link);
+            return $this->id == $id;
+        }
+
+        /**
          * Creates a gallery URL
          */
         public static function createGalleryUrl($postId, $title) {

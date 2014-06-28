@@ -279,7 +279,7 @@ namespace Api {
                     $query .= ' + 0) AS distance FROM `' . $post->_dbTable . '` pd INNER JOIN `images` i ON i.`image_id` = pd.`image_id` ';
 
                     if ($sources) {
-                        $innerQuery .= 'WHERE ';
+                        $query .= 'WHERE ';
                         $sources = !is_array($sources) ? explode(',', $sources) : $sources;
                         $tmpList = [];
                         $i = 0;
@@ -469,15 +469,23 @@ namespace Api {
             $retVal = Lib\Cache::get($cacheKey);
 
             if (false === $retVal) {
-                $query = 'SELECT * FROM `post_data` WHERE `post_id` IN (';
-                $query .= 'SELECT post_id, COUNT(1) AS total FROM `post_data` WHERE `user_id` = :userId';
-                $query .= ' AND `post_link` LIKE "%redditbooru.com%" GROUP BY post_id HAVING total > 1)';
+                $query = 'SELECT pd.*, p.post_link FROM `post_data` pd ';
+                $query .= 'INNER JOIN `posts` p ON p.`post_id` = pd.`post_id` WHERE pd.`post_id` IN (';
+                $query .= 'SELECT pd.`post_id` FROM `post_data` pd ';
+                $query .= 'INNER JOIN `posts` p ON p.`post_id` = pd.`post_id`  WHERE pd.`user_id` = :userId ';
+                $query .= 'AND p.`post_link` LIKE "%redditbooru.com%" GROUP BY pd.`post_id` HAVING COUNT(1) > 1) ';
+                $query .= 'ORDER BY `post_date` DESC';
 
-                $result = Lib\Db::Query($query);
+                $result = Lib\Db::Query($query, [ ':userId' => $userId ]);
                 $retVal = [];
                 if ($result && $result->count) {
                     while ($row = Lib\Db::Fetch($result)) {
-                        $retVal[] = new PostData($row);
+                        $post = new Post($row);
+                        if ($post->isSelfLinked()) {
+                            $image = new PostData($row);
+                            $image->linkedPosts = self::getLinkedPosts($image->postId);
+                            $retVal[] = $image;
+                        }
                     }
                 }
 
@@ -487,6 +495,32 @@ namespace Api {
 
             return $retVal;
 
+        }
+
+        /**
+         * Returns all posts that link to the post in question
+         */
+        public static function getLinkedPosts($id) {
+            return Lib\Cache::fetch(function() use ($id) {
+
+                $retVal = null;
+
+                $result = Lib\Db::Query('CALL proc_GetLinkedPosts(:id)', [ ':id' => $id ]);
+                if ($result && $result->count) {
+                    $retVal = [];
+                    while ($row = Lib\Db::Fetch($result)) {
+                        $retVal[] = new PostData($row);
+                    }
+                }
+
+                return $retVal;
+
+            }, 'Api::Post::getLinkedPosts_' . $id);
+        }
+
+        public static function invalidateCacheForGallery(Post $post) {
+            Lib\Cache::Set('Api:PostData:getGallery_' . $post->id, false);
+            Lib\Cache::Set('Api:PostData:getUserGalleries_' . $post->userId, false);
         }
 
     }

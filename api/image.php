@@ -304,7 +304,7 @@ namespace Api {
         /**
          * Saves an image to all the various dumping grounds
          */
-        private function _saveImage() {
+        public function _saveImage() {
 
             $retVal = false;
 

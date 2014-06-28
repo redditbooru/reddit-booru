@@ -4,6 +4,11 @@
         "replace": "page=images"
     },
     {
+        "rule": "^upload.php?url=([^&]+)",
+        "replace": "/?dialog=upload&imageUri=$1",
+        "redirect": true
+    },
+    {
         "rule": "^search/$",
         "replace": "page=redditbooru"
     },
@@ -33,6 +38,15 @@
     {
         "rule": "^authenticate/$",
         "replace": "page=uas&action=authenticate"
+    },
+    {
+        "rule": "^gallery/mine$",
+        "redirect": true,
+        "replace": "/gallery/mine/"
+    },
+    {
+        "rule": "^gallery/mine/$",
+        "replace": "page=gallery&action=user"
     },
     {
 		"rule": "^r/([^/.]+)/comments/([^/.]+)/(.+)?$",

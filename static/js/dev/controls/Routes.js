@@ -103,12 +103,14 @@
             if (this._routes.hasOwnProperty(i)) {
                 route = this._routes[i];
                 result = route.regEx.exec(path);
+
                 if (result) {
                     _.each(route.map, function(name, index) {
                         params[name] = result[index];
                     });
 
                     this.go(i, params);
+                    return;
                 }
             }
         }

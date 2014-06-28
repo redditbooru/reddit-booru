@@ -54,26 +54,28 @@
                 $el = this.$el;
 
             this.collection.each(function(item) {
-                
-                itemsToRender.push(item);
-                
-                if (item.rendered) {
-                    append = true;
-                } else {
-                    newItems++;
-                    item.rendered = true;
-                }
 
-                if (itemsToRender.length === this.columns) {
+                if (item.attributes.visible || RB.showHidden) {
+                    itemsToRender.push(item);
 
-                    // Only add this to the output if there were new items on this row
-                    if (newItems) {
-                        out = out.concat(this._drawColumn(itemsToRender));
+                    if (item.rendered) {
+                        append = true;
+                    } else {
+                        newItems++;
+                        item.rendered = true;
                     }
 
-                    itemsToRender.reset();
-                    newItems = 0;
-                    count = 0;
+                    if (itemsToRender.length === this.columns) {
+
+                        // Only add this to the output if there were new items on this row
+                        if (newItems) {
+                            out = out.concat(this._drawColumn(itemsToRender));
+                        }
+
+                        itemsToRender.reset();
+                        newItems = 0;
+                        count = 0;
+                    }
                 }
             }, this);
 
@@ -90,7 +92,11 @@
             // Slap on the more button
             $el.find('.more-row').remove();
             $el.append(out);
-            $el.append(this.templates.moreRow());
+
+            // Only display the more row if there are more images than columns
+            if (this.collection.length > this.columns) {
+                $el.append(this.templates.moreRow());
+            }
 
         },
 
@@ -98,10 +104,11 @@
          * Calculates how many columns there should be and redraws if there's been a change
          */
         calculateWindowColumns: function() {
-            var oldColumnCount = this.columns;
-            this.width = this.$el.width();
-            this.columns = Math.floor(this.width / AVERAGE_COLUMN_WIDTH);
-            if (this.columns !== oldColumnCount) {
+            var oldColumnCount = this.columns,
+                currentWidth = this.$el.width();
+            if (currentWidth !== this.width) {
+                this.width = this.$el.width();
+                this.columns = Math.floor(this.width / AVERAGE_COLUMN_WIDTH);
                 this.width -= this.columns * IMAGE_GUTTER;
                 this.render();
             }
@@ -121,7 +128,6 @@
                 image.widthHeightRatio = image.width / image.height;
                 image.widthHeightRatio = image.widthHeightRatio < minRatio ? minRatio : image.widthHeightRatio;
                 widthRatioSum += image.widthHeightRatio;
-                console.log(image);
             });
 
             // Using the sum we just got, we'll figure out what percentage of the total

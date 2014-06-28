@@ -21,7 +21,7 @@
             'paste #imageUrl': 'handlePaste',
             'keyup input': 'handleTextChange',
             'click .close': '_hideDialog',
-            'click #imageFileButton': 'handleUploadClick',
+            'click #imageFileButton': 'beginUpload',
             'click .remove': 'handleRemoveClick',
             'click .repostImage': 'handleRepostClick',
             'submit form': 'handleSubmit'
@@ -36,6 +36,20 @@
             this.router = router;
             this._loadForm();
 
+        },
+
+        /**
+         * Method for external views to open the dialog and start an image upload
+         * @param image {String|File} URL or image file object to begin uploading
+         */
+        openWithUpload: function(image) {
+            this._showDialog();
+            if (image instanceof File) {
+                this.beginUpload(image);
+            } else if (image) {
+                debugger;
+                this._urlUpload(image);
+            }
         },
 
         loadGallery: function(post) {
@@ -86,11 +100,15 @@
             this._showDialog();
         },
 
-        handleUploadClick: function(evt) {
-            var self = this;
+        beginUpload: function(evt) {
+            var self = this,
+                file = evt instanceof File ? evt : undefined;
             new RB.Uploader(function(uploadId, fileName) {
-                self._renderUploader(uploadId, fileName);
-            }, _.bind(this._uploadComplete, this));
+                    self._renderUploader(uploadId, fileName);
+                },
+                _.bind(this._uploadComplete, this),
+                _.bind(this._fileUploadProgress, this),
+                file);
         },
 
         handlePaste: function(evt) {
@@ -110,12 +128,11 @@
 
         submitSuccess: function(data) {
             if ('route' in data) {
-                console.log('going to ' + data.route);
                 this.router.go(data.route);
             } else if ('redirect' in data) {
                 window.open(data.redirect);
             }
-            // this._clearForm();
+            this._clearForm();
             this._hideDialog();
         },
 
@@ -217,16 +234,20 @@
         _progressCallback: function(data) {
             var i,
                 $item = null;
-console.log(data);
+
             if (null !== data) {
 
                 for (i in data) {
-                    $item = this.$el.find('[data-id="' + i + '"]').get(0).progress.progress(Math.round(data[i] * 100));
+                    this.$el.find('[data-id="' + i + '"]').get(0).progress.progress(Math.round(data[i] * 100));
                 }
 
-                setTimeout(_.bind(this._checkProgress, this), 1000);
+                setTimeout(_.bind(this._checkProgress, this), 250);
             }
 
+        },
+
+        _fileUploadProgress: function(progress, uploadId) {
+            this.$el.find('[data-id="' + uploadId + '"]').get(0).progress.progress(progress);
         },
 
         /**
@@ -275,9 +296,11 @@ console.log(data);
         },
 
         _renderUploader: function(id, url) {
-            var $upload = $(RB.Templates.uploading({ id: id, url: url }));
-            this.$el.find('ul').append($upload);
+            var $upload = $(RB.Templates.uploading({ id: id, url: url })),
+                $list = this.$el.find('ul');
+            $list.append($upload);
             $upload[0].progress = new RB.ProgressCircle($upload.find('.donut-loader'), 100, 150, '#e94e77', PROGRESS_BAR_THICKNESS);
+            $list.scrollTop($list[0].scrollHeight);
         }
 
     });

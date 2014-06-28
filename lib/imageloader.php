@@ -2,6 +2,7 @@
 
 namespace Lib {
 
+    use Api;
     use stdClass;
     use MongoGridFS;
 
@@ -35,7 +36,7 @@ namespace Lib {
 
             } else if ('redditbooru.com' === $domain) {
                 // Temporary solution to deal with data coming from PROD
-                $retVal = self::getRedditBooruImages($path);
+                $retVal = self::getRedditBooruImages($url);
 
             // DeviantArt images
             } else if ('deviantart.com' === $domain || 'fav.me' === $domain) {
@@ -212,17 +213,21 @@ namespace Lib {
         /**
          * Retrieves images from a redditbooru album
          */
-        public static function getRedditBooruImages($path) {
+        public static function getRedditBooruImages($url) {
             $retVal = null;
 
             // For testing purposes, we'll use a call to the API. In final version, this will be a database call
-            if (preg_match('/gallery\/([\d]+)/', $path, $matches)) {
-                $data = Http::get('http://redditbooru.com/images/?postId=' . $matches[1]);
+            $id = Api\Post::getPostIdFromUrl($url);
+            if ($id) {
+                $sub = strpos($url, 'beta.') !== false ? 'beta.' : '';
+                $data = Http::get('http://' . $sub . 'redditbooru.com/images/?postId=' . $id);
                 if ($data) {
                     $data = json_decode($data);
-                    $retVal = [];
-                    foreach ($data as $image) {
-                        $retVal[] = $image->cdnUrl;
+                    if (count($data) > 0) {
+                        $retVal = [];
+                        foreach ($data as $image) {
+                            $retVal[] = $image->cdnUrl;
+                        }
                     }
                 }
             }
@@ -243,14 +248,14 @@ namespace Lib {
             }
             return $retVal;
         }
-        
+
         /**
          * Determines the image type of the incoming data
          * @param string $data Data of the image file to determine
          * @return string Mime type of the image, null if not recognized
          */
         private static function _getImageType($data) {
-        
+
             $retVal = null;
             if (ord($data{0}) == 0xff && ord($data{1}) == 0xd8) {
                 $retVal = IMAGE_TYPE_JPEG;
@@ -259,11 +264,11 @@ namespace Lib {
             } else if (substr($data, 0, 6) == 'GIF89a' || substr($data, 0, 6) == 'GIF87a') {
                 $retVal = IMAGE_TYPE_GIF;
             }
-            
+
             return $retVal;
-        
+
         }
-        
+
         /**
          * Loads a file, determines the image type by scanning the header, and returns a GD object
          * @param string $file Path to the file to load
@@ -272,9 +277,9 @@ namespace Lib {
         public static function loadImage($file) {
 
             $retVal = null;
-            
+
             $type = self::getImageType($file);
-            
+
             if (false !== $type) {
                 $retVal = new stdClass;
                 $retVal->mimeType = $type;
@@ -291,19 +296,19 @@ namespace Lib {
                     default:
                         $retVal = null;
                 }
-                
+
                 if (null != $retVal && null == $retVal->image) {
                     $retVal = null;
                 }
-                
+
             }
-            
+
             return $retVal;
-            
+
         }
 
         private static function _downloadImage($url) {
-            
+
             $retVal = null;
 
             // Account for local files or URLs
@@ -315,9 +320,10 @@ namespace Lib {
 
             if (!$file) {
                 Events::fire(IMGEVT_DOWNLOAD_ERROR, 'Unable to download file');
-                self::_log('downloadImage_fail', $url);
+                self::_log('downloadImage_fail', [ 'url' => $url, 'message' => Http::getLastError() ]);
             } else {
                 $type = self::_getImageType($file);
+
                 if (null !== $type) {
 
                     $retVal = new stdClass;
@@ -356,7 +362,7 @@ namespace Lib {
          * Attempts to retrieve an image from mongocache
          */
         private static function _fetchFromMongo($url) {
-            
+
             $retVal = null;
 
             $rb = Mongo::getDatabase();
@@ -386,7 +392,7 @@ namespace Lib {
             $retVal = null;
 
             Events::fire(IMGEVT_DOWNLOAD_BEGIN);
-            
+
             // Check mongo for a copy of the image
             $retVal = self::_fetchFromMongo($url);
 

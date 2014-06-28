@@ -1,6 +1,6 @@
 <div class="image-row">
     {{#each .}}
-        <a class="image{{#if nsfw}} nsfw{{/if}}{{#unless visible}} hidden{{/unless}}" href="http://redd.it/{{externalId}}" data-src="{{cdnUrl}}" style="width: {{viewWidth}}px; background-image: url({{thumb}}_300_300.jpg);" data-id="{{postId}}" target="_blank">
+        <a class="image{{#if nsfw}} nsfw{{/if}}{{#unless visible}} hidden{{/unless}}" href="http://redd.it/{{externalId}}" data-src="{{cdnUrl}}" style="width: {{viewWidth}}px; background-image: url({{thumb}}_300_300.jpg);" data-id="{{postId}}" data-row="{{id}}" target="_blank">
             {{#if nsfw}}
                 <img src="{{thumb}}_300_300.jpg" class="nsfw" alt="{{title}}" style="width: {{viewWidth}}px;" />
             {{/if}}
@@ -8,8 +8,14 @@
             <dl class="information">
                 <dt>Posted to</dt>
                 <dd class="sub">{{sourceName}}</dd>
-                <dt>Score</dt>
-                <dd class="score">{{score}}</dd>
+                {{#unless distance}}
+                    <dt>Score</dt>
+                    <dd class="score">{{score}}</dd>
+                {{/unless}}
+                {{#if distance}}
+                    <dt>Posted</dt>
+                    <dd class="posted">{{relativeTime dateCreated}} ago</dd>
+                {{/if}}
             </dl>
         </a>
     {{/each}}

@@ -113,6 +113,10 @@ namespace Api {
             return explode(',', $retVal);
         }
 
+        public static function getCurrentUser() {
+            return Lib\Session::get('user');
+        }
+
         /**
          * Returns the login URL for OAuth2 authentication
          */
@@ -144,8 +148,7 @@ namespace Api {
                         if (isset($data->name)) {
                             $user = self::getByName($data->name);
                             if ($user) {
-                                $retVal = true;
-                                $_SESSION['user'] = $retVal ? $user : null;
+                                Lib\Session::set('user', $user);
                             }
                         }
 

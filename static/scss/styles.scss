@@ -22,6 +22,23 @@
     font-style: normal;
 }
 
+@-webkit-keyframes imageFadeOut {
+    0% { opacity: 100%; }
+    100% { opacity: 70%; }
+}
+@-moz-keyframes imageFadeOut {
+    0% { opacity: 100%; }
+    100% { opacity: 70%; }
+}
+@-o-keyframes imageFadeOut {
+    0% { opacity: 100%; }
+    100% { opacity: 70%; }
+}
+@keyframes imageFadeOut {
+    0% { opacity: 100%; }
+    100% { opacity: 70%; }
+}
+
 $LIGHT_GREY: #eee;
 $GREY: #ddd;
 $DARK_GREY: #666;
@@ -214,7 +231,7 @@ header {
 
     #title {
         font: 30px/1 'MG Thin', sans-serif;
-        padding: 15px 0 10px 15px;
+        padding: 15px 0 10px;
         float: left;
         &.hidden {
             display: none;
@@ -270,6 +287,8 @@ header {
                 left: -30px;
                 bottom: -30px;
                 right: -30px;
+                filter: url(/static/scss/filters.svg#nsfwBlur);
+                -ms-filter: blur(15px);
                 -webkit-filter: blur(15px);
             }
 
@@ -301,6 +320,10 @@ header {
                         float: right;
                         background: url(/static/images/upvotes.png) no-repeat left 7px;
                         padding-left: 12px;
+                    }
+
+                    &.posted {
+                        float: right;
                     }
 
                     &.sub {
@@ -343,6 +366,9 @@ header {
 
     // Galleries
     &.gallery {
+        .curated {
+            font: 18px 'MG Thin', sans-serif;
+        }
         img {
             max-width: 100%;
             display: block;
@@ -461,6 +487,12 @@ button.singleSourceSearch {
             padding: 10px;
         }
     }
+
+    #postImage {
+        margin-top: 10px;
+        width: 100%;
+    }
+
 }
 
 #dragdrop {
@@ -496,21 +528,6 @@ button.singleSourceSearch {
 
     }
 
-}
-
-.loading {
-    position: relative;
-    &:after {
-        content: '';
-        display: block;
-        position: absolute;
-        left: 0;
-        top: 0;
-        right: 0;
-        bottom: 0;
-        background: #fff url(http://redditbooru.com/view/reddit-booru/images/ajax.gif) no-repeat center center;
-        opacity: 0.5;
-    }
 }
 
 #upload {
@@ -711,4 +728,161 @@ button.singleSourceSearch {
         }
     }
 
+}
+
+#viewer {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.97);
+    z-index: $NAV_INDEX + 1;
+    display: none;
+    padding: 20px 40px 20px 20px;
+
+    h2 {
+        font: 24px 'MG Regular', sans-serif;
+        color: #fff;
+    }
+
+    h3 {
+        color: #fff;
+        font: 18px 'MG Thin', sans-serif;
+        margin-bottom: 10px;
+    }
+
+    p {
+        color: #fff;
+        font: 18px 'MG Thin', sans-serif;
+    }
+
+    .vertical-align {
+        display: inline-block;
+        height: 100%;
+        vertical-align: middle;
+    }
+
+    img {
+        max-height: 100%;
+        max-width: 100%;
+        vertical-align: middle;
+    }
+
+    .post-image {
+        @include border-box();
+        float: left;
+        width: 75%;
+        height: 100%;
+        padding-right: 10px;
+        display: table-cell;
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    &.loading {
+        background-image: url(/static/images/loading.gif);
+        background-repeat: no-repeat;
+        background-position: center center;
+
+        img {
+            -webkit-animation: imageFadeOut 1s;
+            -moz-animation: imageFadeOut 1s;
+            -o-animation: imageFadeOut 1s;
+            animation: imageFadeOut 1s;
+        }
+
+    }
+
+    .post-content {
+        @include border-box();
+        padding-left: 10px;
+        width: 24%;
+        float: right;
+        border-left: 1px solid #222;
+    }
+
+    .viewer-controls  {
+        .transport {
+            padding: 100px 0 0;
+            height: 100px;
+            width: 50px;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.2);
+            border: 0;
+            position: absolute;
+            top: 50%;
+            margin: -50px;
+            &.next {
+                border-radius: 50px 0 0 50px;
+                right: 50px;
+                &:after {
+                    content: '';
+                    display: block;
+                    border: 10px solid transparent;
+                    border-left: 10px solid #fff;
+                    margin-top: -10px;
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                }
+            }
+            &.previous {
+                border-radius: 0 50px 50px 0;
+                left: 50px;
+                &:after {
+                    content: '';
+                    display: block;
+                    border: 10px solid transparent;
+                    border-right: 10px solid #fff;
+                    margin-top: -10px;
+                    position: absolute;
+                    top: 50%;
+                    right: 50%;
+                }
+            }
+        }
+
+        .close {
+            background: transparent;
+            color: #fff;
+            border: 0;
+            position: absolute;
+            right: 7px;
+            top: 0;
+            font-size: 36px;
+        }
+
+    }
+
+    &.screensaver {
+        .post-image {
+            width: 100%;
+        }
+
+        .post-content {
+            display: none;
+        }
+
+        .transport {
+            display: none !important;
+        }
+
+    }
+
+}
+
+#globalUploaderProgress {
+    position: fixed;
+    width: 300px;
+    height: 300px;
+    background: #fff;
+    border-radius: 10px;
+    top: 50%;
+    left: 50%;
+    margin: -150px 0 0 -150px;
+    display: none;
+    canvas {
+        padding: 20px;
+    }
 }

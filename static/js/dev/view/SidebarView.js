@@ -14,6 +14,13 @@
             // TODO - this should probably be event controlled
             RB.App.views.images.calculateWindowColumns();
             RB.App.views.images.render();
+        },
+
+        dismiss: function() {
+            this.$sidebar.html('').removeClass('hasContent');
+            // TODO - this should probably be event controlled
+            RB.App.views.images.calculateWindowColumns();
+            RB.App.views.images.render();
         }
 
     });

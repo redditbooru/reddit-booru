@@ -90,6 +90,10 @@ namespace Lib {
                     return $source;
                 }
             });
+
+            self::addHelper('jsonBlob', function($template, $context, $args, $source) {
+                return json_encode($context->get($args));
+            });
         }
 
     }

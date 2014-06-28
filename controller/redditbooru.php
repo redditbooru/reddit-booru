@@ -6,6 +6,7 @@ namespace Controller {
 
     use Api;
     use Lib;
+    use stdClass;
 
     /**
      * Reddit-Booru
@@ -14,6 +15,8 @@ namespace Controller {
      */
 
     class RedditBooru extends BasePage {
+
+        private static $_allowedFilters = [ 'q', 'sources', 'user', 'imageUri' ];
 
         /**
          * Determines how the page needs to be rendered and passes control off accordingly
@@ -48,10 +51,11 @@ namespace Controller {
             }
 
             $display = 'thumbs';
-            $thumb = null;
             $jsonOut = null;
             $postTitle = null;
             $urlOut = '/images/?';
+
+            $filters = new stdClass;
 
             switch ($action) {
                 case 'single':
@@ -59,7 +63,8 @@ namespace Controller {
                     break;
                 case 'user':
                     $user = Lib\Url::Get('user');
-                    $jsonOut = Images::getByQuery([ 'user' => $user, 'sources' => self::$enabledSources ]);
+                    $jsonOut = Images::getByQuery([ 'user' => $user ]);
+                    $filters->user = $user;
                     $userData = Api\PostData::getUserProfile($user);
                     Lib\Display::renderAndAddKey('supporting', 'userProfile', $userData);
 
@@ -86,19 +91,14 @@ namespace Controller {
                     break;
                 default:
                     $_GET['sources'] = isset($_GET['sources']) ? $_GET['sources'] : self::$enabledSources;
-                    $jsonOut = Images::getByQuery($_GET);
+                    $_GET['honorVisible'] = true;
+                    $filters = self::_filtersFromArray($_GET);
+                    $jsonOut = isset($_GET['imageUri']) ? Images::getByImage($_GET) : Images::getByQuery($_GET);
                     break;
             }
 
-            if (count($jsonOut) > 0) {
-                if ($jsonOut[0] instanceof JsonDataObject) {
-                    $thumb = $jsonOut[0]->cdnUrl;
-                }
-            }
-
-            $urlOut .= isset($_GET['flushCache']) ? '&flushCache' : '';
-
-            self::$renderKeys['images'] = json_encode($jsonOut);
+            self::$renderKeys['images'] = $jsonOut;
+            Lib\Display::addKey('filters', $filters);
             Lib\Display::renderAndAddKey('body', 'index', self::$renderKeys);
 
         }
@@ -142,6 +142,16 @@ namespace Controller {
             Lib\Display::setVariable('URL', $url);
             Lib\Display::render();
             exit;
+        }
+
+        private static function _filtersFromArray($filters) {
+            $retVal = new stdClass;
+            foreach (self::$_allowedFilters as $key) {
+                if (isset($filters[$key])) {
+                    $retVal->$key = $filters[$key];
+                }
+            }
+            return $retVal;
         }
 
     }

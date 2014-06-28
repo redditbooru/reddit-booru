@@ -1,1 +1,22 @@
-<div id="upload"></div>
+<div id="upload">
+    <form action="/upload/" method="POST">
+        <h2>Upload</h2>
+        <div class="form">
+            <fieldset class="uploadInput">
+                <legend>Upload Image</legend>
+                <span class="urlUpload">
+                    <input type="text" placeholder="From URL" id="imageUrl" />
+                </span>
+                <input type="file" id="imageFile" />
+                <button type="button" id="imageFileButton">Upload Image</button>
+            </fieldset>
+            <fieldset class="finalize">
+                <legend>Finish</legend>
+                <input type="text" name="albumTitle" class="albumTitle" placeholder="Album title" />
+                <button class="submit">Done</button>
+            </fieldset>
+            <button type="button" class="close" aria-label="close">&times;</button>
+        </div>
+        <ul></ul>
+    </form>
+</div>

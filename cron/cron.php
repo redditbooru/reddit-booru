@@ -14,7 +14,6 @@ function _log($message) {
 }
 
 function _logDbError($header) {
-    print_r(Lib\Db::$lastError); exit;
     _log($header . Lib\Db::$lastError);
 }
 

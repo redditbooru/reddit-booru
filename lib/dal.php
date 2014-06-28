@@ -1,58 +1,58 @@
 <?php
 
 namespace Lib {
-	
+
     use Exception;
 
 	class Dal {
-		
+
         /**
          * Constructor
          */
         public function __construct($obj = null) {
-        
+
             if (is_numeric($obj)) {
                 $this->getById($obj);
             } else if (is_object($obj)) {
                 $this->copyFromDbRow($obj);
             }
-        
+
         }
-        
+
 		/**
 		 * Syncs the current object to the database
 		 */
 		public function sync() {
-			
+
 			$retVal = 0;
-			
+
 			if (property_exists($this, '_dbTable') && property_exists($this, '_dbMap')) {
-				
+
 				$dbParams = array();
-				
+
 				// Determine if a primary key was set
 				$primaryKey = property_exists($this, '_dbPrimaryKey') ? $this->_dbPrimaryKey : false;
 				$primaryKeyValue = 0;
 				if ($primaryKey) {
 					$primaryKeyValue = (int) $this->$primaryKey;
 				}
-				
+
 				// If the primary key value is non-zero, do an UPDATE
 				$method = $primaryKeyValue !== 0 ? 'UPDATE' : 'INSERT';
 				$parameters = [];
-				
+
 				foreach ($this->_dbMap as $property => $column) {
 					// Primary only gets dropped in for UPDATEs
 					if (($primaryKey === $property && 'UPDATE' === $method) || $primaryKey !== $property) {
 						$paramName = ':' . $property;
-						
+
 						// Serialize objects going in as JSON
 						$value = $this->$property;
 						if (is_object($value)) {
 							$value = json_encode($value);
 						}
 						$params[$paramName] = $value;
-						
+
 						if ('INSERT' === $method) {
 							$parameters[] = $paramName;
 						} else if ($primaryKey != $property) {
@@ -60,7 +60,7 @@ namespace Lib {
 						}
 					}
 				}
-				
+
 				// Build and execute the query
 				$query = $method;
 				if ('INSERT' === $method) {
@@ -70,18 +70,18 @@ namespace Lib {
 					$query .= ' `' . $this->_dbTable . '` SET ' . implode(',', $parameters) . ' WHERE `' . $this->_dbMap[$primaryKey] . '` = :' . $primaryKey;
 				}
 				$retVal = Db::Query($query, $params);
-				
+
 				// Save the ID for insert
 				if ($retVal > 0 && 'INSERT' === $method) {
 					$this->$primaryKey = $retVal;
 				}
-				
+
 			}
-			
+
 			return $retVal > 0;
-		
+
 		}
-		
+
         /**
          * Performs a generic query against the database
          */
@@ -106,7 +106,7 @@ namespace Lib {
                         // Verify that the property actually exists in the map. Ensures constraint and prevents SQLi
                         if (isset($obj->_dbMap[$col])) {
                             if (is_array($info)) {
-                                
+
                                 foreach ($info as $operator => $options) {
 
                                     $comparison = '=';
@@ -139,12 +139,23 @@ namespace Lib {
                                             $params[$value] = $options;
                                             $comparison = 'LIKE';
                                             break;
+
+                                        case 'ne':
+                                            $params[$value] = $options;
+                                            $comparison = '!=';
+                                            break;
+
+                                        case 'null':
+                                            $comparison = 'IS' . ($options ? '' : ' NOT');
+                                            $value = 'NULL';
+                                            break;
+
                                     }
 
                                     $where[] = $oper . ' `' . $obj->_dbMap[$col] . '` ' . $comparison . ' ' . $value;
 
                                 }
-                                
+
                             // If an array wasn't passed, assume testing equality on the value with AND logic
                             } else {
                                 $where[] = 'AND `' . $obj->_dbMap[$col] . '` = :' . $col;
@@ -168,7 +179,7 @@ namespace Lib {
                     $order = [];
 
                     foreach ($sort as $col => $direction) {
-                        
+
                         // Verify that the property actually exists in the map. Ensures constraint and prevents SQLi
                         if (isset($obj->_dbMap[$col])) {
                             switch (strtolower($direction)) {
@@ -245,7 +256,7 @@ namespace Lib {
             $obj->_getById($id);
         	return $obj;
         }
-        
+
         /**
          * Gets a record from the database by the primary key
          */
@@ -291,7 +302,7 @@ namespace Lib {
             $obj = null === $obj ? self::_instantiateThisObject() : $obj;
             return property_exists($obj, '_dbTable') && property_exists($obj, '_dbMap') && property_exists($obj, '_dbPrimaryKey');
         }
-	
+
 	}
 
 }

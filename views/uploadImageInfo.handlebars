@@ -1,8 +1,9 @@
 <li data-id="{{id}}">
     <img src="{{thumb}}_150_150.jpg" alt="thumbnail" />
-    <input type="hidden" name="path[]" value="{{id}}" />
-    <input type="text" name="caption[]" placeholder="Image Caption" class="caption" />
-    <input type="text" bane="source[]" placeholder="Image Source URL" />
-    <button type="button" class="findSource">Find Source</button>
+    <input type="hidden" name="imageId[]" value="{{imageId}}" />
+    <input type="text" name="caption[]" placeholder="Image Caption" class="caption" value="{{caption}}" />
+    <input type="text" name="source[]" placeholder="Image Source URL" value="{{source}}" />
+    <!-- Removing for now until a good way of source searching at scale can be determined -->
+    <!-- <button type="button" class="findSource">Find Source</button> -->
     <button type="button" class="remove">Remove</button>
 </li>

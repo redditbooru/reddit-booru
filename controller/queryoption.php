@@ -30,7 +30,7 @@ namespace Controller {
             // First, get all enabled sources from the database
             $sources = Lib\Cache::fetch(function() {
                 return Api\Source::queryReturnAll([ 'enabled' => 1, 'type' => 'subreddit' ]);
-            }, 'Controller_QueryOption_getUserSources', CACHE_LONG);
+            }, 'Controller_QueryOption_getSources', CACHE_LONG);
 
             $retVal = [];
             $cookieSources = isset($_COOKIE[QS_SOURCES]) ? explode(',', $_COOKIE[QS_SOURCES]) : [ 1 ];

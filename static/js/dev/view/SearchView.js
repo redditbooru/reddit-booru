@@ -15,7 +15,7 @@
         $body: $('body'),
         currentParams: {},
 
-        initialize: function(sidebar, imageCollection, sources, router) {
+        initialize: function(sidebar, imageCollection, sources, router, uploadView) {
             var self = this;
 
             this.imageCollection = imageCollection;
@@ -23,9 +23,6 @@
             this.router = router;
             this.$searchInput.on('keypress', _.bind(this._handleSearch, this));
             this.$clearSearch.on('click', _.bind(this.clearSearch, this));
-
-            // TODO - think about whether this really belongs here. Might need a NavView at some point
-            $('#showNsfw').on('change', _.bind(this._handleNsfwChange, this));
 
             if (typeof window.filters === 'object') {
                 this.currentParams = window.filters;
@@ -37,22 +34,46 @@
             }
 
             // Global catch for source select links
-            $('body').on('click', '.singleSourceSearch', _.bind(this.singleSourceSearch, this));
+            this.$body.on('click', '.singleSourceSearch', _.bind(this.singleSourceSearch, this));
             router.addRoute('search', '/search/', _.bind(this.routeSearch, this));
+
+            // For the "rehost" button when doing reverse image lookup
+            this.$body.on('click', '#postImage', _.bind(this._handleRehostClick, this));
+            this.uploadView = uploadView;
+
+            this.$body.on('click', '#btnUploadSearch', _.bind(this.uploadSearch, this));
+
+            // TODO - think about whether this really belongs here. Might need a NavView at some point
+            $('#showNsfw').on('change', _.bind(this._handleNsfwChange, this));
 
             this.sources = sources;
             sources.on('update', _.bind(this._handleSourcesUpdate, this));
 
         },
 
+        initData: function(data) {
+            if ('results' in data) {
+                this._displayImageSearch(data);
+            }
+        },
+
         routeSearch: function(params) {
             params = _.defaults(params, this.currentParams);
-            this.imageCollection.setQueryOption(params);
             this.currentParams = params;
+
+            // Don't do a request if there's an image specified. There's special processing needed for that
+            this.imageCollection.setQueryOption(params, _.has(params, 'imageUri'));
+
+            if (params.imageUri) {
+                this._reverseImageSearch(params.imageUri);
+            } else {
+                this._buildBreadCrumb();
+            }
+
             if (!params.user) {
                 this.sidebar.dismiss();
             }
-            this._buildBreadCrumb();
+
             return this.currentParams;
         },
 
@@ -66,6 +87,25 @@
 
         singleSourceSearch: function(evt) {
             this.imageCollection.setQueryOption('sources', evt.currentTarget.dataset['id']);
+        },
+
+        uploadSearch: function(evt) {
+
+            var image = evt instanceof File ? evt : null,
+                self = this,
+                nullFunc = function() {};
+
+            new RB.Uploader(nullFunc, _.bind(this._displayImageSearch, this), nullFunc, image, '/images/', true);
+
+        },
+
+        _displayImageSearch: function(data) {
+            if (data.results) {
+                this.imageCollection.reset(data.results);
+                this.sidebar.populate(RB.Templates.imageSearchDetails(data), this);
+                RB.App.setTitle('Similar images');
+                this.$clearSearch.show();
+            }
         },
 
         _handleNsfwChange: function(evt) {
@@ -95,6 +135,10 @@
             }, UPDATE_DELAY);
         },
 
+        _handleRehostClick: function(evt) {
+            this.uploadView.openWithUpload(evt.target.getAttribute('data-original'));
+        },
+
         // Router entry points
         _handleSearch: function(evt) {
             var self = this,
@@ -102,7 +146,8 @@
                 submitSearch = function() {
                     var value = evt.target.value;
                     if (value.indexOf('http') === 0) {
-                        self._reverseImageSearch(value);
+                        // self._reverseImageSearch(value);
+                        self.router.go('search', { imageUri: value });
                     } else {
                         // self._querySearch(value);
                         self.router.go('search', { q: value });
@@ -120,10 +165,30 @@
 
         _reverseImageSearch: function(url) {
             var images = this.imageCollection,
-                self = this;
+                self = this,
+                progress = RB.Uploader.getGlobalProgress(),
 
-            images.clearQueryOptions(true);
-            images.setQueryOption('imageUri', url, false);
+                updateRequest = function() {
+                    $.ajax({
+                        url: '/upload/?action=status',
+                        dataType: 'json',
+                        success: requestSuccess
+                    });
+                },
+
+                requestSuccess = function(data) {
+
+                    if (_.has(data, url)) {
+                        progress.progress(Math.round(data[url] * 100));
+                    }
+
+                    if (data !== null) {
+                        setTimeout(updateRequest, 250);
+                    }
+                };
+
+            RB.Uploader.showGlobalProgress();
+            setTimeout(updateRequest, 1000);
 
             // We're going to hijack the usual request chain so that reverse image search specific logic can be done
             images.reset();
@@ -131,10 +196,11 @@
                 var data = JSON.parse(data),
                     results = data.results;
                 self.sidebar.populate(RB.Templates.imageSearchDetails(data), self);
+                RB.Uploader.hideGlobalProgress();
                 return JSON.stringify(results);
             });
 
-            RB.App.setTitle('Reverse image search');
+            RB.App.setTitle('Similar images');
             this.$clearSearch.show();
         },
 

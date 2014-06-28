@@ -11,7 +11,6 @@
             this.uploadForm = uploadForm;
             this.router = router;
             this._attachEventListeners();
-            console.log('dude');
         },
 
         _attachEventListeners: function() {

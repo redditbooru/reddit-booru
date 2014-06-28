@@ -6,6 +6,7 @@
         <title>
             {{#if pageTitle}}{{pageTitle}}{{else}}redditbooru - a place where cute girls come to meet{{/if}}
         </title>
+        <script src="/static/js/dev/HashRedirect.js"></script>
         <link rel="stylesheet" type="text/css" href="/static/scss/styles.css" />
     </head>
     <body{{#unless showNsfw}} class="hideNsfw"{{/unless}}>
@@ -28,6 +29,7 @@
         {{>dragdrop}}
         {{>upload}}
         {{>globalUploader}}
+        {{>imageViewer}}
 
         <script>
             var RB = {};

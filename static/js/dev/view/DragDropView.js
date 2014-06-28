@@ -1,5 +1,5 @@
 (function(undefined) {
-    
+
     'use strict';
 
     var HOVER = 'hover';
@@ -8,14 +8,18 @@
 
         $dragdrop: $('#dragdrop'),
 
-        initialize: function() {
+        initialize: function(uploadView, searchView) {
 
-            $('body')
-                .on('dragover', _.bind(this.handleDragOver, this))
-                .on('dragleave', _.bind(this.handleDragLeave, this))
-                .on('drop', _.bind(this.handleDrop, this));
+            var body = document.getElementsByTagName('body')[0];
+
+            body.addEventListener('dragover', _.bind(this.handleDragOver, this));
+            body.addEventListener('dragleave', _.bind(this.handleDragLeave, this))
+            body.addEventListener('drop', _.bind(this.handleDrop, this));
 
             this.$dragdrop.find('.search').on('drop', _.bind(this.handleDrop, this));
+
+            this.uploadView = uploadView;
+            this.searchView = searchView;
 
         },
 
@@ -28,7 +32,7 @@
         },
 
         handleDragLeave: function(evt) {
-            
+
             evt.stopPropagation();
             evt.preventDefault();
 
@@ -36,8 +40,8 @@
                 width = this.$dragdrop.width(),
                 height = this.$dragdrop.height();
 
-            if (evt.originalEvent.clientX < position.left || evt.originalEvent.clientY < position.top
-                || evt.originalEvent.clientX > position.left + width || evt.originalEvent.clientY > position.top + height) {
+            if (evt.clientX < position.left || evt.clientY < position.top
+                || evt.clientX > position.left + width || evt.clientY > position.top + height) {
                 this.$dragdrop.hide().find('.' + HOVER).removeClass(HOVER);
             }
 
@@ -46,7 +50,14 @@
         handleDrop: function(evt) {
             evt.preventDefault();
             this.$dragdrop.hide();
-            console.log(evt.target);
+            if (evt.dataTransfer && evt.dataTransfer.files.length > 0) {
+                var file = evt.dataTransfer.files[0];
+                if ($(evt.target).hasClass('upload')) {
+                    this.uploadView.openWithUpload(file);
+                } else {
+                    this.searchView.uploadSearch(file);
+                }
+            }
         }
 
     });

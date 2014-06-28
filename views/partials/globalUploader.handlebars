@@ -1,4 +1,6 @@
 <form action="/upload/?action=upload" method="post" enctype="multipart/form-data" id="globalUpload">
+    <input type="hidden" name="{{phpSessionUpload}}" />
     <input type="hidden" name="uploadId" />
     <input type="file" name="upload" />
 </form>
+<div id="globalUploaderProgress"></div>

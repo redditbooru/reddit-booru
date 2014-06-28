@@ -21,38 +21,45 @@
 
         initialize: function() {
 
+            var self = this;
+
             // Global collections
             this.collections = {
                 sources: new RB.QueryOptionCollection(),
-                images: new RB.ImageCollection()
+                images: new RB.ImageCollection(this.router)
             };
 
             // Bootstrap data
             this.collections.sources.reset(window.sources);
-            this.collections.images.reset(window.startUp);
+            if (window.startUp instanceof Array) {
+                this.collections.images.reset(window.startUp);
+            }
 
             var sidebar = new RB.SidebarView(),
-                upload = new RB.UploadView(),
-                sources = new RB.QueryOptionsView($('#sources'), this.collections.sources);
+                upload = new RB.UploadView(this.router),
+                sources = new RB.QueryOptionsView($('#sources'), this.collections.sources),
+                search = new RB.SearchView(sidebar, this.collections.images, sources, this.router, upload);
 
             // Views
             this.views = {
                 sidebar: sidebar,
                 sources: sources,
                 images: new RB.ImageView($('#images'), this.collections.images),
-                search: new RB.SearchView(sidebar, this.collections.images, sources, this.router),
+                search: search,
                 user: new RB.UserView(sidebar, this.collections.images, this.router),
-                dragdrop: new RB.DragDropView(),
+                dragdrop: new RB.DragDropView(upload, search),
                 upload: upload,
                 gallery: new RB.GalleryView(this.router, sidebar),
-                myGalleries: new RB.MyGalleriesView(this.router, upload)
+                myGalleries: new RB.MyGalleriesView(this.router, upload),
+                imageViewer: new RB.ImageViewer(this.router, this.collections.images)
             };
 
-            // Start the router
-            Backbone.history.start({
-                pushState: true,
-                silent: true
-            });
+            // If the startup blob has a specific view associated, kick it off
+            setTimeout(function() {
+                if ('view' in window.startUp) {
+                    self.views[window.startUp.view].initData(window.startUp);
+                }
+            }, 10);
 
         },
 

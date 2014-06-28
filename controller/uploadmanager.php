@@ -19,7 +19,7 @@ namespace Controller {
                     if ($imageUrl) {
                         $retVal = self::_uploadFromUrl($imageUrl);
                     } else if (count($_POST) && count($_FILES)) {
-                        self::_uploadFromFile();
+                        $retVal = self::uploadFromFile();
                     }
                     break;
                 case 'status':
@@ -40,9 +40,9 @@ namespace Controller {
             return self::_handleImageUpload($imageUrl);
         }
 
-        private static function _uploadFromFile() {
+        public static function uploadFromFile($moveOnly = false) {
             $uploadId = $_POST['uploadId'];
-            Lib\Display::setLayout('upload');
+
             $data = new stdClass;
             $data->error = true;
             if (is_numeric($uploadId)) {
@@ -51,17 +51,18 @@ namespace Controller {
                 $fileName = self::getUploadedFilePath($uploadId);
 
                 if (is_uploaded_file($file['tmp_name']) && move_uploaded_file($file['tmp_name'], $fileName)) {
-                    $data = self::_handleImageUpload($fileName, $uploadId);
+                    if ($moveOnly) {
+                        $data->fileName = $fileName;
+                        $data->error = false;
+                    } else {
+                        $data = self::_handleImageUpload($fileName, $uploadId);
+                    }
                 } else {
                     $data->message = 'Unable to upload file';
                 }
-
-                Lib\Display::addKey('uploadId', $uploadId);
-                Lib\Display::addKey('data', json_encode($data));
             }
 
-            Lib\Display::render();
-            exit;
+            return $data;
         }
 
         /**

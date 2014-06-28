@@ -8,7 +8,7 @@
 
         defaults: function() {
             return {
-                rowId: null,
+                id: null,
                 cdnUrl: null,
                 width: null,
                 height: null,
@@ -26,7 +26,11 @@
                 thumb: null,
                 idxInAlbum: null,
                 age: null,
-                rendered: false
+                rendered: false,
+                visible: false,
+                distance: null,
+                caption: null,
+                sourceUrl: null
             };
         }
 

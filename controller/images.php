@@ -25,7 +25,11 @@ namespace Controller {
 
             // Post means we're uploading an image or otherwise creating an album
             if (count($_POST)) {
-                $images = self::_postImages();
+                if (count($_FILES)) {
+                    $images = self::_uploadImageSearch();
+                } else {
+                    $images = self::_postImages();
+                }
             } else {
                 $url = Lib\Url::Get('imageUri', null);
                 $images = $url ? self::getByImage($_GET) : self::getByQuery($_GET);
@@ -47,7 +51,7 @@ namespace Controller {
          */
         public static function getByQuery($vars) {
 
-            $sources = Lib\Url::Get('sources', 1, $vars);
+            $sources = Lib\Url::Get('sources', [], $vars);
             $limit = Lib\Url::GetInt('limit', 30, $vars);
             $afterId = Lib\Url::GetInt('afterId', null, $vars);
             $postId = Lib\Url::GetInt('postId', null, $vars);
@@ -57,20 +61,34 @@ namespace Controller {
             $keywords = Lib\Url::Get('q', null, $vars);
             $ignoreSource = Lib\Url::GetBool('ignoreSource', $vars);
             $ignoreUser = Lib\Url::GetBool('ignoreUser', $vars);
-            $ignoreVisible = Lib\Url::GetBool('ignoreVisible', $vars);
+            $honorVisible = Lib\Url::GetBool('honorVisible', $vars);
 
-            // Normalize the sources down to an array
-            if (is_string($sources)) {
-                $sources = strpos($sources, ',') !== false ? explode(',', $sources) : $sources;
-            }
-            $sources = is_numeric($sources) ? [ $sources ] : $sources;
+            // At this point, a username search will return all source results. We'll figure the rest out later
+            if (!$userName) {
 
-            // For the cache key
-            $var['sources'] = $sources;
+                // If there were no sources, get the user's default ones
+                if (is_array($sources) && count($sources) === 0) {
+                    $enabledSources = QueryOption::getSources();
+                    foreach ($enabledSources as $source) {
+                        if ($source->checked) {
+                            $sources[] = $source->value;
+                        }
+                    }
 
-            // If specified, save the sources off to cookie
-            if (Lib\Url::GetBool('saveSources')) {
-                setcookie('sources', implode(',', $sources), strtotime('+5 years'), '/');
+                } else  if (is_string($sources)) {
+                    $sources = strpos($sources, ',') !== false ? explode(',', $sources) : $sources;
+                }
+                $sources = is_numeric($sources) ? [ $sources ] : $sources;
+
+                // For the cache key
+                $var['sources'] = $sources;
+
+                // If specified, save the sources off to cookie
+                if (Lib\Url::GetBool('saveSources') && count($sources) > 0) {
+                    setcookie('sources', implode(',', $sources), strtotime('+5 years'), '/');
+                }
+            } else {
+                $sources === null;
             }
 
             $cacheKey = Lib\Cache::createCacheKey('Images::getByQuery_', [
@@ -84,46 +102,55 @@ namespace Controller {
                 'ignoreUser',
                 'user',
                 'q',
-                'ignoreVisible',
+                'honorVisible',
                 'keywords' ], $vars);
 
             $retVal = Lib\Cache::Get($cacheKey);
 
             if (!$retVal) {
 
-                if (is_array($sources)) {
+                $query = [];
 
-                    $query = [ 'sourceId' => [ 'in' => $sources ] ];
-
-                    if ($externalId) {
-                        $query['externalId'] = $externalId;
-                    }
-
-                    if ($postId) {
-                        $query['postId'] = $postId;
-                    }
-
-                    if ($userName) {
-                        $query['userName'] = $userName;
-                    }
-
-                    if ($afterId) {
-                        $query['imageId'] = [ 'lt' => $afterId ];
-                    }
-
-                    if ($afterDate) {
-                        $query['dateCreated'] = [ 'lt' => $afterDate ];
-                    }
-
-                    if ($keywords) {
-                        $query['keywords'] = [ 'like' => '%' . str_replace(' ', '%', $keywords) . '%' ];
-                    }
-
-                    $retVal = Api\PostData::queryReturnAll($query, [ 'dateCreated' => 'desc' ], $limit);
-
-                    Lib\Cache::Set($cacheKey, $retVal);
-
+                if (is_array($sources) && count($sources) > 0) {
+                    $query['sourceId'] = [ 'in' => $sources ];
+                } else {
+                    $query['sourceId'] = [ 'null' => false ];
                 }
+
+                if ($externalId) {
+                    $query['externalId'] = $externalId;
+                }
+
+                if ($postId) {
+                    $query['postId'] = $postId;
+
+                    // Unset the sources since we're requesting a specific post
+                    unset($query['sourceId']);
+                }
+
+                if ($userName) {
+                    $query['userName'] = $userName;
+                }
+
+                if ($afterId) {
+                    $query['imageId'] = [ 'lt' => $afterId ];
+                }
+
+                if ($afterDate) {
+                    $query['dateCreated'] = [ 'lt' => $afterDate ];
+                }
+
+                if ($keywords) {
+                    $query['keywords'] = [ 'like' => '%' . str_replace(' ', '%', $keywords) . '%' ];
+                }
+
+                if ($honorVisible) {
+                    $query['visible'] = 1;
+                }
+
+                $retVal = Api\PostData::queryReturnAll($query, [ 'dateCreated' => 'desc' ], $limit);
+
+                Lib\Cache::Set($cacheKey, $retVal);
 
             }
 
@@ -138,22 +165,15 @@ namespace Controller {
         public static function getByImage($vars) {
             $retVal = new stdClass;
 
-            $evented = Lib\Url::GetBool('evented', $vars);
-
-            // Register the event listeners
-            if ($evented) {
-                Lib\Events::beginAjaxEvent();
-                Lib\Events::addEventListener(IMGEVT_DOWNLOAD_BEGIN, function($data) { self::_imageDownloadBegin($data); });
-                Lib\Events::addEventListener(IMGEVT_PROCESSING, function($data) { self::_imageProcessing($data); });
-            }
-
             $retVal->results = Api\PostData::reverseImageSearch($vars);
-            $retVal->preview = Thumb::createThumbFilename($vars['imageUri']);
+            $retVal->original = $vars['imageUri'];
+            $retVal->preview = Thumb::createThumbFilename($retVal->original);
+            $retVal->view = 'search';
             if (count($retVal->results) > 0) {
                 // A match is considered "identical" when the distance, rounded to the hundredths place, is 0
                 $identicals = [];
                 foreach ($retVal->results as $result) {
-                    if ((int) ($result->distance * 100) === 0) {
+                    if ((int) ($result->distance * 100) === 0 && $result->sourceId) {
                         $identicals[$result->sourceName] = true;
                     }
                 }
@@ -162,12 +182,17 @@ namespace Controller {
 
             self::_log('getByImage', $vars, $retVal);
 
-            if ($evented) {
-                Lib\Events::sendAjaxEvent('DATA', $retVal);
-                Lib\Events::endAjaxEvent();
-            }
-
             return $retVal;
+        }
+
+        public static function _uploadImageSearch() {
+            // Save the image
+            $file = UploadManager::uploadFromFile(true);
+            if (!$file->error) {
+                $_GET['imageUri'] = $file->fileName;
+                return self::getByImage($_GET);
+            }
+            return null;
         }
 
         /**
@@ -228,14 +253,15 @@ namespace Controller {
 
                 // TODO - come up with a way of doing all this without four round trips to the database. Stored proc, maybe?
                 if ($post->sync()) {
-                    $path = '/gallery/' . base_convert($post->id, 10, 36) . '/' . str_replace(' ', '-', $post->keywords);
+                    $path = Api\Post::createGalleryUrl($post->id, $post->title);
                     $post->link = 'http://' . $_SERVER['HTTP_HOST'] . $path;
 
                     // Perform image assignment and data denormalization
                     if (Api\PostImages::assignImagesToPost($retVal->images, $post) && Api\PostData::denormalizeForPost($post->id)) {
                         // Update the link. This is technically non-critical, so we won't error if something goes wrong here
                         $post->sync();
-                        $retVal->redirect = $path;
+                        $retVal->route = $path;
+                        Api\PostData::invalidateCacheForGallery($post);
                     }
 
                 }
@@ -296,10 +322,13 @@ namespace Controller {
 
                 Api\PostImages::rebuildPostAssociations($images, $post);
                 Api\PostData::denormalizeForPost($post->id);
+                Api\PostData::invalidateCacheForGallery($post);
 
             }
 
-            return true;
+            $retVal = new stdClass;
+            $retVal->route = Api\Post::createGalleryUrl($post->id, $post->title);;
+            return $retVal;
 
         }
 

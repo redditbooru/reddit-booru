@@ -3,7 +3,7 @@
  */
 (function(undefined) {
 
-    var API_PATH = '/api/images/',
+    var API_PATH = '/images/',
         EVT_UPDATED = 'updated';
 
     RB.ImageCollection = Backbone.Collection.extend({
@@ -20,25 +20,37 @@
                 params = [ 'saveSources=true' ];
 
             if (this.lastDate > 0) {
-                params.push('afterDate=' + this.lastDate);
+                params = [ 'afterDate=' + this.lastDate ];
             }
 
             return this.queryUrl + separator + params.join('&');
         },
 
-        initialize: function() {
-            var that = this;
+        initialize: function(router) {
+            var self = this;
+
             _.extend(this, Backbone.Events);
             this.on('add', function(item) {
-                that._checkLastDate.call(that, item);
+                self._checkLastDate.call(self, item);
             });
 
             this.on('reset', function(stuff) {
-                that.lastDate = 0;
-                _.each(that.models, function(item) {
-                    that._checkLastDate.call(that, item);
+                self.lastDate = 0;
+                _.each(self.models, function(item) {
+                    self._checkLastDate.call(self, item);
                 });
             });
+
+            if (router) {
+                router.addRoute('home', '/');
+                this.router = router;
+            }
+
+            if (typeof window.filters === 'object') {
+                this.queryOptions = window.filters;
+                this.queryUrl = this._buildQueryUrl();
+            }
+
         },
 
         _checkLastDate: function(item) {
@@ -50,7 +62,14 @@
 
         setQueryOption: function(name, value, noRequest) {
             var oldQueryUrl = this.queryUrl;
-            this.queryOptions[name] = value;
+
+            if (typeof name === 'object') {
+                this.queryOptions = name;
+                noRequest = !!value;
+            } else {
+                this.queryOptions[name] = value;
+            }
+
             this.queryUrl = this._buildQueryUrl();
 
             // If the query has changed, reset the paging and invalidate the current results
@@ -58,7 +77,6 @@
                 this.lastDate = 0;
                 this.reset();
                 this.loadNext();
-                RB.App.router.navigate('search/' + this.queryUrl.replace(API_PATH, ''), { trigger: true });
             }
 
         },
@@ -73,7 +91,9 @@
                 this.lastDate = 0;
                 this.reset();
                 this.loadNext();
-                RB.App.router.navigate('search/' + this.queryUrl.replace(API_PATH, ''), { trigger: true });
+                if (this.router) {
+                    this.router.go('home');
+                }
             }
         },
 

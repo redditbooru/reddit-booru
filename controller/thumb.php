@@ -4,6 +4,7 @@ namespace Controller {
 
   use Lib;
   use Imagick;
+  use ImagickPixel;
 
   class Thumb implements Page {
 
@@ -64,6 +65,8 @@ namespace Controller {
         $tmpFile = tempnam(sys_get_temp_dir(), 'thumb_');
         file_put_contents($tmpFile, $image->data);
         $image = new Imagick($tmpFile);
+        $image->setImageBackgroundColor('white');
+        $image = $image->flattenImages();
         unlink($tmpFile);
 
         if ($image) {

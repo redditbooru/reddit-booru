@@ -1,10 +1,11 @@
 var _ = require('underscore'),
     child_process = require('child_process'),
+    http = require('http'),
     cmd = 'php cron/cron.php',
     CRON_DELAY = 2 * 60 * 1000,
     HEALTH_DELAY = 60 * 1000,
     MAX_PROCESSES = 4,
-    SOURCES_TO_CHECK = [ 1, 2, 7, 8, 9, 11, 13, 14, 15, 17, 19, 20, 21, 22, 23, 24, 25, 26 ],
+    SOURCES_TO_CHECK = [],
 
     cronTimer = null,
     healthTimer = null,
@@ -75,30 +76,59 @@ function taskComplete() {
 
 }
 
+function getActiveSources(callback) {
+    http.get('http://beta.redditbooru.com/sources/', function(res) {
+        var json = '';
+        res.on('data', function(data) {
+            json += data;
+        }).on('end', function() {
+            try {
+                var sources = JSON.parse(json),
+                    i = 0,
+                    count = sources instanceof Array ? sources.length : 0;
+                SOURCES_TO_CHECK = [];
+                for (; i < count; i++) {
+                    SOURCES_TO_CHECK.push(parseInt(sources[i].value, 10));
+                }
+                callback();
+            } catch (exc) {
+                console.log('Invalid JSON sources data, working off of old data');
+                callback();
+            }
+        });
+    }).on('error', function() {
+        console.log('Error retrieving sources');
+        cronTimer = setTimeout(taskRunner, CRON_DELAY);
+    });
+}
+
 function taskRunner() {
 
-    var i = currentSource,
-        count = SOURCES_TO_CHECK.length;
+    getActiveSources(function() {
 
-    if (i === 0) {
-        start = Date.now();
-    }
+        var i = currentSource,
+            count = SOURCES_TO_CHECK.length;
 
-    for (; i < count; i++) {
-        if (processes.length < MAX_PROCESSES) {
-            processes.push(new Process(SOURCES_TO_CHECK[i], taskComplete));
-        } else {
-            break;
+        if (i === 0) {
+            start = Date.now();
         }
-    }
 
-    // Save our spot and wrap if we're at the end of the whole list
-    currentSource = i;
-    if (i >= count && processes.length === 0) {
-        currentSource = 0;
-        cronTimer = setTimeout(taskRunner, CRON_DELAY);
-        console.log('Finished all sources in ' + ((Date.now() - start) / 1000) + ' seconds');
-    }
+        for (; i < count; i++) {
+            if (processes.length < MAX_PROCESSES) {
+                processes.push(new Process(SOURCES_TO_CHECK[i], taskComplete));
+            } else {
+                break;
+            }
+        }
+
+        // Save our spot and wrap if we're at the end of the whole list
+        currentSource = i;
+        if (i >= count && processes.length === 0) {
+            currentSource = 0;
+            cronTimer = setTimeout(taskRunner, CRON_DELAY);
+            console.log('Finished all sources in ' + ((Date.now() - start) / 1000) + ' seconds');
+        }
+    });
 
 }
 
