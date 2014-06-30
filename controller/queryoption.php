@@ -1,13 +1,13 @@
 <?php
 
 namespace Controller {
-    
+
     use Api;
     use Lib;
 
     define('QS_SOURCES', 'sources');
 
-    class QueryOption {
+    class QueryOption implements Page {
 
         public $name;
         public $title;
@@ -20,6 +20,19 @@ namespace Controller {
                 $this->title = str_replace('r/', '', $this->name);
                 $this->value = $obj->id;
             }
+        }
+
+        public static function render() {
+            $action = Lib\Url::Get('action', null);
+            $retVal = null;
+            switch ($action) {
+                case 'sources':
+                    $retVal = self::getSources();
+                    break;
+            }
+            header('Content-Type: text/javascript');
+            echo json_encode($retVal);
+            exit;
         }
 
         /**
