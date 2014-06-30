@@ -393,8 +393,16 @@ namespace Lib {
 
             Events::fire(IMGEVT_DOWNLOAD_BEGIN);
 
+            // If this is a cdn image, just read straight from disk
+            if (strpos($url, CDN_BASE_URL) === 0) {
+                $url = str_replace(CDN_BASE_URL, '', $url);
+                $retVal = self::_downloadImage(LOCAL_IMAGE_PATH . $url);
+            }
+
             // Check mongo for a copy of the image
-            $retVal = self::_fetchFromMongo($url);
+            if (null == $retVal) {
+                $retVal = self::_fetchFromMongo($url);
+            }
 
             // If nothing was found in the mongo cache, go fetch it the old fashioned way
             if (null === $retVal) {
