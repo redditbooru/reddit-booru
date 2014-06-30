@@ -25,15 +25,13 @@ namespace Controller {
      * Given a thumbnail request, derive the thumbnail attributes and create the thumbnail
      */
     public static function createThumbFromEncodedFilename($file) {
-      // Throw away the extension
-      $bits = explode('.', $file);
-      $bits = explode('_', $bits[0]);
 
       // If a height and width were passed, resize and such. Otherise, just pass the data through
-      if (count($bits) === 3) {
-        $url = self::decodeThumbFilename($bits[0]);
-        self::createThumbnail($url, (int) $bits[1], (int) $bits[2]);
+      if (preg_match('/([\w\\_\-\+]+)_([\d]+)_([\d]+)\.jpg/i', $file, $matches)) {
+        $url = self::decodeThumbFilename($matches[1]);
+        self::createThumbnail($url, (int) $matches[2], (int) $matches[3]);
       } else {
+        $bits = explode('.', $file);
         self::passThrough(base64_decode($bits[0]));
       }
     }
@@ -114,7 +112,7 @@ namespace Controller {
             $contentType .= $image->type;
         }
 
-        file_put_contents(self::createThumbFilename($url) . '.jpg', $image->data);
+        file_put_contents('.' . self::createThumbFilename($url) . '.jpg', $image->data);
 
         header('Content-Type: ' . $contentType);
         echo $image->data;
