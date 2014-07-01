@@ -97,9 +97,9 @@ namespace Api {
          */
         public $visible = true;
 
-        public function sync() {
+        public function sync($forceInsert = false) {
             $this->dateUpdated = time();
-            return parent::sync();
+            return parent::sync($forceInsert);
         }
 
         private function __copy($obj) {
@@ -192,11 +192,11 @@ namespace Api {
         public static function getPostIdFromUrl($url) {
             $retVal = null;
 
-            if (preg_match('/^http[s]?:\/\/[\w\.]+?\.redditbooru\.com\/gallery\/([\w]+)(\/[\w-]+)?/is', $url, $matches)) {
-                if (count($matches) === 3) {
-                    $retVal = base_convert($matches[1], 36, 10);
+            if (preg_match('/^http[s]?:\/\/([\w\.]+)?redditbooru\.com\/gallery\/([\w]+)(\/[\w-]+)?/is', $url, $matches)) {
+                if (count($matches) === 4) {
+                    $retVal = base_convert($matches[2], 36, 10);
                 } else {
-                    $retVal = (int) $matches[1];
+                    $retVal = (int) $matches[2];
                 }
             }
 
