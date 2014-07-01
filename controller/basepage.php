@@ -4,6 +4,7 @@ namespace Controller {
 
     use Api;
     use Lib;
+    use stdClass;
 
     class BasePage implements Page {
 
@@ -37,6 +38,15 @@ namespace Controller {
 
             Lib\Display::addKey('sources', json_encode($sources));
 
+        }
+
+        protected static function setOgData($title, $image) {
+            $ogData = new stdClass;
+            $ogData->title = $title;
+            $ogData->image = $image;
+            $ogData->url = 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+            print_r($ogData);
+            Lib\Display::addKey('ogData', $ogData);
         }
 
     }

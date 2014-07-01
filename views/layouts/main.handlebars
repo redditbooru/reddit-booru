@@ -3,6 +3,11 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <meta name="viewport" content="initial-scale=1.0, width=device-width, height=device-height, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        {{#if ogData}}
+            <meta property="og:title" content="{{ogData.title}}" />
+            <meta property="og:image" content="{{ogData.image}}" />
+            <meta property="og:url" content="{{ogData.url}}" />
+        {{/if}}
         <title>
             {{#if pageTitle}}{{pageTitle}}{{else}}redditbooru - a place where cute girls come to meet{{/if}}
         </title>

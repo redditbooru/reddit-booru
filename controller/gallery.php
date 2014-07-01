@@ -63,6 +63,7 @@ namespace Controller {
             if (count($retVal)) {
                 Lib\Display::addKey('title', $retVal[0]->title);
                 Lib\Display::addKey('pageTitle', $retVal[0]->title . ' - redditbooru');
+                self::setOgData($retVal[0]->title, $retVal[0]->cdnUrl);
             }
 
             self::$renderKeys['images'] = $retVal;
