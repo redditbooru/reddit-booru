@@ -45,7 +45,6 @@ namespace Controller {
             $ogData->title = $title;
             $ogData->image = $image;
             $ogData->url = 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-            print_r($ogData);
             Lib\Display::addKey('ogData', $ogData);
         }
 
