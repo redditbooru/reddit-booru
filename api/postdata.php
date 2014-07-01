@@ -437,7 +437,7 @@ namespace Api {
 
                     // If this post is linking to a different gallery, do a redirect to the original
                     $urlId = Post::getPostIdFromUrl($post->link);
-                    if ($id !== $urlId) {
+                    if ($id != $urlId) {
                         header('Location: ' . $post->link);
                         exit;
                     }
