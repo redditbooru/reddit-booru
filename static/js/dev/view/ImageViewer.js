@@ -5,7 +5,17 @@
     var SCREENSAVER = 'screensaver',
         LOADING = 'loading',
         SLIDE_DELAY = 4000,
-        OUTER_PADDING = 40;
+        OUTER_PADDING = 40,
+
+        TRACK_VIEWER = 'viewer',
+
+        TRACKING = {
+            LAUNCH: 'launch',
+            NEXT: 'next',
+            PREVIOUS: 'previous',
+            SCREENSAVER: 'screensaver',
+            CLOSE: 'close'
+        };
 
     RB.ImageViewer = Backbone.View.extend({
 
@@ -38,6 +48,7 @@
         _handleImageClick: function(evt) {
             evt.preventDefault();
             this.navigateToImage(evt.currentTarget.getAttribute('data-row'));
+            RB._track(TRACK_VIEWER, TRACKING.LAUNCH);
         },
 
         navigateToImage: function(id) {
@@ -86,6 +97,7 @@
             if (evt) {
                 evt.preventDefault();
             }
+            RB._track(TRACK_VIEWER, TRACKING.SCREENSAVER);
             this._screenSaver = true;
             this._show();
             this.$viewer.addClass(SCREENSAVER);
@@ -99,6 +111,8 @@
                 images = this.imageCollection;
 
             index = index < 0 ? 0 : index;
+
+            RB._track(TRACK_VIEWER, dir === 1 ? TRACKING.NEXT : TRACKING.PREVIOUS);
 
             // If we've moved outside of the collection length, fetch more images
             if (index >= this.allImages.length) {
@@ -147,6 +161,7 @@
             this.$viewer
                 .removeClass(SCREENSAVER)
                 .fadeOut();
+            RB._track(TRACK_VIEWER, TRACKING.CLOSE);
         },
 
         _resize: function() {
