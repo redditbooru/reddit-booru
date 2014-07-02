@@ -24,15 +24,15 @@
         collection: null,
         sources: [ 1 ], // TODO - make this not hard coded
 
-        events: {
-            'click .more-row button': 'handleMoreClick'
-        },
-
         initialize: function($el, collection) {
             this.collection = collection;
             this.$el = $el;
             this.calculateWindowColumns();
+
             $(window).on('resize', _.bind(this.calculateWindowColumns, this));
+
+            $('body').on('click', '.more-row button', _.bind(this.handleMoreClick, this));
+
             this.collection.on('updated', _.bind(function() {
                 this.render();
             }, this));
@@ -103,20 +103,77 @@
         /**
          * Calculates how many columns there should be and redraws if there's been a change
          */
-        calculateWindowColumns: function() {
+        calculateWindowColumns: function(evt) {
             var oldColumnCount = this.columns,
-                currentWidth = this.$el.width();
+                currentWidth = this.$el.width(),
+                self = this;
+
             if (currentWidth !== this.width) {
                 this.width = this.$el.width();
                 this.columns = Math.floor(this.width / AVERAGE_COLUMN_WIDTH);
                 this.width -= this.columns * IMAGE_GUTTER;
-                this.render();
+                if (evt) {
+                    self.resize();
+                } else {
+                    this.render();
+                }
             }
+        },
+
+        resize: function() {
+
+            var $images = this.$el.find('.image'),
+                $out = $('<section id="images"></section>'),
+                $col = null,
+                itemsInCol = 0,
+                self = this,
+                cols = [],
+                widthRatioSum = 0,
+                gutterPercent = Math.round(IMAGE_GUTTER / this.width * 10000) / 100;
+
+            // Recalculate the width of the images
+            $images.each(function() {
+                widthRatioSum += parseFloat(this.dataset.ratio);
+                itemsInCol++;
+                if (itemsInCol === self.columns) {
+                    cols.push(widthRatioSum);
+                    itemsInCol = 0;
+                    widthRatioSum = 0;
+                }
+            });
+            itemsInCol = 0;
+
+            // Relayout the columns
+            _.each($images, function(image) {
+                var $this = $(image);
+
+                if (itemsInCol === 0) {
+                    widthRatioSum = cols.shift();
+                    $col = $('<div class="image-row"></div>');
+                }
+
+                $this.css('width', (Math.round(parseFloat(image.dataset.ratio) / widthRatioSum * 10000) / 100 - (itemsInCol > 0 ? gutterPercent : 0)) + '%');
+
+                $col.append($this);
+                itemsInCol++;
+
+                if (itemsInCol === self.columns) {
+                    $out.append($col);
+                    itemsInCol = 0;
+                }
+
+            });
+
+            $out.append(this.templates.moreRow());
+            this.$el.replaceWith($out);
+            this.$el = $out;
+
         },
 
         _drawColumn: function(images) {
 
-            var widthRatioSum = 0;
+            var widthRatioSum = 0,
+                gutterPercent = Math.round(IMAGE_GUTTER / this.width * 10000) / 100;
 
             // We're going to make some view specific changes to the data,
             // so serialize a bland copy for us to edit and pipe to the template
@@ -124,7 +181,7 @@
 
             // Now we loop through each image in the row, get it's width to height ratio,
             // and sum them all together for later
-            _.each(images, function(image) {
+            _.each(images, function(image, index) {
                 image.widthHeightRatio = image.width / image.height;
                 image.widthHeightRatio = image.widthHeightRatio < minRatio ? minRatio : image.widthHeightRatio;
                 widthRatioSum += image.widthHeightRatio;
@@ -132,8 +189,9 @@
 
             // Using the sum we just got, we'll figure out what percentage of the total
             // width each image should get
-            _.each(images, function(image) {
-                image.viewWidth = Math.round(image.widthHeightRatio / widthRatioSum * this.width);
+            _.each(images, function(image, index) {
+                image.viewWidth = Math.round(image.widthHeightRatio / widthRatioSum * 10000) / 100 - (index > 0 ? gutterPercent : 0);
+                console.log(image.viewWidth, image.widthHeightRatio);
             }, this);
 
             // Finally, render and return the template
