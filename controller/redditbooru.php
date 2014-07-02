@@ -32,6 +32,7 @@ namespace Controller {
             // Check to see if we got a specific subdomain
             if (preg_match('/([\w]+)\.redditbooru\.com/is', $_SERVER['HTTP_HOST'], $matches)) {
                 $domain = $matches[1];
+                $domain = 'awwnime';
                 if ($domain === 'moesaic') {
                     self::_renderMoesaic();
                 } else if ($domain === 'myfirst') {
@@ -43,9 +44,7 @@ namespace Controller {
                         header('Location: http://redditbooru.com/');
                         exit;
                     } else {
-                        $sources = [ $domain->id ];
-                        Lib\Display::setVariable('SOURCE_NAME', $domain->subdomain);
-                        Lib\Display::setVariable('SOURCE_ID', $domain->id);
+                        self::$enabledSources = [ $domain->id ];
                     }
                 }
             }
@@ -115,8 +114,8 @@ namespace Controller {
          */
         private static function _renderMoesaic() {
             $user = str_replace('/', '', $_SERVER['REQUEST_URI']);
-            Lib\Display::setVariable('USER', $user);
-            Lib\Display::setVariable('TITLE', ($user ? $user . '\'s ' : '') . 'Moesaic');
+            Lib\Display::addKey('USER', $user);
+            Lib\Display::addKey('TITLE', ($user ? $user . '\'s ' : '') . 'Moesaic');
             Lib\Display::setTemplate('moesaic');
             Lib\Display::render();
             exit;
