@@ -757,16 +757,14 @@ button.singleSourceSearch {
         font: 18px 'MG Thin', sans-serif;
     }
 
-    .vertical-align {
-        display: inline-block;
-        height: 100%;
-        vertical-align: middle;
-    }
-
+    // Have the image fill the screen but not be visible
+    // This allows the background to take care of centering while
+    // still allowing right click actions such as save, open in new tab, etc
     img {
-        max-height: 100%;
-        max-width: 100%;
-        vertical-align: middle;
+        display: block;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
     }
 
     .post-image {
@@ -775,9 +773,10 @@ button.singleSourceSearch {
         width: 75%;
         height: 100%;
         padding-right: 10px;
-        display: table-cell;
-        text-align: center;
-        vertical-align: middle;
+        position: relative;
+        background-size: contain;
+        background-position: center center;
+        background-repeat: no-repeat;
     }
 
     &.loading {
