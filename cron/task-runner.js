@@ -77,7 +77,7 @@ function taskComplete() {
 }
 
 function getActiveSources(callback) {
-    http.get('http://beta.redditbooru.com/sources/', function(res) {
+    http.get('http://redditbooru.com/sources/', function(res) {
         var json = '';
         res.on('data', function(data) {
             json += data;
@@ -98,6 +98,7 @@ function getActiveSources(callback) {
         });
     }).on('error', function() {
         console.log('Error retrieving sources');
+        clearTimeout(cronTimer);
         cronTimer = setTimeout(taskRunner, CRON_DELAY);
     });
 }
@@ -125,6 +126,7 @@ function taskRunner() {
         currentSource = i;
         if (i >= count && processes.length === 0) {
             currentSource = 0;
+            clearTimeout(cronTimer);
             cronTimer = setTimeout(taskRunner, CRON_DELAY);
             console.log('Finished all sources in ' + ((Date.now() - start) / 1000) + ' seconds');
         }
