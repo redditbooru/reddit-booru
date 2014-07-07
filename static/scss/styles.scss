@@ -156,6 +156,11 @@ header {
             border: 1px solid transparent;
             padding: 10px;
 
+            &.my-galleries:after {
+                content: '|';
+                padding-left: 20px;
+            }
+
             a {
                 color: #000;
                 text-decoration: none;
