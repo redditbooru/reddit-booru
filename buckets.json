@@ -1,0 +1,20 @@
+{
+    "enableMobile": {
+        "whiteLists": [
+            {
+                "ids": [ 20 ],
+                "value": "enabled"
+            }
+        ],
+        "ramps": [
+            {
+                "percent": 100,
+                "value": "control"
+            },
+            {
+                "percent": 0,
+                "value": "enabled"
+            }
+        ]
+    }
+}
