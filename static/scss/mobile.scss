@@ -1,0 +1,191 @@
+@import "mixins";
+
+// mobile styles
+$HEADER_BG: #2c2c2c;
+
+body {
+    padding-top: 50px;
+}
+
+header {
+    background: $HEADER_BG;
+    padding: 10px;
+    border-bottom-color: #000;
+    border-right: 0;
+
+    h1 {
+        font-size: 24px;
+
+        @include transition(100ms);
+
+        a {
+            color: #fff;
+        }
+    }
+
+    nav {
+        @include fullscreen();
+        @include transition(100ms);
+        left: 100%;
+        background: $HEADER_BG;
+        padding: 10px;
+        color: #fff;
+
+        .primary-nav {
+            margin: 0;
+            & > li {
+                display: block;
+                padding: 5px;
+                &.my-galleries {
+                    border-bottom: 1px solid #666;
+                    padding-bottom: 10px;
+                    margin-bottom: 5px;
+                    &:after {
+                        display: none;
+                    }
+                }
+            }
+
+            a {
+                color: #fff;
+            }
+
+            .has-secondary-nav {
+
+                border: 0;
+
+                &:hover {
+                    box-shadow: none;
+                    border: 0;
+                    &:before {
+                        display: none;
+                    }
+                }
+
+                .secondary-nav {
+                    display: block;
+                    position: static;
+                    box-shadow: none;
+                    border: 0;
+                    padding: 10px 0 0;
+                    width: auto !important;
+                    background: none;
+                    &.source-list li {
+                        width: 110px;
+                    }
+                }
+
+            }
+
+        }
+
+    }
+
+    .open-menu {
+        display: block;
+        position: absolute;
+        right: 10px;
+        top: 14px;
+        border: 0;
+        border-radius: 0;
+        border-top: 3px solid #fff;
+        border-bottom: 3px solid #fff;
+        background: none;
+        height: 0;
+        width: 24px;
+        padding: 11px 0 0;
+        overflow: hidden;
+
+        @include transition(100ms);
+
+        &:before {
+            content: '';
+            display: block;
+            width: 100%;
+            height: 3px;
+            background: #fff;
+            position: relative;
+            top: -7px;
+        }
+    }
+
+    .search {
+        display: none;
+    }
+}
+
+#content {
+    @include transition(100ms);
+    position: relative;
+    left: 0;
+    opacity: 1;
+}
+
+body.menu-open {
+    h1 {
+        margin-left: -200px;
+    }
+
+    nav {
+        left: 44px;
+    }
+
+    .open-menu {
+        right: 100%;
+        margin-right: -34px;
+    }
+
+    #content {
+        left: -75%;
+        opacity: 0.25;
+    }
+
+}
+
+#viewer {
+    padding: 10px;
+    .post-image {
+        width: 100%;
+        float: none;
+        padding: 0;
+    }
+    .post-content {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        width: 100%;
+        float: none;
+        padding: 10px;
+    }
+}
+
+#upload {
+    @include fullscreen();
+
+    h2 {
+        padding: 10px;
+        background: $HEADER_BG;
+        font-size: 24px;
+    }
+
+    .close {
+        right: 5px;
+        top: 5px;
+        background: none;
+        border: 0;
+        color: #fff;
+    }
+
+    #imageUrl,
+    #imageFile {
+        width: 50%;
+        @include border-box();
+        float: left;
+    }
+
+    .uploadInput {
+        overflow: hidden;
+    }
+
+}

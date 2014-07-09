@@ -10,10 +10,19 @@ namespace Controller {
 
         protected static $renderKeys = [];
         protected static $enabledSources;
+        protected static $tests;
 
         public static function render() {
 
-            Lib\Display::addKey('user', Api\User::getCurrentUser());
+            self::$tests = new stdClass;
+
+            $user = Api\User::getCurrentUser();
+            Lib\Display::addKey('user', $user);
+
+            if ($user instanceof Api\User) {
+                Lib\TestBucket::initialize($user->id);
+            }
+
             Lib\Display::addKey('phpSessionUpload', ini_get("session.upload_progress.name"));
 
             // Get sources
@@ -36,7 +45,10 @@ namespace Controller {
             }
             self::$enabledSources = $enabledSources;
 
+            self::addTestToOutput('enableMobile');
+
             Lib\Display::addKey('sources', json_encode($sources));
+            Lib\Display::addKey('tests', self::$tests);
 
         }
 
@@ -46,6 +58,10 @@ namespace Controller {
             $ogData->image = $image;
             $ogData->url = 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
             Lib\Display::addKey('ogData', $ogData);
+        }
+
+        protected static function addTestToOutput($key) {
+            self::$tests->$key = Lib\TestBucket::get($key);
         }
 
     }

@@ -2,7 +2,6 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-        <meta name="viewport" content="initial-scale=1.0, width=device-width, height=device-height, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
         {{#if ogData}}
             <meta property="og:title" content="{{ogData.title}}" />
             <meta property="og:image" content="{{ogData.image}}" />
@@ -13,6 +12,10 @@
         </title>
         <script src="/static/js/dev/HashRedirect.js"></script>
         <link rel="stylesheet" type="text/css" href="/static/scss/styles.css" />
+        {{#inTestBucket "enableMobile" "enabled"}}
+        <meta name="viewport" content="initial-scale=1.0, width=device-width, height=device-height, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <link rel="stylesheet" type="text/css" href="/static/scss/mobile.css" media="(max-width: 480px)" />
+        {{/inTestBucket}}
     </head>
     <body{{#unless showNsfw}} class="hideNsfw"{{/unless}}>
         <header>
