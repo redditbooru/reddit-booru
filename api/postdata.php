@@ -246,7 +246,7 @@ namespace Api {
                 $vars['image'] = md5(json_encode($image));
             }
 
-            $cacheKey = 'PostData_reverseImageSearch_' . implode('_', $vars);
+            $cacheKey = Lib\Cache::createCacheKey('Api::PostData::reverseImageSearch', [ 'image', 'imageUri', 'count', 'sources', 'getCount', 'maxRating' ], $vars);
             $retVal = Lib\Cache::Get($cacheKey);
 
             if ((null != $file || $image instanceof Image) && false === $retVal) {
