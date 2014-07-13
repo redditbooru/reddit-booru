@@ -191,7 +191,6 @@
             // width each image should get
             _.each(images, function(image, index) {
                 image.viewWidth = Math.round(image.widthHeightRatio / widthRatioSum * 10000) / 100 - (index > 0 ? gutterPercent : 0);
-                console.log(image.viewWidth, image.widthHeightRatio);
             }, this);
 
             // Finally, render and return the template
