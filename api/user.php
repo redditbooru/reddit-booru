@@ -6,6 +6,9 @@ namespace Api {
     use stdClass;
     use OAuth2;
 
+    // Ten minute expiry for vote information
+    define('VOTE_CACHE_EXPIRY', 60 * 10);
+
     class User extends Lib\Dal {
 
         /**
@@ -17,7 +20,6 @@ namespace Api {
             'id' => 'user_id',
             'name' => 'user_name',
             'redditId' => 'user_reddit_id',
-            'token' => 'user_token',
             'dateCreated' => 'user_date_created',
             'linkKarma' => 'user_link_karma',
             'commentKarma' => 'user_comment_karma',
@@ -40,11 +42,6 @@ namespace Api {
         public $redditId;
 
         /**
-         * Reddit OAuth refresh token
-         */
-        public $token;
-
-        /**
          * Date the account was created
          */
         public $dateCreated;
@@ -63,6 +60,21 @@ namespace Api {
          * Whether the user has an avatar or not
          */
         public $hasAvatar;
+
+        /**
+         * Reddit auth token
+         */
+        private $token;
+
+        /**
+         * Expiration time for the auth token
+         */
+        private $tokenExpires;
+
+        /**
+         * Array of post votes
+         */
+        private $voteData = [];
 
         /**
          * Attempts to retrieve the user from the database and, failing that, reddit
@@ -124,8 +136,9 @@ namespace Api {
             $client = self::_createOAuth2();
             $auth = new OAuth2\Strategy\AuthCode($client);
             return $auth->authorizeUrl([
-                'scope' => 'identity',
+                'scope' => 'identity,vote,read',
                 'state' => md5(rand()),
+                'duration' => 'permanent',
                 'redirect_uri' => REDDIT_OAUTH_HANDLER
             ]);
         }
@@ -148,7 +161,10 @@ namespace Api {
                         if (isset($data->name)) {
                             $user = self::getByName($data->name);
                             if ($user) {
-                                Lib\Session::set('user', $user);
+                                $user->token = $token;
+                                // subtract a minute to safely account for any latency
+                                $user->tokenExpires = time() + 3540;
+                                $user->saveUserSession();
                             }
                         }
 
@@ -158,6 +174,26 @@ namespace Api {
 
             }
 
+            return $retVal;
+        }
+
+        /**
+         * Returns an auth token refreshing when needed
+         */
+        public function getAuthToken() {
+            $retVal = null;
+            if (time() < $this->tokenExpires) {
+                $retVal = $this->token;
+            } else {
+                try {
+                    $retVal = $this->token->refresh();
+                    $this->token = $retVal;
+                    $this->tokenExpires = time() + 3540;
+                    $this->saveUserSession();
+                } catch (Exception $e) {
+                    // do nothing for now
+                }
+            }
             return $retVal;
         }
 
@@ -178,6 +214,37 @@ namespace Api {
             $retVal->commentKarma = (int) $data->comment_karma;
         }
 
+        /**
+         * Returns whether the current user has voted on a post
+         */
+        public function getVoteForPost($postId) {
+            $retVal = isset($this->voteData[$postId]) ? $this->voteData[$postId] : false;
+            if ($retVal) {
+                if ($retVal->expires < time()) {
+                    $retVal = false;
+                } else {
+                    $retVal = $retVal->vote;
+                }
+            }
+            return $retVal;
+        }
+
+        /**
+         * Saves a user's vote for a post
+         */
+        public function setVoteForPost($postId, $vote) {
+            $obj = new stdClass;
+            $obj->vote = $vote;
+            $obj->expires = time() + VOTE_CACHE_EXPIRY;
+            $this->voteData[$postId] = $obj;
+        }
+
+        /**
+         * Writes the vote data to session
+         */
+        public function saveUserSession() {
+            Lib\Session::set('user', $this);
+        }
 
     }
 

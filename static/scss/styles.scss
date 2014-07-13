@@ -46,6 +46,13 @@ $PINK: #e94e77;
 $YELLOW: #ffed77;
 $DARK_YELLOW: #736400;
 
+// reddit colors
+$DOWN_VOTE: #a194ff;
+$UP_VOTE: #ff8b60;
+$NO_VOTE: #c6c6c6;
+
+$BASE_ARROW_SIZE: 8px;
+
 $NAV_INDEX: 100;
 
 // Itty bitty reset
@@ -798,6 +805,95 @@ button.singleSourceSearch {
             -moz-animation: imageFadeOut 1s;
             -o-animation: imageFadeOut 1s;
             animation: imageFadeOut 1s;
+        }
+
+    }
+
+    .voter {
+
+        margin-top: 15px;
+        display: block;
+        float: left;
+        width: 40px;
+
+        &.no-data {
+            display: none;
+        }
+
+        .score {
+            display: block;
+            font: 18px/1 'MG Thin', sans-serif;
+            color: #fff;
+            padding: 5px 0;
+            text-align: center;
+        }
+
+        button {
+            display: block;
+            width: $BASE_ARROW_SIZE;
+            height: $BASE_ARROW_SIZE;
+            padding: 0;
+            border: 0;
+            border-radius: 0;
+            background: $NO_VOTE;
+            color: $NO_VOTE;
+            margin: 0 auto;
+        }
+
+        .upvote:before {
+            content: '';
+            display: block;
+            position: relative;
+            width: 0;
+            height: 0;
+            border: $BASE_ARROW_SIZE solid transparent;
+            border-bottom-color: $NO_VOTE;
+            top: $BASE_ARROW_SIZE * 2 * -1;
+            left: $BASE_ARROW_SIZE / 2 * -1;
+        }
+
+        .downvote:before {
+            content: '';
+            display: block;
+            position: relative;
+            width: 0;
+            height: 0;
+            border: $BASE_ARROW_SIZE solid transparent;
+            border-top-color: $NO_VOTE;
+            top: $BASE_ARROW_SIZE;
+            left: $BASE_ARROW_SIZE / 2 * -1;
+        }
+
+        &.upvote {
+
+            .score {
+                color: $UP_VOTE;
+                font-family: 'MG Regular';
+            }
+
+            .upvote {
+                background: $UP_VOTE;
+                color: $UP_VOTE;
+                &:before {
+                    border-bottom-color: $UP_VOTE;
+                }
+            }
+        }
+
+        &.downvote {
+
+            .score {
+                color: $DOWN_VOTE;
+                font-family: 'MG Regular';
+            }
+
+            .downvote {
+                background: $DOWN_VOTE;
+                color: $DOWN_VOTE;
+                &:before {
+                    border-top-color: $DOWN_VOTE;
+                }
+            }
         }
 
     }

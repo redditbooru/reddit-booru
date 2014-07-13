@@ -14,6 +14,15 @@ namespace Controller {
 
     class Images implements Page {
 
+        private static $_showRedditControls = false;
+
+        public static function initialize() {
+            $user = Api\User::getCurrentUser();
+            if ($user instanceof Api\User) {
+                self::$_showRedditControls = Lib\TestBucket::get('showRedditControls', $user->id) === 'enabled';
+            }
+        }
+
         /**
          * Determines how the page needs to be rendered and passes control off accordingly
          */
@@ -83,10 +92,8 @@ namespace Controller {
                 // For the cache key
                 $var['sources'] = $sources;
 
-                // If specified, save the sources off to cookie
-                if (Lib\Url::GetBool('saveSources') && count($sources) > 0) {
-                    setcookie('sources', implode(',', $sources), strtotime('+5 years'), '/');
-                }
+                self::_saveSources($sources);
+
             } else {
                 $sources === null;
             }
@@ -156,6 +163,10 @@ namespace Controller {
 
             self::_log('getByQuery', $vars, $retVal);
 
+            if (self::$_showRedditControls) {
+                $retVal = Api\PostData::getVotesForPosts($retVal, Api\User::getCurrentUser());
+            }
+
             return $retVal;
         }
 
@@ -164,6 +175,8 @@ namespace Controller {
          */
         public static function getByImage($vars) {
             $retVal = new stdClass;
+
+            self::_saveSources();
 
             $retVal->results = Api\PostData::reverseImageSearch($vars);
             $retVal->original = $vars['imageUri'];
@@ -181,6 +194,10 @@ namespace Controller {
             }
 
             self::_log('getByImage', $vars, $retVal);
+
+            if (self::$_showRedditControls) {
+                $retVal = Api\PostData::getVotesForPosts($retVal, Api\User::getCurrentUser());
+            }
 
             return $retVal;
         }
@@ -363,6 +380,15 @@ namespace Controller {
             Lib\Logger::log('controller', $log);
         }
 
+        private static function _saveSources($sources) {
+            // If specified, save the sources off to cookie
+            if (Lib\Url::GetBool('saveSources') && count($sources) > 0) {
+                setcookie('sources', implode(',', $sources), strtotime('+5 years'), '/');
+            }
+        }
+
     }
+
+    Images::initialize();
 
 }

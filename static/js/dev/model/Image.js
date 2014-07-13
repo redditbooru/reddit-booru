@@ -30,7 +30,8 @@
                 visible: false,
                 distance: null,
                 caption: null,
-                sourceUrl: null
+                sourceUrl: null,
+                userVote: null
             };
         }
 

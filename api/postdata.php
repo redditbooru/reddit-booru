@@ -523,6 +523,70 @@ namespace Api {
             Lib\Cache::Set('Api:PostData:getUserGalleries_' . $post->userId, false);
         }
 
+        /**
+         * Decorates an array of PostData items with user voting data
+         */
+        public static function getVotesForPosts(Array $posts, User $user) {
+
+            $token = $user->getAuthToken();
+
+            if ($token) {
+
+                // Make a list of vote data that needs to be retrieved from reddit
+                $ids = [];
+                $postCache = [];
+                foreach ($posts as $post) {
+                    $vote = $user->getVoteForPost($post->externalId);
+                    if ($vote !== false) {
+                        $post->userVote = $vote;
+                    } else {
+                        $ids[$post->externalId] = true;
+                        $postCache[$post->externalId] = $post;
+                    }
+                }
+
+                // Get the missing vote data
+                if (count($ids) > 0) {
+                    $url = 'https://oauth.reddit.com/by_id/t3_' . implode(',t3_', array_keys($ids)) . '/.json';
+                    try {
+                        $response = $token->get($url);
+                        if ($response) {
+                            $data = json_decode($response->body());
+                            if (isset($data->data) && is_array($data->data->children)) {
+                                foreach ($data->data->children as $post) {
+                                    $vote = 0;
+                                    $post = $post->data;
+
+                                    if (isset($post->likes))  {
+                                        if ($post->likes === null) {
+                                            $vote = 0; // no vote
+                                        } else if ($post->likes === false) {
+                                            $vote = -1; // down vote
+                                        } else {
+                                            $vote = 1; // up vote
+                                        }
+                                    }
+
+                                    $postCache[$post->id]->userVote = $vote;
+                                    $user->setVoteForPost($post->id, $vote);
+                                }
+                            }
+                        }
+
+                        $user->saveUserSession();
+
+                    } catch (Exception $e) {
+                        // do nothing
+                    }
+                }
+
+
+            }
+
+            return $posts;
+
+        }
+
     }
 
 }

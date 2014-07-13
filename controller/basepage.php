@@ -46,6 +46,7 @@ namespace Controller {
             self::$enabledSources = $enabledSources;
 
             self::addTestToOutput('enableMobile');
+            self::addTestToOutput('showRedditControls');
 
             Lib\Display::addKey('sources', json_encode($sources));
             Lib\Display::addKey('tests', self::$tests);

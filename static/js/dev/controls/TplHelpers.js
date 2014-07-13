@@ -32,4 +32,16 @@
 
     });
 
+    Handlebars.registerHelper('voteStatus', function(vote) {
+        return vote === -1 ? 'downvote' :
+               vote === 1 ? 'upvote' :
+               vote === 0 ? 'no-vote' : 'no-data';
+    });
+
+    Handlebars.registerHelper('inTestBucket', function(a, b, c) {
+        if (_.has(window.tests, a.hash.key)) {
+            return window.tests[a.hash.key] === a.hash.value ? a.fn(this) : '';
+        }
+    });
+
 }());
