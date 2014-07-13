@@ -20,14 +20,14 @@ namespace Lib {
 	class Cache {
 
 		private static $_conn;
-		
+
 		public static function Connect($host = 'localhost', $port = 11211) {
 			self::$_conn = new Memcache();
 			if (!self::$_conn->pconnect($host, $port)) {
 				self::$_conn = null;
 			}
 		}
-		
+
 		public static function Set($key, $val, $expiration = 600) {
 			$retVal = false;
 			if (null != self::$_conn && $key) {
@@ -35,17 +35,17 @@ namespace Lib {
 			}
 			return $retVal;
 		}
-		
-		public static function Get($key) {
+
+		public static function Get($key, $forceCacheGet = false) {
 			$retVal = false;
-			if (null != self::$_conn && $key && !isset($_GET['flushCache'])) {
+			if (null != self::$_conn && $key && (!isset($_GET['flushCache']) || $forceCacheGet)) {
 				$retVal = self::$_conn->get($key);
 			}
 			return $retVal;
 		}
-		
+
 		public static function Flush() {
-			self::$_conn->flush();
+			// self::$_conn->flush();
 		}
 
 		/**

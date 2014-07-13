@@ -18,7 +18,7 @@ namespace Lib {
                 self::$_id = bin2hex(openssl_random_pseudo_bytes(32));
                 setcookie(RBSESS, self::$_id, time() + SESSION_EXPIRE, '/', 'redditbooru.com');
             }
-            self::$_sess = Cache::Get(RBSESS . '_' . self::$_id);
+            self::$_sess = Cache::Get(RBSESS . '_' . self::$_id, true);
         }
 
         public static function get($key) {
