@@ -69,6 +69,13 @@
         handleSubmit: function(evt) {
             var postId = this.editingPostId ? '?postId=' + this.editingPostId : '';
             evt.preventDefault();
+
+            this.$albumTitle.removeClass('error');
+            if (this.$el.find('li').length > 1 && $.trim(this.$albumTitle.val()).length === 0) {
+                this.$albumTitle.addClass('error');
+                return;
+            }
+
             $.ajax({
                 url: '/images/' + postId,
                 data: this.$el.find('form').serialize(),
@@ -127,13 +134,13 @@
         },
 
         submitSuccess: function(data) {
+            this._clearForm();
+            this._hideDialog();
             if ('route' in data) {
                 this.router.go(data.route);
             } else if ('redirect' in data) {
-                window.open(data.redirect);
+                window.location.href = data.redirect;
             }
-            this._clearForm();
-            this._hideDialog();
         },
 
         /**
