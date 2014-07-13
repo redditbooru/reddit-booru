@@ -22,7 +22,7 @@ namespace Lib {
 		/**
 		 * Syncs the current object to the database
 		 */
-		public function sync() {
+		public function sync($forceInsert = false) {
 
 			$retVal = 0;
 
@@ -38,7 +38,7 @@ namespace Lib {
 				}
 
 				// If the primary key value is non-zero, do an UPDATE
-				$method = $primaryKeyValue !== 0 ? 'UPDATE' : 'INSERT';
+				$method = $primaryKeyValue !== 0 && !$forceInsert ? 'UPDATE' : 'INSERT';
 				$parameters = [];
 
 				foreach ($this->_dbMap as $property => $column) {
@@ -69,6 +69,7 @@ namespace Lib {
 				} else {
 					$query .= ' `' . $this->_dbTable . '` SET ' . implode(',', $parameters) . ' WHERE `' . $this->_dbMap[$primaryKey] . '` = :' . $primaryKey;
 				}
+
 				$retVal = Db::Query($query, $params);
 
 				// Save the ID for insert

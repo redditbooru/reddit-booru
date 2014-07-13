@@ -366,9 +366,9 @@ namespace Api {
          * Syncs this object to the database and saves local and backup copies
          * @override
          */
-        public function sync() {
+        public function sync($forceInsert = false) {
             $isInsert = $this->id === null || $this->id === 0;
-            $retVal = parent::sync();
+            $retVal = parent::sync($forceInsert);
 
             // On successful image insert, save copies
             if ($retVal && $isInsert) {
