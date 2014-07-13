@@ -76,3 +76,19 @@
   left: 20px;
   right: 20px;
 }
+
+@mixin fullscreen() {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+}
+
+@mixin transition($speed: 200ms) {
+  -webkit-transition: all $speed linear;
+  -moz-transition: all $speed linear;
+  -o-transition: all $speed linear;
+  -ms-transition: all $speed linear;
+  transition: all $speed linear;
+}
