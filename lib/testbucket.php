@@ -60,10 +60,11 @@ namespace Lib {
          */
         public static function get($key, $seed = null) {
 
+            self::initialize();
+
             $seed = $seed ?: self::$_seed;
             $cacheKey = 'test_' . $key . '_' . $seed;
 
-            self::initialize();
             return Cache::fetch(function() use ($key, $seed) {
                 $retVal = DEFAULT_TEST_VALUE;
                 $found = false;
