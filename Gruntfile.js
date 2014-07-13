@@ -12,6 +12,7 @@ module.exports = function(grunt) {
                     'static/js/dev/lib/backbone.min.js',
                     'static/js/dev/lib/handlebars.runtime.js',
                     'static/js/dev/model/*.js',
+                    'static/js/dev/controls/*.js',
                     'static/js/templates.js',
                     'static/js/dev/view/*.js',
                     'static/js/dev/Uploader.js',
@@ -34,7 +35,8 @@ module.exports = function(grunt) {
         sass: {
             dist: {
                 files: {
-                    'static/scss/styles.css': 'static/scss/styles.scss'
+                    'static/scss/styles.css': 'static/scss/styles.scss',
+                    'static/scss/mobile.css': 'static/scss/mobile.scss'
                 }
             }
         },
@@ -59,6 +61,7 @@ module.exports = function(grunt) {
                 'static/js/dev/lib/*.js',
                 'static/js/dev/model/*.js',
                 'static/js/dev/view/*.js',
+                'static/js/dev/controls/*.js',
                 'static/js/dev/*.js',
                 'views/*.handlebars',
                 'views/partials/*.handlebars',
