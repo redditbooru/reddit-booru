@@ -72,6 +72,11 @@ namespace Api {
         private $tokenExpires;
 
         /**
+         * Reddit refresh token
+         */
+        private $refreshToken;
+
+        /**
          * Array of post votes
          */
         private $voteData = [];
@@ -161,9 +166,10 @@ namespace Api {
                         if (isset($data->name)) {
                             $user = self::getByName($data->name);
                             if ($user) {
+                                $user->refreshToken = $token->getRefreshToken();
                                 $user->token = $token;
                                 // subtract a minute to safely account for any latency
-                                $user->tokenExpires = time() + 3540;
+                                $user->tokenExpires = time() + $token->getExpiresIn();
                                 $user->saveUserSession();
                             }
                         }
@@ -186,10 +192,25 @@ namespace Api {
                 $retVal = $this->token;
             } else {
                 try {
-                    $retVal = $this->token->refresh();
-                    $this->token = $retVal;
-                    $this->tokenExpires = time() + 3540;
-                    $this->saveUserSession();
+                    $client = self::_createOAuth2();
+                    $token = $client->getToken([
+                        'client_id' => REDDIT_TOKEN,
+                        'client_secret' => REDDIT_SECRET,
+                        'grant_type' => 'refresh_token',
+                        'refresh_token' => $this->refreshToken,
+                        'scope' => 'identity,vote,read',
+                        'state' => md5(rand()),
+                        'duration' => 'permanent',
+                        'redirect_uri' => REDDIT_OAUTH_HANDLER
+                    ]);
+
+                    if ($token) {
+                        $retVal = $token;
+                        $this->token = $token;
+                        $this->tokenExpires = time() + $token->getExpiresIn();
+                        $this->saveUserSession();
+                    }
+
                 } catch (Exception $e) {
                     // do nothing for now
                 }
