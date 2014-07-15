@@ -29,6 +29,13 @@ namespace Controller {
                         exit;
                     }
                     break;
+                case 'vote':
+                    $user = Api\User::getCurrentUser();
+                    if ($user) {
+                        $user->vote(Lib\Url::Get('id'), Lib\Url::GetInt('dir'));
+                    }
+                    exit;
+                    break;
             }
 
             session_write_close();

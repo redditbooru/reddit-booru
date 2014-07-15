@@ -9,6 +9,10 @@
         "redirect": true
     },
     {
+        "rule": "^sources/$",
+        "replace": "page=queryoption&action=sources"
+    },
+    {
         "rule": "^search/$",
         "replace": "page=redditbooru"
     },
@@ -34,6 +38,10 @@
     {
         "rule": "^login/$",
         "replace": "page=uas&action=login"
+    },
+    {
+        "rule": "^uas/$",
+        "replace": "page=uas"
     },
     {
         "rule": "^authenticate/$",

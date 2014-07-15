@@ -7,6 +7,10 @@
         SLIDE_DELAY = 4000,
         OUTER_PADDING = 40,
 
+        UPVOTE = 'upvote',
+        DOWNVOTE = 'downvote',
+        NOVOTE = 'no-vote',
+
         TRACK_VIEWER = 'viewer',
 
         TRACKING = {
@@ -14,7 +18,10 @@
             NEXT: 'next',
             PREVIOUS: 'previous',
             SCREENSAVER: 'screensaver',
-            CLOSE: 'close'
+            CLOSE: 'close',
+            UPVOTE: 'upvote',
+            DOWNVOTE: 'downvote',
+            UNVOTE: 'unvote'
         };
 
     RB.ImageViewer = Backbone.View.extend({
@@ -31,14 +38,18 @@
             $('body')
                 .on('click', 'a.image', _.bind(this._handleImageClick, this))
                 .on('click', '.screensaver', _.bind(this.startScreensaver, this));
+
             this.$window = $(window).on('resize', _.bind(this._resize, this));
             this.$content = this.$viewer.find('.viewer-content');
             this.$next = this.$viewer.find('.next');
             this.$previous = this.$viewer.find('.previous');
+
             this.imageCollection = imageCollection;
             this.$viewer
                 .on('click', '.transport', _.bind(this._handleNavigate, this))
-                .on('click', '.close', _.bind(this._hide, this));
+                .on('click', '.close', _.bind(this._hide, this))
+                .on('click', '.voter button', _.bind(this._vote, this));
+
             this.allImages = new RB.ImageCollection();
             this.allImages.reset(imageCollection.models);
             imageCollection.on('updated', _.bind(this._collectionUpdated, this));
@@ -66,6 +77,7 @@
                         self.$content.html(RB.Templates.imageView(image.attributes));
                         self._show();
                         self.currentIndex = self.allImages.indexOf(image);
+                        self.$voter = self.$viewer.find('.voter');
 
                         if (self._screenSaver) {
                             clearTimeout(self._timer); // just out of caution
@@ -172,6 +184,43 @@
             clearTimeout(this._timer);
             delete this.imageLoader;
             this._screenSaver = false;
+        },
+
+        _vote: function(evt) {
+            var $target = $(evt.currentTarget),
+                dir = $target.hasClass(UPVOTE) ? 1 : -1,
+                existingVote = $target.parent().hasClass(UPVOTE) ? 1 : $target.parent().hasClass(DOWNVOTE) ? -1 : 0,
+                image = this.allImages.at(this.currentIndex).attributes,
+
+                // If the clicked vote button and the existing vote condition are the same, the user is unvoting
+                submitDir = dir === existingVote ? 0 : dir;
+
+            image.score = parseInt(image.score, 10) + submitDir + existingVote * -1;
+            this.$voter.find('.score').text(image.score);
+
+            $.ajax({
+                url: '/uas/?action=vote&dir=' + submitDir + '&id=' + image.externalId,
+                dataType: 'json'
+            });
+
+            this.$voter.removeClass([ UPVOTE, DOWNVOTE, NOVOTE ].join(' '));
+
+
+            switch (submitDir) {
+                case 0:
+                    this.$voter.addClass(NOVOTE);
+                    RB._track(TRACK_VIEWER, TRACKING.UNVOTE);
+                    break;
+                case 1:
+                    this.$voter.addClass(UPVOTE);
+                    RB._track(TRACK_VIEWER, TRACKING.UPVOTE);
+                    break;
+                case -1:
+                    this.$voter.addClass(DOWNVOTE);
+                    RB._track(TRACK_VIEWER, TRACKING.DOWNVOTE);
+                    break;
+            }
+
         }
 
     });

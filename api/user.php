@@ -267,6 +267,21 @@ namespace Api {
             Lib\Session::set('user', $this);
         }
 
+        public function vote($id, $dir) {
+            if ($id && $dir) {
+
+                // Check for vote constraints
+                if ($dir >= -1 && $dir <= 1) {
+                    $token = $this->getAuthToken();
+                    if ($token) {
+                        $response = $token->post('https://oauth.reddit.com/api/vote', [ 'body' => implode('&', [ 'id' => 't3_' . $id, 'dir' => $dir ]) ]);
+                        $this->setVoteForPost($postId, $dir);
+                    }
+                }
+
+            }
+        }
+
     }
 
 }
