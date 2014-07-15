@@ -423,7 +423,7 @@ namespace Api {
         /**
          *
          */
-        public static function getGallery($id) {
+        public static function getGallery($id, $noRedirect = false) {
 
             $cacheKey = 'Api:PostData:getGallery_' . $id;
             $retVal = Lib\Cache::Get($cacheKey);
@@ -437,7 +437,7 @@ namespace Api {
 
                     // If this post is linking to a different gallery, do a redirect to the original
                     $urlId = Post::getPostIdFromUrl($post->link);
-                    if ($id != $urlId) {
+                    if ($id != $urlId && !$noRedirect) {
                         header('Location: ' . $post->link);
                         exit;
                     }

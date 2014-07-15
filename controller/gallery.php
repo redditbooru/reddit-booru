@@ -57,7 +57,7 @@ namespace Controller {
             }
 
             if (is_numeric($id)) {
-                $retVal = Api\PostData::getGallery($id);
+                $retVal = Api\PostData::getGallery($id, $from === 'reddit');
             }
 
             if (count($retVal)) {
