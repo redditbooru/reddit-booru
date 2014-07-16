@@ -176,7 +176,7 @@ namespace Controller {
         public static function getByImage($vars) {
             $retVal = new stdClass;
 
-            self::_saveSources();
+            // self::_saveSources();
 
             $retVal->results = Api\PostData::reverseImageSearch($vars);
             $retVal->original = $vars['imageUri'];
@@ -196,7 +196,7 @@ namespace Controller {
             self::_log('getByImage', $vars, $retVal);
 
             if (self::$_showRedditControls) {
-                $retVal = Api\PostData::getVotesForPosts($retVal, Api\User::getCurrentUser());
+                $retVal->results = Api\PostData::getVotesForPosts($retVal->results, Api\User::getCurrentUser());
             }
 
             return $retVal;
