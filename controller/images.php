@@ -382,7 +382,7 @@ namespace Controller {
 
         private static function _saveSources($sources) {
             // If specified, save the sources off to cookie
-            if (Lib\Url::GetBool('saveSources') && count($sources) > 0) {
+            if (Lib\Url::GetBool('saveSources') && is_array($sources) && count($sources) > 0) {
                 setcookie('sources', implode(',', $sources), strtotime('+5 years'), '/');
             }
         }
