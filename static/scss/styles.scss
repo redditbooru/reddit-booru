@@ -191,6 +191,16 @@ header {
                 padding: 10px;
                 box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.5);
 
+                &.user-actions {
+                    width: 150px;
+                    li {
+                        padding: 10px 0 0;
+                        &:first-child {
+                            padding-top: 0;
+                        }
+                    }
+                }
+
                 &.source-list {
                     width: 400px;
                     overflow: hidden;
@@ -210,26 +220,42 @@ header {
             }
 
 
-            &.has-secondary-nav:hover {
-                cursor: pointer;
-                &:before {
-                    display: block;
-                    position: absolute;
+            &.has-secondary-nav {
+
+                position: relative;
+                padding-right: 17px;
+
+                &:after {
                     content: '';
-                    top: 0;
-                    left: -1px;
-                    bottom: 0;
-                    right: 0;
-                    background: #fff;
-                    border: 1px solid $GREY;
-                    border-bottom: 0;
-                    clip: rect(0, 155px, 38px, -1px);
-                    box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.25);
-                    z-index: -1;
-                }
-                .secondary-nav {
                     display: block;
-                    z-index: -2;
+                    border: 5px solid transparent;
+                    border-top-color: #000;
+                    position: absolute;
+                    right: 0;
+                    top: 17px;
+                }
+
+                &:hover {
+                    cursor: pointer;
+                    &:before {
+                        display: block;
+                        position: absolute;
+                        content: '';
+                        top: 0;
+                        left: -1px;
+                        bottom: 0;
+                        right: -10px;
+                        background: #fff;
+                        border: 1px solid $GREY;
+                        border-bottom: 0;
+                        clip: rect(0, 175px, 38px, -1px);
+                        box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.25);
+                        z-index: -1;
+                    }
+                    .secondary-nav {
+                        display: block;
+                        z-index: -2;
+                    }
                 }
             }
         }

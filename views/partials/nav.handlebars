@@ -1,12 +1,29 @@
 <nav>
     <ul class="primary-nav">
         {{#if user}}
-            <li>
-                Welcome, <a href="/user/{{user.name}}/" class="user-profile">{{user.name}}</a>!
+            <li{{#inTestBucket key="userDropDownMenu" value="enabled"}} class="has-secondary-nav user-actions"{{/inTestBucket}}>
+                {{#inTestBucket key="userDropDownMenu" value="control"}}Welcome, <a href="/user/{{user.name}}/" class="user-profile">{{user.name}}</a>!{{/inTestBucket}}
+
+                {{#inTestBucket key="userDropDownMenu" value="enabled"}}
+                {{user.name}}
+                <ul class="secondary-nav user-actions">
+                    <li>
+                        <a href="/user/{{user.name}}/">View Profile</a>
+                    </li>
+                    <li class="my-galleries">
+                        <a href="/gallery/mine/">My Galleries</a>
+                    </li>
+                    <li>
+                        <a href="/logout/">Logout</a>
+                    </li>
+                </ul>
+                {{/inTestBucket}}
             </li>
+            {{#inTestBucket key="userDropDownMenu" value="control"}}
             <li class="my-galleries">
                 <a href="/gallery/mine/">My Galleries</a>
             </li>
+            {{/inTestBucket}}
         {{/if}}
         {{#unless user}}
             <li>
