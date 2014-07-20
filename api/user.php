@@ -6,8 +6,13 @@ namespace Api {
     use stdClass;
     use OAuth2;
 
-    // Ten minute expiry for vote information
-    define('VOTE_CACHE_EXPIRY', 60 * 10);
+    // For posts made within the last 24 hours, cache for 3 hours
+    define('VOTE_SHORT_CACHE', 3600 * 3);
+
+    // For anything older, two days
+    define('VOTE_LONG_CACHE', 64800 * 2);
+
+    define('USER_CSRF_ENTRPOY', 8);
 
     class User extends Lib\Dal {
 
@@ -80,6 +85,11 @@ namespace Api {
          * Array of post votes
          */
         private $voteData = [];
+
+        /**
+         * CSRF token
+         */
+        public $csrfToken;
 
         /**
          * Attempts to retrieve the user from the database and, failing that, reddit
@@ -166,6 +176,7 @@ namespace Api {
                         if (isset($data->name)) {
                             $user = self::getByName($data->name);
                             if ($user) {
+                                $user->csrfToken = bin2hex(openssl_random_pseudo_bytes(USER_CSRF_ENTRPOY));
                                 $user->refreshToken = $token->getRefreshToken();
                                 $user->token = $token;
                                 // subtract a minute to safely account for any latency
@@ -253,11 +264,12 @@ namespace Api {
         /**
          * Saves a user's vote for a post
          */
-        public function setVoteForPost($postId, $vote) {
+        public function setVoteForPost(Post $post, $vote) {
+            $within24Hours = $post->dateCreated < time() - 64800;
             $obj = new stdClass;
             $obj->vote = $vote;
-            $obj->expires = time() + VOTE_CACHE_EXPIRY;
-            $this->voteData[$postId] = $obj;
+            $obj->expires = time() + $within24Hours ? VOTE_SHORT_CACHE : VOTE_LONG_CACHE;
+            $this->voteData[$post->externalId] = $obj;
         }
 
         /**
@@ -273,9 +285,12 @@ namespace Api {
                 if ($dir >= -1 && $dir <= 1) {
                     $token = $this->getAuthToken();
                     if ($token) {
-                        $response = $token->post('https://oauth.reddit.com/api/vote', [ 'body' => implode('&', [ 'id=t3_' . $postId, 'dir=' . $dir ]) ]);
-                        $this->setVoteForPost($postId, $dir);
-                        $this->saveUserSession();
+                        $row = Post::queryReturnAll([ 'externalId' => $postId ]);
+                        if ($row) {
+                            $response = $token->post('https://oauth.reddit.com/api/vote', [ 'body' => implode('&', [ 'id=t3_' . $postId, 'dir=' . $dir ]) ]);
+                            $this->setVoteForPost($row[0], $dir);
+                            $this->saveUserSession();
+                        }
                     }
                 }
 

@@ -4,7 +4,7 @@ namespace Lib {
 
     use stdClass;
 
-    define('RBSESS', 'RBSESS');
+    define('RBSESS', 'RBSESS_20140718');
     define('SESSION_EXPIRE', 86400 * 365); // session lasts for a year
 
     class Session {

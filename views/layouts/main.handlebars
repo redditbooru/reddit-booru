@@ -44,6 +44,9 @@
             window.sources = {{{sources}}};
             window.filters = {{{jsonBlob filters}}};
             window.tests = {{{jsonBlob tests}}};
+            {{#if csrfToken}}
+            window.csrfToken = '{{csrfToken}}';
+            {{/if}}
         </script>
         <script src="/static/js/RedditBooru.js"></script>
         {{>ga}}

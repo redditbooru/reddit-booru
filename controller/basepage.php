@@ -21,6 +21,7 @@ namespace Controller {
 
             if ($user instanceof Api\User) {
                 Lib\TestBucket::initialize($user->id);
+                Lib\Display::addKey('csrfToken', $user->csrfToken);
             }
 
             Lib\Display::addKey('phpSessionUpload', ini_get("session.upload_progress.name"));
