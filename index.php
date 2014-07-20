@@ -26,6 +26,9 @@ $GLOBALS['_baseURI'] = current(explode('?', Lib\Url::getRawUrl()));
 Lib\Display::setTheme('.');
 Lib\Display::setLayout('main');
 
+// Warm up the test buck stuff
+Lib\TestBucket::initialize();
+
 // Handle URL rewrites
 if (!$found) {
 
