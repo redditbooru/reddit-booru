@@ -2,6 +2,8 @@
 
 namespace Lib {
 
+    use stdClass;
+
     define('TEST_BUCKET_CACHE_KEY', 'bucket_tests');
     define('DEFAULT_TEST_VALUE', 'control');
 
@@ -24,23 +26,20 @@ namespace Lib {
 
                 // Add template helpers
                 Display::addHelper('inTestBucket', function($template, $context, $args, $source) {
-                    $args = explode(' ', $args);
-                    $argc = count($args);
 
-                    if ($argc === 2) {
-                        for ($i = 0; $i < $argc; $i++) {
-
-                            // Check for literal value vs template variable
-                            if (strpos($args[$i], '"') === 0) {
-                                $args[$i] = str_replace('"', '', $args[$i]);
-                            } else {
-                                $args[$i] = $context->get($args[$i]);
-                            }
-
+                    if (preg_match_all('/([\w]+)=\"([^\"]+)\"/i', $args, $matches)) {
+                        $args = new stdClass;
+                        for ($i = 0, $count = count($matches[0]); $i < $count; $i++) {
+                            $key = $matches[1][$i];
+                            $args->$key = str_replace('"', '', $matches[2][$i]);
                         }
 
-                        if (self::get($args[0]) == $args[1]) {
-                            return $template->render($context);
+                        if (isset($args->key) && isset($args->value)) {
+                            if (self::get($args->key) == $args->value) {
+                                return $template->render($context);
+                            }
+                        } else {
+                            throw new Exception('inTestBucket requires "key" and "test" parameters');
                         }
 
                     }
@@ -81,7 +80,7 @@ namespace Lib {
                         }
                     }
 
-                    if (!$found) {
+                    if (!$found && isset($test->ramps)) {
                         srand($seed);
                         $rand = rand() % 100;
                         $percentTotal = 0;
