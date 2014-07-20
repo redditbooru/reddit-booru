@@ -177,7 +177,7 @@
         },
 
         _resize: function() {
-            this.$content.height(this.$window.height() - OUTER_PADDING);
+            this.$content.height(this.$viewer.height() - OUTER_PADDING);
         },
 
         _killSlideshow: function() {
@@ -197,12 +197,12 @@
 
             image.score = parseInt(image.score, 10) + submitDir + existingVote * -1;
             this.$voter.find('.score').text(image.score);
-/*
+
             $.ajax({
                 url: '/uas/?action=vote&dir=' + submitDir + '&id=' + image.externalId + '&csrfToken=' + window.csrfToken,
                 dataType: 'json'
             });
-*/
+
             this.$voter.removeClass([ UPVOTE, DOWNVOTE, NOVOTE ].join(' '));
 
             switch (submitDir) {
