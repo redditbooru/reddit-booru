@@ -30,16 +30,20 @@ namespace Controller {
                     }
                     break;
                 case 'vote':
-                    $user = Api\User::getCurrentUser();
-                    if ($user) {
-                        $user->vote(Lib\Url::Get('id'), Lib\Url::GetInt('dir'));
-                    }
+                    self::_vote();
                     exit;
-                    break;
             }
 
-            session_write_close();
+        }
 
+        private static function _vote() {
+            $user = Api\User::getCurrentUser();
+            if ($user) {
+                $csrfToken = Lib\Url::Get('csrfToken', null);
+                if ($csrfToken === $user->csrfToken) {
+                    $user->vote(Lib\Url::Get('id'), Lib\Url::GetInt('dir'));
+                }
+            }
         }
 
     }

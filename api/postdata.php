@@ -555,7 +555,7 @@ namespace Api {
                             if (isset($data->data) && is_array($data->data->children)) {
                                 foreach ($data->data->children as $post) {
                                     $vote = 0;
-                                    $post = $post->data;
+                                    $post = Post::createFromRedditObject($post->data);
 
                                     if (isset($post->likes))  {
                                         if ($post->likes === null) {
@@ -567,8 +567,8 @@ namespace Api {
                                         }
                                     }
 
-                                    $postCache[$post->id]->userVote = $vote;
-                                    $user->setVoteForPost($post->id, $vote);
+                                    $postCache[$post->externalId]->userVote = $vote;
+                                    $user->setVoteForPost($post, $vote);
                                 }
                             }
                         }

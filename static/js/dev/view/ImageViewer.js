@@ -199,7 +199,7 @@
             this.$voter.find('.score').text(image.score);
 
             $.ajax({
-                url: '/uas/?action=vote&dir=' + submitDir + '&id=' + image.externalId,
+                url: '/uas/?action=vote&dir=' + submitDir + '&id=' + image.externalId + '&csrfToken=' + window.csrfToken,
                 dataType: 'json'
             });
 
