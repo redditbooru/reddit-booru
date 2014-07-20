@@ -97,7 +97,7 @@ function updatePost(Api\Post $post, Api\Post $dbPost) {
         _log('[ ' . $post->externalId . ' ] Updating...');
         $dbPost->title = $post->title;
         $dbPost->keywords = $post->keywords;
-        $dbPost->score = $dbPost->score;
+        $dbPost->score = $post->score;
         if ($dbPost->sync()) {
             Api\PostData::updateDenormalizedPostData($dbPost->id);
         }
