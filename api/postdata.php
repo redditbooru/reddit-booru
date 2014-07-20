@@ -541,7 +541,10 @@ namespace Api {
                         $post->userVote = $vote;
                     } else {
                         $ids[$post->externalId] = true;
-                        $postCache[$post->externalId] = $post;
+                        if (!isset($postCache[$post->externalId])) {
+                            $postCache[$post->externalId] = [];
+                        }
+                        $postCache[$post->externalId][] = $post;
                     }
                 }
 
@@ -555,7 +558,7 @@ namespace Api {
                             if (isset($data->data) && is_array($data->data->children)) {
                                 foreach ($data->data->children as $post) {
                                     $vote = 0;
-                                    $post = Post::createFromRedditObject($post->data);
+                                    $post = $post->data;
 
                                     if (isset($post->likes))  {
                                         if ($post->likes === null) {
@@ -567,7 +570,12 @@ namespace Api {
                                         }
                                     }
 
-                                    $postCache[$post->externalId]->userVote = $vote;
+                                    // Update every post image for this reddit id
+                                    foreach ($postCache[$post->id] as $postData) {
+                                        $postData->userVote = $vote;
+                                    }
+
+                                    $post = Post::createFromRedditObject($post);
                                     $user->setVoteForPost($post, $vote);
                                 }
                             }

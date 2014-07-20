@@ -197,14 +197,13 @@
 
             image.score = parseInt(image.score, 10) + submitDir + existingVote * -1;
             this.$voter.find('.score').text(image.score);
-
+/*
             $.ajax({
                 url: '/uas/?action=vote&dir=' + submitDir + '&id=' + image.externalId + '&csrfToken=' + window.csrfToken,
                 dataType: 'json'
             });
-
+*/
             this.$voter.removeClass([ UPVOTE, DOWNVOTE, NOVOTE ].join(' '));
-
 
             switch (submitDir) {
                 case 0:
@@ -220,6 +219,14 @@
                     RB._track(TRACK_VIEWER, TRACKING.DOWNVOTE);
                     break;
             }
+
+            // Update any other item with this reddit ID with the new vote value
+            _.each(this.allImages.filter(function(post) {
+                return post.attributes.externalId === image.externalId;
+            }), function(post) {
+                post.attributes.score = image.score;
+                post.attributes.userVote = dir;
+            });
 
         }
 
