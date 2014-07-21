@@ -244,6 +244,7 @@ namespace Api {
             $retVal->dateCreated = (int) $data->created_utc;
             $retVal->linkKarma = (int) $data->link_karma;
             $retVal->commentKarma = (int) $data->comment_karma;
+            return $retVal;
         }
 
         /**
