@@ -21,6 +21,13 @@ namespace Controller {
                     // Redirect to the reddit OAuth2 login endpoint
                     header('Location: ' . Api\User::getLoginUrl());
                     exit;
+                case 'logout':
+                    $user = Api\User::getCurrentUser();
+                    if ($user) {
+                        $user->logout();
+                    }
+                    header('Location: /');
+                    exit;
                 case 'authenticate':
                     $code = Lib\Url::Get('code');
                     if (false !== $code) {

@@ -274,10 +274,14 @@ namespace Api {
         }
 
         /**
-         * Writes the vote data to session
+         * Saves the user session or clears it
          */
-        public function saveUserSession() {
-            Lib\Session::set('user', $this);
+        public function saveUserSession($end = false) {
+            Lib\Session::set('user', $end ? null : $this);
+        }
+
+        public function logout() {
+            $this->saveUserSession(true);
         }
 
         public function vote($postId, $dir) {

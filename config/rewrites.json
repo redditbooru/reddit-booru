@@ -40,6 +40,10 @@
         "replace": "page=uas&action=login"
     },
     {
+        "rule": "^logout/$",
+        "replace": "page=uas&action=logout"
+    },
+    {
         "rule": "^uas/$",
         "replace": "page=uas"
     },
