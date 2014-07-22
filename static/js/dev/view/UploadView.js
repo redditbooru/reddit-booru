@@ -19,11 +19,11 @@
 
         events: {
             'paste #imageUrl': 'handlePaste',
-            'keyup input': 'handleTextChange',
             'click .close': '_hideDialog',
             'click #imageFileButton': 'beginUpload',
             'click .remove': 'handleRemoveClick',
             'click .repostImage': 'handleRepostClick',
+            'keypress form': 'handleTextChange',
             'submit form': 'handleSubmit'
         },
 
@@ -47,7 +47,6 @@
             if (image instanceof File) {
                 this.beginUpload(image);
             } else if (image) {
-                debugger;
                 this._urlUpload(image);
             }
         },
@@ -87,11 +86,19 @@
 
         handleTextChange: function(evt) {
             var keyCode = evt.keyCode || evt.charCode;
+            
+            // If the target is the image URL textbox, check for submit, otherwise save the for
+            // because it was a change on the album title
             if (evt.target.getAttribute('id') === 'imageUrl') {
                 if (keyCode === KEY_ENTER) {
+                    evt.preventDefault();
+                    evt.stopPropagation();
                     this._urlUpload(evt.target.value, false, evt.target);
                 }
             } else {
+                if ($.trim(this.$albumTitle.val()).length > 0) {
+                    this.$albumTitle.removeClass('error');
+                }
                 clearTimeout(this.delayTimer);
                 this.delayTimer = setTimeout(_.bind(this._saveForm, this), SAVE_DELAY);
             }
