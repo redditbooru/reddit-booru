@@ -134,7 +134,7 @@ namespace Controller {
         private static function _getCommonPhrases($data) {
     
             $phrases = [];
-            
+
             foreach($data as $id => $item) {
 
                 $title = explode(' ', trim($item->keywords));
@@ -147,11 +147,9 @@ namespace Controller {
                     $lastPhrase = '';
                     $phrase = '';
                     for ($j = 0, $wordsLeft = $titleLen - $i; $j < $wordsLeft; $j++) {
-                        $phrase .= ' ' . trim($title[$i + $j]);
-                        $phrase = trim($phrase);
+                        $phrase = trim($phrase . ' ' . $title[$i + $j]);
 
-                        $count = self::_getSimilarPostCount($phrase, $id, $data);
-                        if ($count > 0 && strlen($phrase) > 2) {
+                        if (strlen($phrase) > 2 && self::_hasSimilarPhrases($phrase, $id, $data)) {
                             if (!isset($localPhrases[$phrase])) {
                                 $localPhrases[$phrase] = 1;
                             } else {
@@ -173,9 +171,12 @@ namespace Controller {
 
                 // Remove duplicate phrase chunks leaving only the longest
                 foreach ($localPhrases as $needle => $nCount) {
-                    foreach ($localPhrases as $haystack => $hCount) {
-                        if ($needle != $haystack && strpos($haystack, $needle) !== false) {
-                            $localPhrases[$needle] = 0;
+                    if ($localPhrases[$needle] > 0) {
+                        foreach ($localPhrases as $haystack => $hCount) {
+                            if ($needle != $haystack && strpos($haystack, $needle) !== false) {
+                                $localPhrases[$needle] = 0;
+                                break;
+                            }
                         }
                     }
                 }
@@ -184,7 +185,6 @@ namespace Controller {
                 
             }
 
-            $phraseCount = count($phrases);
             $phrases = array_filter($phrases, function($a) { return $a > 0; });
             arsort($phrases);
             
@@ -192,16 +192,13 @@ namespace Controller {
 
         }
 
-        private static function _getSimilarPostCount($keyphrase, $postId, &$data) {
-            $retVal = 0;
-            if (strlen(trim($keyphrase)) > 0) {
-                foreach ($data as $id => $item) {
-                    if ($postId != $id && strpos($item->keywords, $keyphrase) !== false) {
-                        $retVal++;
-                    }
+        private static function _hasSimilarPhrases($keyphrase, $postId, &$data) {
+            foreach ($data as $id => $item) {
+                if ($postId != $id && strpos($item->keywords, $keyphrase) !== false) {
+                    return true;
                 }
             }
-            return $retVal;
+            return false;
         }
 
         private static function _mergePhrases($arr, $phrases) {
