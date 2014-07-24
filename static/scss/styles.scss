@@ -706,6 +706,10 @@ button.singleSourceSearch {
 
     .albumTitle {
         display: none;
+        &.error {
+            border-color: #f00;
+            color: #f00;
+        }
     }
 
 }
@@ -864,12 +868,14 @@ button.singleSourceSearch {
             background: $NO_VOTE;
             color: $NO_VOTE;
             margin: 0 auto;
+            position: relative;
+            color: transparent;
         }
 
         .upvote:before {
             content: '';
             display: block;
-            position: relative;
+            position: absolute;
             width: 0;
             height: 0;
             border: $BASE_ARROW_SIZE solid transparent;
@@ -881,7 +887,7 @@ button.singleSourceSearch {
         .downvote:before {
             content: '';
             display: block;
-            position: relative;
+            position: absolute;
             width: 0;
             height: 0;
             border: $BASE_ARROW_SIZE solid transparent;
@@ -899,7 +905,6 @@ button.singleSourceSearch {
 
             .upvote {
                 background: $UP_VOTE;
-                color: $UP_VOTE;
                 &:before {
                     border-bottom-color: $UP_VOTE;
                 }
@@ -915,7 +920,6 @@ button.singleSourceSearch {
 
             .downvote {
                 background: $DOWN_VOTE;
-                color: $DOWN_VOTE;
                 &:before {
                     border-top-color: $DOWN_VOTE;
                 }
