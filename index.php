@@ -10,9 +10,6 @@ $_begin = microtime (true);
 // Include base libraries
 require_once('./lib/aal.php');
 
-// Set the time zone
-date_default_timezone_set('America/Chicago');
-
 // Start the session
 Lib\Session::start();
 

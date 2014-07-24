@@ -6,6 +6,9 @@ define('DB_USER', 'USER');
 define('DB_PASS', 'PASSWORD');
 define('DB_NAME', 'reddit-booru');
 
+// Set the time zone
+date_default_timezone_set('America/Chicago');
+
 define('AWS_KEY', 'KEY');
 define('AWS_SECRET', 'SECRET');
 define('AWS_ENABLED', true);
