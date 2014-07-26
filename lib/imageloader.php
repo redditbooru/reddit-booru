@@ -9,6 +9,8 @@ namespace Lib {
     define('IMAGE_TYPE_JPEG', 'jpg');
     define('IMAGE_TYPE_PNG', 'png');
     define('IMAGE_TYPE_GIF', 'gif');
+    define('IMAGE_TYPE_MAX_LENGTH', 3);
+    define('IMAGE_CACHE_EXT', 'csh');
 
     define('IMGEVT_DOWNLOAD_BEGIN', 'IMGEVT_DOWNLOAD_BEGIN');
     define('IMGEVT_DOWNLOAD_COMPLETE', 'IMGEVT_DOWNLOAD_COMPLETE');
@@ -332,21 +334,9 @@ namespace Lib {
                     $retVal->data = $file;
                     self::_log('downloadImage_success', $url);
 
-                    // Cache to mongo
-                    $rb = Mongo::getDatabase();
-                    if ($rb) {
-                        $gridFS = $rb->getGridFS();
-
-                        // Make an array because WHAT THE FUCK, MONGO
-                        $obj = [ 'url' => $url, 'type' => $retVal->type, 'timestamp' => $retVal->timestamp ];
-                        $id = $gridFS->storeBytes($file, $obj);
-                        if (!$id) {
-                            self::_log('downloadImage_mongo_save_fail', $url);
-                        } else {
-                            self::_log('downloadImage_mongo_save_success', $url);
-                        }
-
-                    }
+                    // Cache the image
+                    self::_saveCacheFile($url, $retVal);
+                    
 
                 } else {
                     self::_log('downloadImage_invalid', $url);
@@ -361,25 +351,38 @@ namespace Lib {
         /**
          * Attempts to retrieve an image from mongocache
          */
-        private static function _fetchFromMongo($url) {
+        private static function _fetchFromCache($url) {
 
             $retVal = null;
 
-            $rb = Mongo::getDatabase();
-            if ($rb) {
-                $gridFS = $rb->getGridFS();
-                $result = $gridFS->findOne([ 'url' => $url ]);
-
-                if ($result) {
+            $cacheFile = THUMBNAIL_STORAGE . md5($url) . '.' . IMAGE_CACHE_EXT;
+            if (is_readable($cacheFile)) {
+                $file = fopen($cacheFile, 'rb');
+                if ($file) {
                     $retVal = new stdClass;
-                    $retVal->type = $result->file['type'];
-                    $retVal->timestamp = $result->file['timestamp'];
-                    $retVal->data = $result->getBytes();
-                    self::_log('fetchImage_mongo_hit', $url);
+                    $retVal->type = fread($file, IMAGE_TYPE_MAX_LENGTH);
+                    $retVal->timestamp = filemtime($cacheFile);
+                    $retVal->data = fread($file, filesize($cacheFile) - IMAGE_TYPE_MAX_LENGTH);
+                    fclose($file);
                 }
+            } else {
+                $retVal = self::_downloadImage($url);
             }
 
             return $retVal;
+        }
+
+        /**
+         * Saves image data to a cache file
+         */
+        private static function _saveCacheFile($url, $data) {
+            $cacheFile = THUMBNAIL_STORAGE . md5($url) . '.' . IMAGE_CACHE_EXT;
+            $file = fopen($cacheFile, 'cb');
+            if ($file) {
+                fwrite($file, $data->type);
+                fwrite($file, $data->data);
+                fclose($file);
+            }
         }
 
         /**
@@ -399,9 +402,9 @@ namespace Lib {
                 $retVal = self::_downloadImage(LOCAL_IMAGE_PATH . $url);
             }
 
-            // Check mongo for a copy of the image
+            // Check the cache for a copy of the image
             if (null == $retVal) {
-                $retVal = self::_fetchFromMongo($url);
+                $retVal = self::_fetchFromCache($url);
             }
 
             // If nothing was found in the mongo cache, go fetch it the old fashioned way
