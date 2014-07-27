@@ -411,11 +411,22 @@ header {
         .curated {
             font: 18px 'MG Thin', sans-serif;
         }
-        img {
-            max-width: 100%;
-            display: block;
+        .gallery-image {
+            display: table;
             margin: 0 auto 25px;
-            @include image-shadow();
+            img {
+                max-width: 100%;
+                display: block;
+                @include image-shadow();
+            }
+            p {
+                padding: 10px 0;
+                font: 18px 'MG Thin', sans-serif;
+                a {
+                    color: $PINK;
+                    text-decoration: none;
+                }
+            }
         }
     }
 

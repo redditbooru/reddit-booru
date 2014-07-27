@@ -1,4 +1,11 @@
 <p class="curated">Curated by <a href="/user/{{images.0.userName}}/">{{images.0.userName}}</a>
 {{#each images}}
-    <img src="{{cdnUrl}}" />
+    <div class="gallery-image">
+        <img src="{{cdnUrl}}" />
+        {{#if caption}}
+            <p>{{caption}}{{#if sourceUrl}} [ <a href="{{sourceUrl}}" target="_blank">Source</a> ]{{/if}}</p>
+        {{else}}
+            {{#if sourceUrl}}<p>[ <a href="{{sourceUrl}}" target="_blank">Source</a> ]</p>{{/if}}
+        {{/if}}
+    </div>
 {{/each}}
