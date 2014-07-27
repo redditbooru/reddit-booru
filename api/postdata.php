@@ -536,15 +536,17 @@ namespace Api {
                 $ids = [];
                 $postCache = [];
                 foreach ($posts as $post) {
-                    $vote = $user->getVoteForPost($post->externalId);
-                    if ($vote !== false) {
-                        $post->userVote = $vote;
-                    } else {
-                        $ids[$post->externalId] = true;
-                        if (!isset($postCache[$post->externalId])) {
-                            $postCache[$post->externalId] = [];
+                    if ($post->externalId) {
+                        $vote = $user->getVoteForPost($post->externalId);
+                        if ($vote !== false) {
+                            $post->userVote = $vote;
+                        } else {
+                            $ids[$post->externalId] = true;
+                            if (!isset($postCache[$post->externalId])) {
+                                $postCache[$post->externalId] = [];
+                            }
+                            $postCache[$post->externalId][] = $post;
                         }
-                        $postCache[$post->externalId][] = $post;
                     }
                 }
 
