@@ -22,6 +22,13 @@
             UPVOTE: 'upvote',
             DOWNVOTE: 'downvote',
             UNVOTE: 'unvote'
+        },
+
+        KEYS = {
+            UP: 38,
+            DOWN: 40,
+            LEFT: 37,
+            RIGHT: 39
         };
 
     RB.ImageViewer = Backbone.View.extend({
@@ -49,6 +56,8 @@
                 .on('click', '.transport', _.bind(this._handleNavigate, this))
                 .on('click', '.close', _.bind(this._hide, this))
                 .on('click', '.voter button', _.bind(this._vote, this));
+
+            $(document).on('keyup', _.bind(this._handleKeypress, this));
 
             this.allImages = new RB.ImageCollection();
             this.allImages.reset(imageCollection.models);
@@ -142,6 +151,26 @@
                 this.$next.show();
             }
 
+        },
+
+        _handleKeypress: function(evt) {
+            var keyCode = evt.keyCode || evt.charCode;
+            if (this.$viewer.is(':visible')) {
+                switch (keyCode) {
+                    case KEYS.RIGHT:
+                        this.$next.click();
+                        break;
+                    case KEYS.LEFT:
+                        this.$previous.click();
+                        break;
+                    case KEYS.UP:
+                        this.$viewer.find('button.upvote').click();
+                        break;
+                    case KEYS.DOWN:
+                        this.$viewer.find('button.downvote').click();
+                        break
+                }
+            }
         },
 
         _collectionUpdated: function() {
