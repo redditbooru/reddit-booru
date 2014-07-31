@@ -2,7 +2,11 @@
     {{#each .}}
         <a class="image{{#if nsfw}} nsfw{{/if}}{{#unless visible}} hidden{{/unless}}" href="http://redd.it/{{externalId}}" data-src="{{cdnUrl}}" style="width: {{viewWidth}}%; background-image: url({{thumb}}_300_300.jpg);" data-id="{{postId}}" data-row="{{id}}" target="_blank" data-ratio="{{widthHeightRatio}}">
             {{#if nsfw}}
-                <img src="{{thumb}}_300_300.jpg" class="nsfw" alt="{{title}}" style="width: {{viewWidth}}px;" />
+                <img src="{{thumb}}_300_300.jpg" class="blurred" alt="{{title}}" style="width: {{viewWidth}}px;" />
+            {{else}}
+                {{#unless visible}}
+                    <img src="{{thumb}}_300_300.jpg" class="blurred" alt="{{title}}" style="width: {{viewWidth}}px;" />
+                {{/unless}}
             {{/if}}
 
             <dl class="information">

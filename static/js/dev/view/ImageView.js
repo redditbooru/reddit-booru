@@ -54,28 +54,25 @@
                 $el = this.$el;
 
             this.collection.each(function(item) {
+                itemsToRender.push(item);
 
-                if (item.attributes.visible || RB.showHidden) {
-                    itemsToRender.push(item);
+                if (item.rendered) {
+                    append = true;
+                } else {
+                    newItems++;
+                    item.rendered = true;
+                }
 
-                    if (item.rendered) {
-                        append = true;
-                    } else {
-                        newItems++;
-                        item.rendered = true;
+                if (itemsToRender.length === this.columns) {
+
+                    // Only add this to the output if there were new items on this row
+                    if (newItems) {
+                        out = out.concat(this._drawColumn(itemsToRender));
                     }
 
-                    if (itemsToRender.length === this.columns) {
-
-                        // Only add this to the output if there were new items on this row
-                        if (newItems) {
-                            out = out.concat(this._drawColumn(itemsToRender));
-                        }
-
-                        itemsToRender.reset();
-                        newItems = 0;
-                        count = 0;
-                    }
+                    itemsToRender.reset();
+                    newItems = 0;
+                    count = 0;
                 }
             }, this);
 

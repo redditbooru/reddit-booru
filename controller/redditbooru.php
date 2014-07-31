@@ -90,7 +90,6 @@ namespace Controller {
                     break;
                 default:
                     $_GET['sources'] = isset($_GET['sources']) ? $_GET['sources'] : self::$enabledSources;
-                    $_GET['honorVisible'] = true;
                     $filters = self::_filtersFromArray($_GET);
                     $jsonOut = isset($_GET['imageUri']) ? Images::getByImage($_GET) : Images::getByQuery($_GET);
                     break;

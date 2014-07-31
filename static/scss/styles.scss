@@ -314,13 +314,12 @@ header {
 
             .hideNsfw &.nsfw {
                 @include image-label('NSFW');
-                &:hover .nsfw {
+                &:hover .blurred {
                     display: none;
                 }
             }
 
-            .hideNsfw & .nsfw,
-            .hidden {
+            .hideNsfw & .blurred {
                 display: block;
                 position: absolute;
                 min-width: 125%;
@@ -332,6 +331,13 @@ header {
                 filter: url(/static/scss/filters.svg#nsfwBlur);
                 -ms-filter: blur(15px);
                 -webkit-filter: blur(15px);
+            }
+
+            &.hidden {
+                @include image-label('DELETED');
+                &:hover .blurred {
+                    display: none;
+                }
             }
 
             &:first-child {

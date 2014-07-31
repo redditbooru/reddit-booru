@@ -70,7 +70,11 @@ namespace Controller {
             $keywords = Lib\Url::Get('q', null, $vars);
             $ignoreSource = Lib\Url::GetBool('ignoreSource', $vars);
             $ignoreUser = Lib\Url::GetBool('ignoreUser', $vars);
-            $honorVisible = Lib\Url::GetBool('honorVisible', $vars);
+            $honorVisible = Lib\Url::Get('honorVisible', true, $vars);
+
+            // Kind of some inverse logic from usual. By default, visible is honored.
+            // However, if a non-true value is passed in (i.e., anything), it will be ignored
+            $honorVisible = $honorVisible === true ?: false;
 
             // At this point, a username search will return all source results. We'll figure the rest out later
             if (!$userName) {
@@ -191,13 +195,14 @@ namespace Controller {
                     }
                 }
                 $retVal->identical = count($identicals) > 0 ? array_keys($identicals) : false;
+
+                if (self::$_showRedditControls) {
+                    $retVal->results = Api\PostData::getVotesForPosts($retVal->results, Api\User::getCurrentUser());
+                }
+
             }
 
             self::_log('getByImage', $vars, $retVal);
-
-            if (self::$_showRedditControls) {
-                $retVal->results = Api\PostData::getVotesForPosts($retVal->results, Api\User::getCurrentUser());
-            }
 
             return $retVal;
         }
