@@ -319,7 +319,8 @@ header {
                 }
             }
 
-            .hideNsfw & .blurred {
+            .hideNsfw & .blurred,
+            &.hidden .blurred {
                 display: block;
                 position: absolute;
                 min-width: 125%;
@@ -334,7 +335,7 @@ header {
             }
 
             &.hidden {
-                @include image-label('DELETED');
+                @include image-label('DELETED', right);
                 &:hover .blurred {
                     display: none;
                 }
