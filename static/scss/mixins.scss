@@ -66,7 +66,7 @@
         padding: 10px 10px 8px;
         border-radius: 2px;
         @include image-shadow();
-        z-index: 9000;
+        z-index: 99;
     }
   } @else {
     &:after {
