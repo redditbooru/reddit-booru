@@ -312,6 +312,10 @@ header {
             background-position: center center;
             overflow: hidden;
 
+            .blurred {
+                display: none;
+            }
+
             .hideNsfw &.nsfw {
                 @include image-label('NSFW');
                 &:hover .blurred {
