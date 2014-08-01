@@ -50,35 +50,47 @@ function processImage($url) {
         $retVal = new Api\Image(Lib\Db::Fetch($result));
     } else {
 
-        // Attempt a fetch of the image
-        _log($logHead . 'Downloading...');
-        $imageData = Lib\ImageLoader::fetchImage($url);
-        if (null !== $imageData) {
+        // If the image is hosted on the CDN, attempt to grab the original from the database
+        if (strpos($url, CDN_BASE_URL) !== false) {
+            _log($logHead . 'Pulling ID from CDN hosted image');
+            $id = str_replace(CDN_BASE_URL, '', $url);
+            $id = substr($id, 0, strpos($id, '.'));
+            $id = base_convert($id, 36, 10);
+            $retVal = Api\Image::getById($id);
+            $retVal = $retVal->id == $id ? $retVal : null;
+        }
 
-            // Generate the histogram
-            _log($logHead . 'Processing...');
-            $image = Api\Image::createFromBuffer($imageData->data);
-            if (null !== $image) {
-                $image->url = $url;
-                $image->type = $imageData->type;
+        if (!$retVal) {
+            // Attempt a fetch of the image
+            _log($logHead . 'Downloading...');
+            $imageData = Lib\ImageLoader::fetchImage($url);
+            if (null !== $imageData) {
 
-                // Save to the database
-                if ($image->sync()) {
+                // Generate the histogram
+                _log($logHead . 'Processing...');
+                $image = Api\Image::createFromBuffer($imageData->data);
+                if (null !== $image) {
+                    $image->url = $url;
+                    $image->type = $imageData->type;
 
-                    // Save all the various copies of the image
-                    $retVal = $image;
-                    _log($logHead . 'DONE');
+                    // Save to the database
+                    if ($image->sync()) {
+
+                        // Save all the various copies of the image
+                        $retVal = $image;
+                        _log($logHead . 'DONE');
+
+                    } else {
+                        _log($logHead . 'Unable to sync image to database');
+                    }
 
                 } else {
-                    _log($logHead . 'Unable to sync image to database');
+                    _log($logHead . 'Unable to process image');
                 }
 
             } else {
-                _log($logHead . 'Unable to process image');
+                _log($logHead . 'Unable to download image');
             }
-
-        } else {
-            _log($logHead . 'Unable to download image');
         }
 
     }
