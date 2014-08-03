@@ -203,10 +203,11 @@ namespace Lib {
 
                 // Add LIMIT
                 if (is_numeric($limit)) {
-                    $query .= ' LIMIT ' . $limit;
+                    $query .= ' LIMIT ';
                     if (is_numeric($offset)) {
-                        $query .= ', ' . $offset;
+                        $query .= $offset . ', ';
                     }
+                    $query .= $limit;
                 }
 
                 $retVal = Db::Query($query, $params);
