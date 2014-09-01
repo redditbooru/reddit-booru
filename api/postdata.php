@@ -96,6 +96,11 @@ namespace Api {
         public $title;
 
         /**
+         * Post keywords
+         */
+        public $keywords;
+
+        /**
          * Date the post was created
          */
         public $dateCreated;
@@ -527,6 +532,10 @@ namespace Api {
          * Decorates an array of PostData items with user voting data
          */
         public static function getVotesForPosts(Array $posts, User $user) {
+
+            if (REDDIT_IS_DOWN) {
+                return $posts;
+            }
 
             $token = $user->getAuthToken();
 
