@@ -76,7 +76,7 @@ namespace Controller {
             // - URL of file, base64 encoded with trailing == removed
             // - height and width of thumbnail
             $encodedUrl = self::createThumbFilename($url);
-            $outFile = '.' . $encodedUrl . '_' . $width . '_' . $height . '.jpg';
+            $outFile = getcwd() . $encodedUrl . '_' . $width . '_' . $height . '.jpg';
 
             if ($image->getNumberImages() > 0) {
                 foreach ($image as $frame) {
