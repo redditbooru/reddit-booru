@@ -178,6 +178,7 @@ namespace Controller {
          * Performs a reverse image lookup
          */
         public static function getByImage($vars) {
+
             $retVal = new stdClass;
 
             // self::_saveSources();
@@ -187,11 +188,12 @@ namespace Controller {
             $retVal->preview = Thumb::createThumbFilename($retVal->original);
             $retVal->view = 'search';
             if (count($retVal->results) > 0) {
-                // A match is considered "identical" when the distance, rounded to the hundredths place, is 0
+                // A match is considered "identical" when the distance, rounded to the tens place, is 0
                 $identicals = [];
                 foreach ($retVal->results as $result) {
                     if ((int) ($result->distance * 100) === 0 && $result->sourceId) {
                         $identicals[$result->sourceName] = true;
+                        $result->identical = true;
                     }
                 }
                 $retVal->identical = count($identicals) > 0 ? array_keys($identicals) : false;
