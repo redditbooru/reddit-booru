@@ -36,3 +36,5 @@ define('MONGO_DATABASE', 'redditbooru');
 define('HTTP_UA', 'moe downloader by /u/dxprog');
 
 define('SAUCENAO_KEY', 'SAUCENAO_API_KEY');
+
+define('RB_BOT', 'ai-tan');
