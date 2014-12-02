@@ -17,7 +17,8 @@ namespace Api {
 			'type' => 'source_type',
 			'enabled' => 'source_enabled',
 			'subdomain' => 'source_subdomain',
-            'contentRating' => 'source_content_rating'
+            'contentRating' => 'source_content_rating',
+            'repostCheck' => 'source_repost_check'
 		);
 
 		/**
@@ -64,6 +65,11 @@ namespace Api {
          * Content rating
          */
         public $contentRating;
+
+        /**
+         * If non-zero, the number of seconds in which a repost is banned for this sub
+         */
+       	public $repostCheck;
 
 		/**
 		 * Constructor
