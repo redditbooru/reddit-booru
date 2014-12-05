@@ -156,7 +156,7 @@
         _urlUpload: function(url, force, target) {
             // QnD URL validation
             var $target = target instanceof jQuery ? target : $(target);
-            if (url.indexOf('http://') === 0 || url.indexOf('https://')) {
+            if (url.indexOf('http://') === 0 || url.indexOf('https://') === 0) {
 
                 this._renderUploader(url, url);
 
