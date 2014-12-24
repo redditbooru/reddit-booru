@@ -2,6 +2,7 @@
 
 require('lib/aal.php');
 define('DISABLE_CACHE', true);
+define('MIN_TIME_LIMIT', 7200);
 
 $start = time();
 $bot = new Api\Reddit(RB_BOT);
@@ -39,7 +40,10 @@ foreach ($sources as $source) {
                     // - this is an identical match
                     // - it isn't the image we're checking
                     // - the post falls within the blacked out timeframe
-                    if (isset($match->identical) && $match->postId != $image->postId && $match->dateCreated + $source->repostCheck > $start) {
+                    if (isset($match->identical) && $match->postId != $image->postId &&
+                            $match->dateCreated + $source->repostCheck > $start &&
+                            $match->dateCreated + MIN_TIME_LIMIT < $start &&
+                            $match->visible) {
                         $reposts[$image->externalId]->reposts[] = $match;
                         break;
                     }
@@ -59,6 +63,9 @@ foreach ($sources as $source) {
                 $message .= PHP_EOL . 'Be sure to use [redditbooru](http://redditbooru.com/) before posting to check for similar images.';
                 $bot->Comment($message, $externalId, REDDIT_LINK);
                 $bot->Report($externalId, REDDIT_LINK);
+
+                echo 'Message sent: ', PHP_EOL;
+                echo $message, PHP_EOL, PHP_EOL;
 
                 // Sleep a little bit so we don't hammer reddit too much
                 sleep(5);
