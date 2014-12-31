@@ -44,4 +44,10 @@
         }
     });
 
+    Handlebars.registerHelper('sep', function(context) {
+        if (_.isObject(context) && !context.data.last) {
+            return context.fn(context, {});
+        } 
+    });
+
 }());
