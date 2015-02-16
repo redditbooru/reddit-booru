@@ -38,3 +38,5 @@ define('HTTP_UA', 'moe downloader by /u/dxprog');
 define('SAUCENAO_KEY', 'SAUCENAO_API_KEY');
 
 define('RB_BOT', 'ai-tan');
+
+define('REDIS_SERVER', 'tcp://127.0.0.1:6379');
