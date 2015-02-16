@@ -39,4 +39,5 @@ define('SAUCENAO_KEY', 'SAUCENAO_API_KEY');
 
 define('RB_BOT', 'ai-tan');
 
+define('CACHE_PREFIX', 'RedditBooru');
 define('REDIS_SERVER', 'tcp://127.0.0.1:6379');

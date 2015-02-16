@@ -85,6 +85,7 @@ namespace Lib {
 		 */
 		public static function fetchLongCache($method, $cacheKey, $force = false) {
 			self::_redisConnect();
+			$cacheKey = CACHE_PREFIX . ':' . $cacheKey;
 			$retVal = self::$_redis->get($cacheKey);
 			if (null === $retVal || $force || self::$_disabled) {
 				$retVal = $method();
@@ -97,6 +98,7 @@ namespace Lib {
 
 		public static function setLongCache($cacheKey, $data) {
 			self::_redisConnect();
+			$cacheKey = CACHE_PREFIX . ':' . $cacheKey;
 			self::$_redis->set($cacheKey, serialize($data));
 		}
 
