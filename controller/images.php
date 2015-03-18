@@ -62,6 +62,7 @@ namespace Controller {
 
             $sources = Lib\Url::Get('sources', [], $vars);
             $limit = Lib\Url::GetInt('limit', 30, $vars);
+            $imageId = Lib\Url::GetInt('imageId', null, $vars);
             $afterId = Lib\Url::GetInt('afterId', null, $vars);
             $postId = Lib\Url::GetInt('postId', null, $vars);
             $externalId = Lib\Url::Get('externalId', null, $vars);
@@ -141,6 +142,10 @@ namespace Controller {
 
                 if ($userName) {
                     $query['userName'] = $userName;
+                }
+
+                if ($imageId) {
+                    $query['imageId'] = $imageId;
                 }
 
                 if ($afterId) {
