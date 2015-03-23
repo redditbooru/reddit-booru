@@ -13,7 +13,7 @@ Returns images. If this is POSTed to with an image file, it will honor all of th
 - **externalId** - Returns all images for a specific reddit post ID.  _(Default: null)_
 - **afterDate** - Return only images posted after a specific unix timestamp.  _(Default: null)_
 - **userName** - Return images posted by a specific user.  _(Default: null)_
-- **keywords** - Return images that match a keywords search query.  _(Default: null)_
+- **q** - Return images that match a keywords search query.  _(Default: null)_
 - **ignoreSource** - DEPRECATED
 - **ignoreUser** - DEPRECATED
 - **honorVisible** - DEPRECATED
