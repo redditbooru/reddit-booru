@@ -30,13 +30,14 @@ namespace Controller {
             Lib\Display::addClientData('upload_name', ini_get('session.upload_progress.name'));
 
             // Check to see if we got a specific subdomain
-            if (preg_match('/([\w]+)\.redditbooru\.com/is', $_SERVER['HTTP_HOST'], $matches)) {
+            if (preg_match('/([\w]+)\.(redditbooru|awwni)\.[\w]{2,3}/is', $_SERVER['HTTP_HOST'], $matches)) {
                 $domain = $matches[1];
-                $domain = 'awwnime';
                 if ($domain === 'moesaic') {
                     self::_renderMoesaic();
                 } else if ($domain === 'myfirst') {
                     self::_getMyFirst();
+                } else if ($domain === 'mumble') {
+                    self::_multiplayerMoe();
                 } else if ($domain !== 'www' && $domain !== 'beta') {
                     $domain = Api\Source::getBySubdomain([ 'domain' => $domain ]);
                     // If no sub was found, redirect to the main page
@@ -150,6 +151,17 @@ namespace Controller {
                 }
             }
             return $retVal;
+        }
+
+        private static function _multiplayerMoe() {
+            $row = Lib\Cache::Fetch(function() {
+                $result = Lib\Db::Query('SELECT post_external_id FROM posts WHERE post_title LIKE "%multiplayer moe%" AND user_id = 8 ORDER BY post_date DESC LIMIT 1');
+                return $result && $result->count ? Lib\Db::Fetch($result) : null;
+            }, 'MumblePage', CACHE_LONG);
+            if ($row) {
+                header('Location: http://redd.it/' . $row->post_external_id);
+                exit;
+            }
         }
 
     }
