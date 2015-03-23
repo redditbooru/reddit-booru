@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * @todo This entire module needs to be refactored and moved to lib
+ */
+
 namespace Api {
 
 	use Lib;
@@ -160,6 +164,24 @@ namespace Api {
 			$count *= 25;
 			$file = Lib\Http::get('http://www.reddit.com/' . $page . '.json?count=' . $count . '&after=' . $afterId . '&limit=' . $limit, $this->_cookie);
 			if (strlen($file) > 0) {
+				$obj = json_decode($file);
+				if (is_object($obj) && isset($obj->data) && is_array($obj->data->children)) {
+					$retVal = $obj->data;
+				}
+			}
+			return $retVal;
+		}
+
+		/**
+		 * Returns post data from reddit for an array of post IDs
+		 * @param array $ids Array of post IDs to fetch (type is t3)
+		 * @return object The post object returned by reddit
+		 */
+		public static function GetPostsByIds(array $ids) {
+			$retVal = null;
+			$url = 'http://www.reddit.com/by_id/t3_' . implode(',t3_', $ids) . '.json?limit=' . count($ids);
+			$file = Lib\Http::get($url);
+			if (strlen($file)) {
 				$obj = json_decode($file);
 				if (is_object($obj) && isset($obj->data) && is_array($obj->data->children)) {
 					$retVal = $obj->data;
