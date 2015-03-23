@@ -86,6 +86,8 @@ namespace Lib {
 		public static function fetchLongCache($method, $cacheKey, $force = false) {
 			self::_redisConnect();
 			$cacheKey = CACHE_PREFIX . ':' . $cacheKey;
+			$force = DISABLE_CACHE ?: $force;
+
 			$retVal = self::$_redis->get($cacheKey);
 			if (null === $retVal || $force || self::$_disabled) {
 				$retVal = $method();
