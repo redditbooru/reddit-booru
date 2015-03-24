@@ -146,6 +146,7 @@ namespace Controller {
 
                 if ($imageId) {
                     $query['imageId'] = $imageId;
+                     unset($query['sourceId']);
                 }
 
                 if ($afterId) {
