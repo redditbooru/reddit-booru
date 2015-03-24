@@ -106,6 +106,7 @@ namespace Controller {
             $cacheKey = Lib\Cache::createCacheKey('Images::getByQuery_', [
                 'sources',
                 'limit',
+                'imageId',
                 'afterId',
                 'postId',
                 'externalId',
