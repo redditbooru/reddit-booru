@@ -49,7 +49,7 @@ namespace Controller {
                 header('Access-Control-Allow-Origin: *');
             }
 
-            header('Content-Type: text/javascript; charset=utf-8');
+            header('Content-Type: application/json; charset=utf-8');
             echo json_encode($images);
             exit;
         }
@@ -147,6 +147,7 @@ namespace Controller {
 
                 if ($imageId) {
                     $query['imageId'] = $imageId;
+                     unset($query['sourceId']);
                 }
 
                 if ($afterId) {
