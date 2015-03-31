@@ -44,6 +44,7 @@
          */
         openWithUpload: function(image) {
             this._showDialog();
+
             if (image instanceof File) {
                 this.beginUpload(image);
             } else if (image) {
@@ -86,7 +87,7 @@
 
         handleTextChange: function(evt) {
             var keyCode = evt.keyCode || evt.charCode;
-            
+
             // If the target is the image URL textbox, check for submit, otherwise save the for
             // because it was a change on the album title
             if (evt.target.getAttribute('id') === 'imageUrl') {
@@ -156,7 +157,7 @@
         _urlUpload: function(url, force, target) {
             // QnD URL validation
             var $target = target instanceof jQuery ? target : $(target);
-            if (url.indexOf('http://') === 0 || url.indexOf('https://') === 0) {
+            if (url.indexOf('http://') === 0 || url.indexOf('https://') === 0 || url.indexOf('/tmp') === 0) {
 
                 this._renderUploader(url, url);
 
