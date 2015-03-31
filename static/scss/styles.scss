@@ -62,7 +62,7 @@ $NAV_INDEX: 100;
 }
 
 body {
-    padding-top: 86px;
+    padding-top: 56px;
 }
 
 input {
@@ -106,22 +106,24 @@ a {
 header {
 
     position: fixed;
-    background: url(/static/images/sidebar_bg.png);
     border-right: 1px solid #ddd;
+    background: #333;
+    color: #fff;
     top: 0;
     left: 0;
     right: 0;
-    padding: 20px 20px 15px;
-    border-bottom: 1px solid $GREY;
+    padding: 5px 20px 5px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
     z-index: $NAV_INDEX;
 
     h1 {
-        font: 36px/1 'MG Thin', sans-serif;
+        font: 28px/1 'MG Thin', sans-serif;
         float: left;
+        position: relative;
+        top: 6px;
         a {
             text-decoration: none;
-            color: #000;
+            color: #fff;
             &:hover {
                 text-decoration: none;
             }
@@ -157,6 +159,8 @@ header {
     .primary-nav {
 
         margin-left: 20px;
+        position: relative;
+        top: 2px;
 
         > li {
 
@@ -173,7 +177,7 @@ header {
             }
 
             a {
-                color: #000;
+                color: #fff;
                 text-decoration: none;
                 &.user-profile {
                     color: $PINK;
@@ -229,7 +233,7 @@ header {
                     content: '';
                     display: block;
                     border: 5px solid transparent;
-                    border-top-color: #000;
+                    border-top-color: #fff;
                     position: absolute;
                     right: 0;
                     top: 17px;
@@ -237,6 +241,7 @@ header {
 
                 &:hover {
                     cursor: pointer;
+                    color: #000;
                     &:before {
                         display: block;
                         position: absolute;
@@ -252,6 +257,11 @@ header {
                         box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.25);
                         z-index: -1;
                     }
+
+                    &:after {
+                        border-top-color: #000;
+                    }
+
                     .secondary-nav {
                         display: block;
                         z-index: -2;
@@ -566,7 +576,7 @@ button.singleSourceSearch {
     background: $GREY;
     opacity: 0.9;
     border-radius: 5px;
-    z-index: $NAV_INDEX + 1;
+    z-index: $NAV_INDEX + 10;
 
     div {
         font: 30px/1 'MG Regular', sans-serif;
