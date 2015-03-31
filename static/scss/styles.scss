@@ -142,8 +142,15 @@ header {
                 position: absolute;
                 right: 10px;
                 top: -7px;
-                color: $DARK_GREY;
+                color: $GREY;
             }
+        }
+
+        button {
+            background: $DARK_GREY;
+            color: #fff;
+            border: 0;
+            padding-top: 7px;
         }
 
     }
