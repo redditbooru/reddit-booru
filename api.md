@@ -84,6 +84,6 @@
 
 * ***Sample Call:***
 
-  `curl http://redditbooru.com/api/images?sources=1&limit=5&user=chiefnoah&q=alice`
+  `curl http://redditbooru.com/api/images/?sources=1&limit=5&user=chiefnoah&q=alice`
 
   
