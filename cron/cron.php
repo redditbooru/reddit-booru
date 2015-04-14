@@ -4,6 +4,7 @@ require('lib/aal.php');
 
 define('ARG_SOURCE', 'source');
 define('ARG_SORT', 'sort');
+define('ARG_PAGE_COUNT', 'page-count');
 define('ITEMS_TO_LOAD', 100);
 
 /**
@@ -25,7 +26,7 @@ function parseArgs($argv, $argc) {
     $retVal = [];
 
     for ($i = 0; $i < $argc; $i++) {
-        if (preg_match('/--([\w]+)=([\w]+)/', $argv[$i], $match)) {
+        if (preg_match('/--([\w-]+)=([\w]+)/', $argv[$i], $match)) {
             $retVal[$match[1]] = $match[2];
         }
     }
@@ -228,7 +229,7 @@ function checkPostRemovals($sourceId, $listing) {
 /**
  * Processes the top X posts in a subreddit page
  */
-function processSubreddit($id, $page) {
+function processSubreddit($id, $page, $pageCount = 1) {
 
     // Get the source information
     $source = Api\Source::getById($id);
@@ -236,40 +237,55 @@ function processSubreddit($id, $page) {
 
         // Get the reddit page listing
         $reddit = new Api\reddit();
-        $listing = $reddit->GetPageListing($source->name . $page, 0, null, ITEMS_TO_LOAD);
-        if ($listing && isset($listing->children) && is_array($listing->children)) {
-            $posts = [];
-            $externalIds = [];
+        $afterId = null;
 
-            // Create post objects out of the listing and save off the reddit IDs so we can fetch them from the database
-            foreach ($listing->children as $post) {
-                $obj = Api\Post::createFromRedditObject($post->data);
-                $obj->sourceId = $source->id;
-                $posts[] = $obj;
-                $externalIds[] = $obj->externalId;
-            }
+        for ($i = 0; $i < $pageCount; $i++) {
 
-            // Get all database posts matching the current set
-            $dbPosts = Api\Post::queryReturnAll([ 'externalId' => [ 'in' => $externalIds ] ]);
-            $dbPosts = count($dbPosts) > 0 ? $dbPosts : [];
+            _log('Retrieving listing page ' . ($i + 1) . ' for ' . $source->name);
 
-            // Process them
-            foreach ($posts as $post) {
-                $dbPost = array_filter($dbPosts, function($item) use ($post) {
-                    return $item->externalId == $post->externalId;
-                });
+            $listing = $reddit->GetPageListing($source->name . $page, null, $afterId, ITEMS_TO_LOAD);
+            if ($listing && isset($listing->children) && is_array($listing->children)) {
+                $posts = [];
+                $externalIds = [];
 
-                if (count($dbPost) > 0) {
-                    updatePost($post, current($dbPost));
-                } else {
-                    addPost($post);
+                // Create post objects out of the listing and save off the reddit IDs so we can fetch them from the database
+                foreach ($listing->children as $post) {
+                    $obj = Api\Post::createFromRedditObject($post->data);
+                    $obj->sourceId = $source->id;
+                    $posts[] = $obj;
+                    $externalIds[] = $obj->externalId;
                 }
 
+                // Get all database posts matching the current set
+                $dbPosts = Api\Post::queryReturnAll([ 'externalId' => [ 'in' => $externalIds ] ]);
+                $dbPosts = count($dbPosts) > 0 ? $dbPosts : [];
+
+                // Process them
+                foreach ($posts as $post) {
+                    $dbPost = array_filter($dbPosts, function($item) use ($post) {
+                        return $item->externalId == $post->externalId;
+                    });
+
+                    if (count($dbPost) > 0) {
+                        updatePost($post, current($dbPost));
+                    } else {
+                        addPost($post);
+                    }
+
+                }
+
+                // Don't check for removals on anything other than the first page
+                if ($i === 0) {
+                    checkPostRemovals($id, $listing->children);
+                }
+
+                // Save the afterId for the next iteration
+                $afterId = $listing->after;
+
+            } else {
+                _log('Unable to retrieve page listing for ' . $source->name);
             }
 
-            checkPostRemovals($id, $listing->children);
-        } else {
-            _log('Unable to retrieve page listing for ' . $source->name);
         }
 
     } else {
@@ -282,9 +298,10 @@ function processSubreddit($id, $page) {
 $args = parseArgs($argv, $argc);
 $sourceId = Lib\Url::Get(ARG_SOURCE, null, $args);
 $sort = Lib\Url::Get(ARG_SORT, 'new', $args);
+$pageCount = Lib\Url::GetInt(ARG_PAGE_COUNT, 1, $args);
 
 if ($sourceId) {
-    processSubreddit($sourceId, '/' . $sort);
+    processSubreddit($sourceId, '/' . $sort, $pageCount);
 } else {
     _log('Must provide a source ID');
 }
