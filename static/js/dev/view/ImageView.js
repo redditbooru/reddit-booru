@@ -128,6 +128,11 @@
                 widthRatioSum = 0,
                 gutterPercent = Math.round(IMAGE_GUTTER / this.width * 10000) / 100;
 
+            // Quick fix for https://github.com/dxprog/reddit-booru/issues/16
+            if (!$images.length) {
+                return;
+            }
+
             // Recalculate the width of the images
             $images.each(function() {
                 widthRatioSum += parseFloat(this.dataset.ratio);
