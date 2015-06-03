@@ -3,6 +3,39 @@
 require('lib/aal.php');
 define('DISABLE_CACHE', true);
 define('MIN_TIME_LIMIT', 7200);
+define('USER_AGENT', 'Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/43.0.2357.81 Safari/537.36');
+
+$DOMAIN_BLACKLIST = [ 'safebooru.org', 'pixiv.net', 'danbooru.us', 'gelbooru.com', 'yande.re' ];
+$BLACKLIST_REGEX = '/(' . implode('|', str_replace('.', '\\.', $DOMAIN_BLACKLIST)) . ')/i';
+
+/**
+ * Mimics a browser request for a post and returns the status code
+ * @param Api\Post $post The post to request
+ * @return int The HTTP reponse code
+ */
+function mimicBrowserRequest(Api\Post $post) {
+    $c = curl_init($post->link);
+    curl_setopt($c, CURLOPT_USERAGENT, USER_AGENT);
+    curl_setopt($c, CURLOPT_FOLLOWLOCATION, true);
+    curl_setopt($c, CURLOPT_REFERER, 'http://redd.it/' . $post->externalId);
+    curl_setopt($c, CURLOPT_NOBODY, true);
+    curl_setopt($c, CURLOPT_TIMEOUT, 60);
+
+    curl_exec($c);
+    $retVal = curl_getinfo($c, CURLINFO_HTTP_CODE);
+    curl_close($c);
+
+    return (int) $retVal;
+}
+
+/**
+ * Comments on a post and reports it
+ */
+function messageAndReport(Api\Reddit $bot, $post, $message) {
+    $bot->Comment($message, $post->externalId, REDDIT_LINK);
+    $bot->Report($post->externalId, REDDIT_LINK);
+    sleep(5);
+}
 
 $start = time();
 $bot = new Api\Reddit(RB_BOT);
@@ -18,6 +51,34 @@ if (!$data) {
 $sources = Api\Source::queryReturnAll([ 'repostCheck' => [ 'gt' => 0 ] ]);
 foreach ($sources as $source) {
 
+    // Validate that the latest wave of post URLs actually resolve correctly
+    $posts = Api\Post::queryReturnAll([ 'dateCreated' => [ 'gt' => $data->lastCheck ], 'sourceId' => $source->id ]);
+    if ($posts) {
+        foreach ($posts as $post) {
+            echo '[' . $post->externalId . '] Verifying "' . $post->title . '"...';
+
+            // Check for hotlinking first
+            if (preg_match($BLACKLIST_REGEX, $post->link)) {
+
+                $message = 'It looks like you might be linking to a site that doesn\'t allow hotlinking. Please rehost with a service like [redditbooru](http://redditbooru.com) or [imgur](http://imgur.com) and then repost.';
+                messageAndReport($bot, $post, $message);
+
+            // Passing that, verify that the link actually loads
+            } else {
+                $httpCode = mimicBrowserRequest($post);
+                if ($httpCode !== 200) {
+                    $message = 'Uh oh! I wasn\'t able to load this link. Here\'s a few tips to help you out:' . PHP_EOL . PHP_EOL;
+                    $message .= '- Make sure that your URL is correct' . PHP_EOL;
+                    $message .= '- If you are linking directly to an image, please rehost with a service like [redditbooru](http://redditbooru.com) or [imgur](http://imgur.com) and then repost.' . PHP_EOL . PHP_EOL;
+                    $message .= 'Response code: ' . $httpCode;
+                    messageAndReport($bot, $post, $message);
+                }
+            }
+
+            echo 'DONE', PHP_EOL;
+        }
+    }
+
     $reposts = [];
 
     // Grab all images for this source that have been created since the last check
@@ -28,7 +89,8 @@ foreach ($sources as $source) {
             if (!isset($reposts[$image->externalId])) {
                 $reposts[$image->externalId] = (object) [
                     'imageCount' => 0,
-                    'reposts' => []
+                    'reposts' => [],
+                    'externalId' => $image->externalId
                 ];
             }
             $reposts[$image->externalId]->imageCount++;
@@ -61,14 +123,10 @@ foreach ($sources as $source) {
                     $message .= '- [' . $repost->title . '](http://redd.it/' . $repost->externalId . ') posted by /u/' . $repost->userName . ' ' . Lib\Util::relativeTime($repost->dateCreated) . ' ago' . PHP_EOL;
                 }
                 $message .= PHP_EOL . 'Be sure to use [redditbooru](http://redditbooru.com/) before posting to check for similar images.';
-                $bot->Comment($message, $externalId, REDDIT_LINK);
-                $bot->Report($externalId, REDDIT_LINK);
+                messageAndReport($bot, $post, $message);
 
                 echo 'Message sent: ', PHP_EOL;
                 echo $message, PHP_EOL, PHP_EOL;
-
-                // Sleep a little bit so we don't hammer reddit too much
-                sleep(5);
             }
         }
 
