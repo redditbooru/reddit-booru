@@ -106,11 +106,12 @@ function processImage($url) {
 function updatePost(Api\Post $post, Api\Post $dbPost) {
 
     // Check for any actual changes between the reddit version and the database version before firing off a request
-    if ($post->title !== $dbPost->title || $post->keywords !== $dbPost->keywords || $post->score != $dbPost->score) {
+    if ($post->title !== $dbPost->title || $post->keywords !== $dbPost->keywords || $post->score != $dbPost->score || $post->nsfw != $dbPost->nsfw) {
         _log('[ ' . $post->externalId . ' ] Updating...');
         $dbPost->title = $post->title;
         $dbPost->keywords = $post->keywords;
         $dbPost->score = $post->score;
+        $dbPost->nsfw = $post->nsfw;
         if ($dbPost->sync()) {
             Api\PostData::updateDenormalizedPostData($dbPost->id);
         }
