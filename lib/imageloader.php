@@ -60,9 +60,9 @@ namespace Lib {
             } else if ($domain === 'mediacru.sh') {
                 $retVal = self::getMediacrushImages($url);
 
-            // gyfcat
+            // gfycat
             } else if ($domain === 'gfycat.com' && strpos($path, '.gif') === false) {
-                $retVal = self::getGfycatImage($url);
+                $retVal[] = self::getGfycatImage($url);
             // Everything else
             } else {
                 $retVal[] = $url;
@@ -241,16 +241,25 @@ namespace Lib {
         }
 
         /**
-         * Gets the GIF version of a gyfcat image
+         * Gets the GIF version of a gfycat image
          */
         public static function getGfycatImage($url) {
             $parts = explode('/', $url);
             $name = end($parts);
+            $retVal = null;
 
             // Make sure we don't get any hash shit
             $name = explode('#', $name)[0];
 
-            return 'http://giant.gfycat.com/' . $name . '.gif';
+            $data = file_get_contents('http://gfycat.com/cajax/get/' . $name);
+            if ($data) {
+                $data = json_decode($data);
+                if ($data && isset($data->gfyItem)) {
+                    $retVal = $data->gfyItem->gifUrl;
+                }
+            }
+
+            return $retVal;
         }
 
         /**
