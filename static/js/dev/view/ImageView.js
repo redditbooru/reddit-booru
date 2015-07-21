@@ -105,8 +105,8 @@
                 currentWidth = this.$el.width(),
                 self = this;
 
-            if (currentWidth !== this.width) {
-                this.width = this.$el.width();
+            if (currentWidth !== this.windowWidth) {
+                this.windowWidth = this.width = currentWidth;
                 this.columns = Math.floor(this.width / AVERAGE_COLUMN_WIDTH);
                 this.width -= this.columns * IMAGE_GUTTER;
                 if (evt) {
