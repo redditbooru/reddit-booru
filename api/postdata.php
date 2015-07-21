@@ -561,7 +561,7 @@ namespace Api {
 
                 // Get the missing vote data
                 if (count($ids) > 0) {
-                    $url = 'https://oauth.reddit.com/by_id/t3_' . implode(',t3_', array_keys($ids)) . '/.json';
+                    $url = 'https://oauth.reddit.com/by_id/t3_' . implode(',t3_', array_keys($ids)) . '/.json?limit=' . count($ids);
                     try {
                         $response = $token->get($url);
                         if ($response) {
