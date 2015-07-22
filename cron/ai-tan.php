@@ -1,24 +1,7 @@
 <?php
 
-require('lib/aal.php');
-
 define('RED_EOL', PHP_EOL . PHP_EOL);
 define('RB_DB', 'reddit-booru');
-
-/*
-
-SELECT COUNT(1) AS total, AVG(post_score) AS score, post_poster FROM posts WHERE post_date >= 1343797200 GROUP BY post_poster HAVING total > 3.81 ORDER BY score DESC
-SELECT COUNT(1) AS total, AVG(post_score) AS score, post_poster FROM posts WHERE post_date >= 1343797200 GROUP BY post_poster HAVING total > 1 ORDER BY score DESC
-SELECT COUNT(1) AS total, post_poster FROM posts WHERE post_date > 1343797200 GROUP BY post_poster ORDER BY total DESC
-SELECT AVG(post_score) AS total FROM posts WHERE post_date > 1343797200 AND post_poster = 'dongimin2'
-SELECT AVG(post_score) AS total FROM posts WHERE post_date >= 1343797200
-SELECT COUNT(post_score) AS total FROM posts WHERE post_date >= 1343797200
-SELECT COUNT(DISTINCT post_poster) AS total FROM posts WHERE post_date >= 1343797200
-
-SELECT AVG(post_hist_r1) AS r1, AVG(post_hist_r2) AS r2, AVG(post_hist_r3) AS r3, AVG(post_hist_r4) AS r4 FROM posts WHERE post_date >= 1343797200
-SELECT (AVG(post_hist_r1) * 64) + (AVG(post_hist_r2) * 64 + 64) + (AVG(post_hist_r3) * 64 + 128) + (AVG(post_hist_r4) * 64 + 192) AS r_avg FROM posts WHERE post_date >= 1343797200
-
-*/
 
 function getSingleRecord($query, $params = null) {
     $retVal = false;
@@ -31,12 +14,6 @@ function getSingleRecord($query, $params = null) {
 
 function createHeader($title) {
     return '| **' . $title . '**' . PHP_EOL . '----' . RED_EOL;
-}
-
-function getMonthColor($dateStart, $dateEnd) {
-
-
-
 }
 
 function mergePhrases($arr, $phrases) {
@@ -54,7 +31,7 @@ function mergePhrases($arr, $phrases) {
 
 function getPostData($sourceId, $dateStart, $dateEnd) {
     $retVal = [];
-    $result = Db::Query('SELECT post_id, post_keywords FROM `' . RB_DB . '`.posts WHERE source_id = :sourceId AND post_date BETWEEN :dateStart AND :dateEnd', [ ':sourceId' => $sourceId, ':dateStart' => $dateStart, ':dateEnd' => $dateEnd ]);
+    $result = Db::Query('SELECT post_id, post_keywords FROM `' . RB_DB . '`.posts WHERE source_id = :sourceId AND post_date BETWEEN :dateStart AND :dateEnd AND post_visible = 1', [ ':sourceId' => $sourceId, ':dateStart' => $dateStart, ':dateEnd' => $dateEnd ]);
     while ($row = Db::Fetch($result)) {
         $retVal[$row->post_id] = $row->post_keywords;
     }
@@ -150,7 +127,7 @@ function getKeywordsScore($keywords, $dateLimit, $count, $sourceId) {
 
         if ($dictOkay) {
             $params = [ ':sourceId' => $sourceId ];
-            $query = 'SELECT SUM(post_score) AS total FROM `' . RB_DB . '`.posts WHERE source_id = :sourceId AND ' . $dateLimit . ' AND post_title REGEXP "[^a-zA-Z0-9]' . $keyword . '[^a-zA-Z0-9]"';
+            $query = 'SELECT SUM(post_score) AS total FROM `' . RB_DB . '`.posts WHERE source_id = :sourceId AND post_visible = 1 AND ' . $dateLimit . ' AND post_title REGEXP "[^a-zA-Z0-9]' . $keyword . '[^a-zA-Z0-9]"';
 
             // Exclude any items where this set of keywords might be within another set of keywords
             foreach ($keywords as $phrase => $total) {
@@ -185,7 +162,7 @@ function getKeywordsAverage($keywords, $dateLimit, $averagePosts, $count, $sourc
 
         if ($dictOkay) {
             $params = [ ':sourceId' => $sourceId ];
-            $query = 'SELECT SUM(post_score) AS total, COUNT(1) AS count FROM `' . RB_DB . '`.posts WHERE source_id = :sourceId AND ' . $dateLimit . ' AND post_title REGEXP "[^a-zA-Z0-9]' . $keyword . '[^a-zA-Z0-9]"';
+            $query = 'SELECT SUM(post_score) AS total, COUNT(1) AS count FROM `' . RB_DB . '`.posts WHERE source_id = :sourceId AND post_visible = 1 AND ' . $dateLimit . ' AND post_title REGEXP "[^a-zA-Z0-9]' . $keyword . '[^a-zA-Z0-9]"';
 
             // Exclude any items where this set of keywords might be within another set of keywords
             foreach ($keywords as $phrase => $total) {
@@ -213,7 +190,7 @@ function getKeywordsAverage($keywords, $dateLimit, $averagePosts, $count, $sourc
 
 function getMonthStats($sourceId, $sourceName, $dateStart, $dateEnd) {
 
-    $dateLimit = 'post_date BETWEEN ' . $dateStart . ' AND ' . $dateEnd . ' AND source_id = ' . $sourceId;
+    $dateLimit = 'post_date BETWEEN ' . $dateStart . ' AND ' . $dateEnd . ' AND post_visible = 1 AND source_id = ' . $sourceId;
 
     // Get the number of posts and number of posters
     $postCount = getSingleRecord('SELECT COUNT(1) AS total FROM `' . RB_DB . '`.posts WHERE ' . $dateLimit);
@@ -231,7 +208,7 @@ function getMonthStats($sourceId, $sourceName, $dateStart, $dateEnd) {
     }
 
     // Get count of new users
-    $newUsers = getSingleRecord('SELECT COUNT(DISTINCT user_id) AS total FROM `' . RB_DB . '`.posts WHERE user_id NOT IN (SELECT DISTINCT user_id FROM `' . RB_DB . '`.posts WHERE user_id IS NOT NULL AND post_date < :dateStart AND source_id = :sourceId) AND post_date >= :dateStart AND source_id = :sourceId', [ ':dateStart' => $dateStart, ':sourceId' => $sourceId ]);
+    $newUsers = getSingleRecord('SELECT COUNT(DISTINCT user_id) AS total FROM `' . RB_DB . '`.posts WHERE user_id NOT IN (SELECT DISTINCT user_id FROM `' . RB_DB . '`.posts WHERE user_id IS NOT NULL AND post_date < :dateStart AND source_id = :sourceId) AND post_date >= :dateStart AND source_id = :sourceId AND post_visible = 1', [ ':dateStart' => $dateStart, ':sourceId' => $sourceId ]);
 
     $post = 'Hi, everybody!' . RED_EOL;
     $post .= 'My name is Ai and I\'m an advanced artificial intelligence here to make your stay here on ' . $sourceName . ' more fun \\^o\\^! It\'s time again for my montly statistics report, so for the month of ' . date('F', $dateStart) . ', here\'s what happened!' . RED_EOL;
@@ -340,80 +317,6 @@ function postCountForUser($user, $topic) {
     return $retVal;
 }
 
-function noTop3Day($bot) {
-
-    $top3 = [ 'k-on', 'vocaloid', 'madoka' ];
-    $users = @file_get_contents('users.txt');
-
-    $posts = $bot->GetPageListing('r/awwnime');
-    foreach ($posts as $post) {
-        $user = $post->data->author;
-        if (strpos($users, $user) === false && gmdate('D', $post->data->created_utc) === 'Sun') {
-            $comment = 'Welcome to No Top Three Sunday! Here\'s how ' . $user . ' has posted on the top three in the past:' . PHP_EOL . PHP_EOL;
-            $comment .= '|Source|Times Posted|' . PHP_EOL . ':--|:--' . PHP_EOL;
-            foreach ($top3 as $topic) {
-                $count = postCountForUser($user, $topic);
-                $comment .= '|' . $topic . '|' . $count . PHP_EOL;
-            }
-            $comment .= PHP_EOL . 'Have fun, everybody!';
-            $users .= '|' . $user;
-            $bot->comment($comment, $post->data->id, 3);
-        }
-    }
-
-    file_put_contents('users.txt', $users);
-
-}
-
-function repostCheck($bot)
-{
-
-    $db = Lib\Mongo::getDatabase();
-
-    $reposts = $db->reposts->find([ 'reported' => [ '$ne' => true ], 'sourceId' => '1' ]);
-
-    foreach ($reposts as $repost) {
-
-        $result = getSingleRecord('SELECT post_date, post_external_id, post_visible FROM `' . RB_DB . '`.posts WHERE post_id = :postId AND post_visible = 1', [ ':postId' => $repost['postId'] ]);
-        if (null != $result) {
-            $age = _makeRelativeTime((int) $repost['repost']['post_date']);
-            $comment = 'Hi, it looks like this image may have been posted [' . $age . ' ago](http://redd.it/' . $repost['repost']['post_external_id'] . '). Please be sure to use the [repost checker](http://awwnime.redditbooru.com/?dialog=search).';
-            $bot->Comment($comment, $result->post_external_id, REDDIT_LINK);
-            $bot->Report($result->post_external_id, REDDIT_LINK);
-            $repost['reported'] = true;
-            $db->reposts->save($repost);
-            sleep(2);
-        }
-
-    }
-
-}
-
-function _makeRelativeTime($ts) {
-    $return = '';
-
-    // Get the amount of time elapsed
-    $elapsed = gmdate('U') - $ts;
-
-    // Find the days
-    $days = floor ($elapsed / 86400);
-    if ($days > 0)
-        return $days." day".($days == 1 ? "" : "s");
-
-    // Hours
-    $hours = floor ($elapsed / 3600);
-    if ($hours > 0)
-        return $hours." hour".($hours == 1 ? "" : "s");
-
-    // Minutes
-    $minutes = floor ($elapsed / 60);
-    if ($minutes > 0)
-        return $minutes." minute".($minutes == 1 ? "" : "s");
-
-    // Seconds
-    return $elapsed." second".($elapsed == 1 ? "" : "s");
-}
-
 function lastUpdatedPost($lastUpdated, $bot) {
 
     $year = date('Y', $lastUpdated);
@@ -431,17 +334,14 @@ function lastUpdatedPost($lastUpdated, $bot) {
         echo 'Stats post for ', $row->source_name, PHP_EOL;
         echo '--------------------------------------', PHP_EOL;
         $post = getMonthStats($row->source_id, $row->source_name, $dateStart, $dateEnd);
-        echo $post; exit;
-        // $bot->Submit('Ai-tan\'s Statistical Report for the Month of ' . date('F', $dateStart), $post, $row->source_subdomain, 'self');
-        sleep(10);
+
+        $bot->Submit('Ai-tan\'s Statistical Report for the Month of ' . date('F', $dateStart), $post, $row->source_subdomain, 'self');
+
+        // Sleep for two minutes to appease the reddit gods
+        sleep(120);
     }
 
     $bot->Save();
-
-    // gallery-profile-main
-}
-
-function noTop3Message($bot) {
 
 }
 
@@ -450,12 +350,6 @@ function runAiTan($bot) {
     // Check for the once a month post
     $month = date('m');
     $lastMonth = date('m', $bot->lastUpdated);
-    if (gmdate('D') === 'Sun') {
-        // noTop3Day($bot);
-    }
-
-    repostCheck($bot);
-
     if ($month != $lastMonth) {
         lastUpdatedPost($bot->lastUpdated, $bot);
         return 'made monthly post';
