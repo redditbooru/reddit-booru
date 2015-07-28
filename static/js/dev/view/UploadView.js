@@ -280,7 +280,7 @@
                         id: $this.data('id'),
                         thumb: $this.find('img').attr('src'),
                         caption: $this.find('[name="caption[]"]').val(),
-                        source: $this.find('[name="source[]"]').val(),
+                        sourceUrl: $this.find('[name="source[]"]').val(),
                         imageId: $this.find('[name="imageId[]"]').val()
                     };
 
