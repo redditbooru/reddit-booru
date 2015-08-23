@@ -14,6 +14,12 @@ $BLACKLIST_REGEX = '/(' . implode('|', str_replace('.', '\\.', $DOMAIN_BLACKLIST
  * @return int The HTTP reponse code
  */
 function mimicBrowserRequest(Api\Post $post) {
+    
+    // If this is a cdn.awwni.me link, remove any https
+    if (strpos($post->link, CDN_BASE_URL) === 0) {
+        $post->link = str_replace('https', 'http', $post->link);
+    }
+    
     $c = curl_init($post->link);
     curl_setopt($c, CURLOPT_USERAGENT, USER_AGENT);
     curl_setopt($c, CURLOPT_FOLLOWLOCATION, true);

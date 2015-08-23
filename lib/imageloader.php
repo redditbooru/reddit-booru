@@ -419,6 +419,12 @@ namespace Lib {
 
             $retVal = null;
 
+            // Because SSL is handled at the load balancer level,
+            // strip the SLL off of anything being fetched internally
+            if (strpos($url, CDN_BASE_URL) === 0) {
+                $url = str_replace('https', 'http', $url);
+            }
+
             Events::fire(IMGEVT_DOWNLOAD_BEGIN);
 
             // Check the cache for a copy of the image
