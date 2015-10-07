@@ -12,10 +12,8 @@
         </title>
         <script src="/static/js/dev/HashRedirect.js"></script>
         <link rel="stylesheet" type="text/css" href="/static/scss/styles.css" />
-        {{#inTestBucket key="enableMobile" value="enabled"}}
         <meta name="viewport" content="initial-scale=1.0, width=device-width, height=device-height, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
         <link rel="stylesheet" type="text/css" href="/static/scss/mobile.css" media="(max-width: 568px)" />
-        {{/inTestBucket}}
     </head>
     <body{{#unless showNsfw}} class="hideNsfw"{{/unless}}>
         <header>
@@ -41,7 +39,7 @@
 
         <script>
             var RB = {};
-            window.sources = {{{sources}}};
+            window.sources = {{{jsonBlob sources}}};
             window.filters = {{{jsonBlob filters}}};
             window.tests = {{{jsonBlob tests}}};
             {{#if csrfToken}}
