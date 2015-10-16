@@ -120,19 +120,16 @@
 
         _handleSourcesUpdate: function(item) {
             var collections = this.imageCollection,
-                self = this;
-            clearTimeout(this._delayTimer);
-            this._delayTimer = setTimeout(function() {
-                var sources = self.sources.collection.where({ checked: true }),
-                    updated = [];
+                self = this,
+                sources = self.sources.collection.where({ checked: true }),
+                updated = [];
 
-                _.each(sources, function(item) {
-                    updated.push(item.attributes.value);
-                });
+            _.each(sources, function(item) {
+                updated.push(item.attributes.value);
+            });
 
-                self.router.go('search', { sources: updated.join(',') });
+            self.router.go('search', { sources: updated.join(',') });
 
-            }, UPDATE_DELAY);
         },
 
         _handleRehostClick: function(evt) {

@@ -37,13 +37,13 @@
 
             var sidebar = new RB.SidebarView(),
                 upload = new RB.UploadView(this.router),
-                sources = new RB.QueryOptionsView($('#sources'), this.collections.sources),
-                search = new RB.SearchView(sidebar, this.collections.images, sources, this.router, upload);
+                filters = new RB.FiltersView($('.filters'), this.collections.sources),
+                search = new RB.SearchView(sidebar, this.collections.images, filters, this.router, upload);
 
             // Views
             this.views = {
                 sidebar: sidebar,
-                sources: sources,
+                filters: filters,
                 images: new RB.ImageView($('#images'), this.collections.images),
                 search: search,
                 user: new RB.UserView(sidebar, this.collections.images, this.router),
