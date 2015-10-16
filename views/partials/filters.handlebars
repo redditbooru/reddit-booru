@@ -1,0 +1,43 @@
+<div class="filters">
+    <div class="sources-filter filters-section">
+        <h3>Sources</h3>
+        <ul>
+            <li class="full-width">
+                <input type="checkbox" name="sources" id="source-all" value="all" />
+                <label for="source-all">All</label>
+            </li>
+            {{#each sources}}
+                <li>
+                    <input type="checkbox" name="sources" id="source-{{value}}" value="{{value}}" {{#if checked}}checked{{/if}} />
+                    <label for="source-{{value}}">{{title}}</label>
+                </li>
+            {{/each}}
+        </ul>
+    </div>
+    <div class="sizes-filter filters-section">
+        <h3>Sizes</h3>
+        <ul>
+            <li>
+                <input type="checkbox" name="sizes" id="size-all" value="all" />
+                <label for="size-all">All</label>
+            </li>
+            <li>
+                <input type="checkbox" name="sizes" id="size-widescreen" value="widescreen" />
+                <label for="size-widescreen">Widescreen</label>
+            </li>
+            <li>
+                <input type="checkbox" name="sizes" id="size-sd" value="sd" />
+                <label for="size-sd">Standard Def</label>
+            </li>
+            <li>
+                <input type="checkbox" name="sizes" id="size-phone" value="phone" />
+                <label for="size-phone">Phone</label>
+            </li>
+        </ul>
+    </div>
+    <div class="filters-foot">
+        <input type="checkbox" name="save-filters" id="save-filters" value="save" />
+        <label for="save-filters">Save Preferences</label>
+        <button type="button">Refresh</button>
+    </div>
+</div>

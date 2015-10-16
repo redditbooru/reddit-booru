@@ -1,0 +1,91 @@
+@import "mixins";
+
+.filters {
+  padding: 20px;
+  background: #fff;
+  width: 600px;
+  overflow: hidden;
+  cursor: default;
+  @include border-box();
+
+  h3 {
+    font: 18px 'MG Regular', sans-serif;
+    margin-bottom: 8px;
+  }
+
+  input[type="checkbox"] {
+
+    position: absolute;
+    left: -9999px;
+    top: -9999px;
+
+    & + label {
+      position: relative;
+      font: 18px 'MG Thin', sans-serif;
+      padding-left: 20px;
+      &:before {
+        content: '';
+        display: block;
+        width: 11px;
+        height: 11px;
+        border: 1px solid #ddd;
+        position: absolute;
+        left: 0;
+        bottom: 3px;
+      }
+    }
+
+    &:checked + label:after {
+      content: '';
+      display: block;
+      position: absolute;
+      left: 0;
+      bottom: 8px;
+      width: 12px;
+      height: 5px;
+      border-left: 3px solid $PINK;
+      border-bottom: 3px solid $PINK;
+      transform: rotate(-45deg);
+      border-radius: 2px;
+    }
+
+  }
+
+  ul {
+    list-style: none;
+    overflow: hidden;
+  }
+
+  li {
+    width: 50%;
+    float: left;
+    padding-bottom: 4px;
+    &.full-width {
+      clear: both;
+      width: 100%;
+    }
+  }
+
+  .filters-section {
+    width: 75%;
+    float: left;
+    &.sizes-filter {
+      width: 25%;
+      li {
+        width: 100%;
+      }
+    }
+  }
+
+  .filters-foot {
+    clear: both;
+    float: right;
+    button {
+      color: #fff;
+      margin-left: 20px;
+      background-color: $PINK;
+    }
+
+  }
+
+}

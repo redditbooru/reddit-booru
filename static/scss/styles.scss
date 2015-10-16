@@ -1,4 +1,5 @@
 @import "mixins";
+@import "filters";
 
 @font-face {
     font-family: 'MG Regular';
@@ -38,22 +39,6 @@
     0% { opacity: 100%; }
     100% { opacity: 70%; }
 }
-
-$LIGHT_GREY: #eee;
-$GREY: #ddd;
-$DARK_GREY: #666;
-$PINK: #e94e77;
-$YELLOW: #ffed77;
-$DARK_YELLOW: #736400;
-
-// reddit colors
-$DOWN_VOTE: #a194ff;
-$UP_VOTE: #ff8b60;
-$NO_VOTE: #c6c6c6;
-
-$BASE_ARROW_SIZE: 8px;
-
-$NAV_INDEX: 100;
 
 // Itty bitty reset
 * {
@@ -213,13 +198,7 @@ header {
                 }
 
                 &.source-list {
-                    width: 400px;
-                    overflow: hidden;
-                    li {
-                        float: left;
-                        width: 170px;
-                        padding: 5px;
-                    }
+                    margin-left: -20px;
                 }
 
                 input,
