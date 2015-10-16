@@ -1,0 +1,34 @@
+# See http://help.github.com/ignore-files/ for more about ignoring files.
+
+# compiled output
+/dist
+/tmp
+
+# dependencies
+/node_modules
+/bower_components
+composer.lock
+
+# misc
+/.sass-cache
+/connect.lock
+/coverage/*
+/libpeerconnection.log
+npm-debug.log
+testem.log
+*.sublime*
+
+config.php
+app-config.php
+
+# build/redditbooru specific stuff
+static/fonts/
+static/images/
+static/js/*.js
+static/scss/*.css
+experiments/
+cache/
+
+# OS X files
+._*
+.DS_Store
