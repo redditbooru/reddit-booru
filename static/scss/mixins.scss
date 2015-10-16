@@ -1,3 +1,19 @@
+$LIGHT_GREY: #eee;
+$GREY: #ddd;
+$DARK_GREY: #666;
+$PINK: #e94e77;
+$YELLOW: #ffed77;
+$DARK_YELLOW: #736400;
+
+// reddit colors
+$DOWN_VOTE: #a194ff;
+$UP_VOTE: #ff8b60;
+$NO_VOTE: #c6c6c6;
+
+$BASE_ARROW_SIZE: 8px;
+
+$NAV_INDEX: 100;
+
 @mixin image-text($background, $width, $height) {
   overflow: hidden;
   width: $width;
