@@ -14,7 +14,8 @@
         template: RB.Templates.queryOptionItem,
 
         events: {
-            'click button': 'handleRefreshClick'
+            'click button': 'handleRefreshClick',
+            'change input[type="checkbox"]': 'handleCheckChange'
         },
 
         initialize: function($el, collection) {
@@ -44,7 +45,24 @@
                 this.trigger(EVT_UPDATE);
             }
 
+        },
 
+        handleCheckChange: function(evt) {
+            var $target = $(evt.currentTarget);
+            var selector = '[name="' + $target.attr('name') + '"]';
+            var $set = this.$el.find(selector);
+            var checked = $target.is(':checked');
+
+            if ($target.val() === 'all') {
+                $set.prop('checked', checked);
+            } else {
+                // If only one checkbox isn't checked, it's the "all", so check it
+                if (checked && this.$el.find(selector + ':not(:checked)').length === 1) {
+                    this.$el.find(selector + '[value="all"]').prop('checked', checked);
+                } else {
+                    this.$el.find(selector + '[value="all"]').prop('checked', false);
+                }
+            }
         }
 
     });
