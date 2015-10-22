@@ -20,28 +20,25 @@ var $window = $(window),
 
 export default Backbone.View.extend({
 
+    el: '#images',
+
     templates: {
         imagesRow: imagesRow,
         moreRow: moreRow
     },
 
-    collection: null,
     sources: [ 1 ], // TODO - make this not hard coded
 
-    initialize: function($el, collection) {
-        this.collection = collection;
-        this.$el = $el;
+    initialize: function() {
         this.calculateWindowColumns();
 
         $(window).on('resize', _.bind(this.calculateWindowColumns, this));
 
         $('body').on('click', '.more-row button', _.bind(this.handleMoreClick, this));
 
-        this.collection.on('updated', _.bind(function() {
-            this.render();
-        }, this));
-        this.collection.on('reset', function() {
-            $el.empty();
+        this.collection.on('updated', this.render);
+        this.collection.on('reset', () => {
+            this.$el.empty();
         });
     },
 

@@ -50,14 +50,17 @@ var AppView = Backbone.View.extend({
 
         var sidebar = new SidebarView(),
             upload = new UploadView(this.router),
-            filters = new FiltersView($('.filters'), this.collections.sources),
+            filters = new FiltersView({
+                el: $('.filters').get(0),
+                collection: this.collections.sources
+            }),
             search = new SearchView(sidebar, this.collections.images, filters, this.router, upload);
 
         // Views
         this.views = {
             sidebar: sidebar,
             filters: filters,
-            images: new ImageView($('#images'), this.collections.images),
+            images: new ImageView({ collection: this.collections.images }),
             search: search,
             user: new UserView(sidebar, this.collections.images, this.router),
             dragdrop: new DragDropView(upload, search),

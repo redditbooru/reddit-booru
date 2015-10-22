@@ -38,7 +38,7 @@ var SCREENSAVER = 'screensaver',
 
 export default Backbone.View.extend({
 
-    $viewer: $('#viewer'),
+    el: '#viewer',
     currentIndex: 0,
     allImages: null, // this is a copy of the main image collection except it keeps track of ALL models
     imageLoader: null,
@@ -52,12 +52,12 @@ export default Backbone.View.extend({
             .on('click', '.screensaver', _.bind(this.startScreensaver, this));
 
         this.$window = $(window).on('resize', _.bind(this._resize, this));
-        this.$content = this.$viewer.find('.viewer-content');
-        this.$next = this.$viewer.find('.next');
-        this.$previous = this.$viewer.find('.previous');
+        this.$content = this.$el.find('.viewer-content');
+        this.$next = this.$el.find('.next');
+        this.$previous = this.$el.find('.previous');
 
         this.imageCollection = imageCollection;
-        this.$viewer
+        this.$el
             .on('click', '.transport', _.bind(this._handleNavigate, this))
             .on('click', '.close', _.bind(this._hide, this))
             .on('click', '.voter button', _.bind(this._vote, this));
@@ -91,19 +91,19 @@ export default Backbone.View.extend({
                     self.$content.html(imageView(image.attributes));
                     self._show();
                     self.currentIndex = self.allImages.indexOf(image);
-                    self.$voter = self.$viewer.find('.voter');
+                    self.$voter = self.$el.find('.voter');
 
                     if (self._screenSaver) {
                         clearTimeout(self._timer); // just out of caution
                         self._timer = setTimeout(_.bind(self._nextSlide, self), SLIDE_DELAY);
-                        self.$viewer.removeClass(LOADING);
+                        self.$el.removeClass(LOADING);
                     }
                 }
             };
 
         // We don't want to appear to hang while in normal browsing mode
         if (this._screenSaver) {
-            this.$viewer.addClass(LOADING);
+            this.$el.addClass(LOADING);
             this.imageLoader = new Image();
             this.imageLoader.onload = displayImage;
             this.imageLoader.src = image.attributes.cdnUrl;
@@ -126,7 +126,7 @@ export default Backbone.View.extend({
         track(TRACK_VIEWER, TRACKING.SCREENSAVER);
         this._screenSaver = true;
         this._show();
-        this.$viewer.addClass(SCREENSAVER);
+        this.$el.addClass(SCREENSAVER);
         this.currentIndex += 1; // because when we call handle navigate, it's going to subtract 1
         this._handleNavigate();
     },
@@ -160,7 +160,7 @@ export default Backbone.View.extend({
 
     _handleKeypress: function(evt) {
         var keyCode = evt.keyCode || evt.charCode;
-        if (this.$viewer.is(':visible')) {
+        if (this.$el.is(':visible')) {
             switch (keyCode) {
                 case KEYS.RIGHT:
                     this.$next.click();
@@ -169,10 +169,10 @@ export default Backbone.View.extend({
                     this.$previous.click();
                     break;
                 case KEYS.UP:
-                    this.$viewer.find('button.upvote').click();
+                    this.$el.find('button.upvote').click();
                     break;
                 case KEYS.DOWN:
-                    this.$viewer.find('button.downvote').click();
+                    this.$el.find('button.downvote').click();
                     break
             }
         }
@@ -198,20 +198,20 @@ export default Backbone.View.extend({
     },
 
     _show: function() {
-        this.$viewer.fadeIn();
+        this.$el.fadeIn();
         this._resize();
     },
 
     _hide: function() {
         this._killSlideshow();
-        this.$viewer
+        this.$el
             .removeClass(SCREENSAVER)
             .fadeOut();
         track(TRACK_VIEWER, TRACKING.CLOSE);
     },
 
     _resize: function() {
-        this.$content.height(this.$viewer.height() - OUTER_PADDING);
+        this.$content.height(this.$el.height() - OUTER_PADDING);
     },
 
     _killSlideshow: function() {

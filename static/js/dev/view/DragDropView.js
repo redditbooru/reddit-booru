@@ -6,7 +6,7 @@ var HOVER = 'hover';
 
 export default Backbone.View.extend({
 
-    $dragdrop: $('#dragdrop'),
+    el: '#dragdrop',
 
     initialize: function(uploadView, searchView) {
 
@@ -16,7 +16,7 @@ export default Backbone.View.extend({
         body.addEventListener('dragleave', _.bind(this.handleDragLeave, this))
         body.addEventListener('drop', _.bind(this.handleDrop, this));
 
-        this.$dragdrop.find('.search').on('drop', _.bind(this.handleDrop, this));
+        this.$el.find('.search').on('drop', _.bind(this.handleDrop, this));
 
         this.uploadView = uploadView;
         this.searchView = searchView;
@@ -26,9 +26,9 @@ export default Backbone.View.extend({
     handleDragOver: function(evt) {
         evt.stopPropagation();
         evt.preventDefault();
-        this.$dragdrop.show();
-        this.$dragdrop.find('.' + HOVER).removeClass(HOVER);
-        this.$dragdrop.find(evt.target).addClass(HOVER);
+        this.$el.show();
+        this.$el.find('.' + HOVER).removeClass(HOVER);
+        this.$el.find(evt.target).addClass(HOVER);
     },
 
     handleDragLeave: function(evt) {
@@ -36,20 +36,20 @@ export default Backbone.View.extend({
         evt.stopPropagation();
         evt.preventDefault();
 
-        var position = this.$dragdrop.position(),
-            width = this.$dragdrop.width(),
-            height = this.$dragdrop.height();
+        var position = this.$el.position(),
+            width = this.$el.width(),
+            height = this.$el.height();
 
         if (evt.clientX < position.left || evt.clientY < position.top
             || evt.clientX > position.left + width || evt.clientY > position.top + height) {
-            this.$dragdrop.hide().find('.' + HOVER).removeClass(HOVER);
+            this.$el.hide().find('.' + HOVER).removeClass(HOVER);
         }
 
     },
 
     handleDrop: function(evt) {
         evt.preventDefault();
-        this.$dragdrop.hide();
+        this.$el.hide();
         if (evt.dataTransfer && evt.dataTransfer.files.length > 0) {
             var file = evt.dataTransfer.files[0];
             if ($(evt.target).hasClass('upload')) {

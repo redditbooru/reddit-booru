@@ -17,7 +17,7 @@ var SAVE_KEY = 'RB_Uploads',
 
 export default Backbone.View.extend({
 
-    $el: null,
+    el: '#upload',
     $albumTitle: null,
 
     progressTimer: null,
@@ -37,7 +37,6 @@ export default Backbone.View.extend({
     initialize: function(router) {
         $('body').on('click', '.upload', _.bind(this.handleNavClick, this));
 
-        this.$el = $('#upload');
         this.$albumTitle = this.$el.find('.albumTitle');
 
         this.router = router;
@@ -162,7 +161,7 @@ export default Backbone.View.extend({
      */
     _urlUpload: function(url, force, target) {
         // QnD URL validation
-        var $target = target instanceof jQuery ? target : $(target);
+        var $target = target instanceof $ ? target : $(target);
         if (url.indexOf('http://') === 0 || url.indexOf('https://') === 0 || url.indexOf('/tmp') === 0) {
 
             this._renderUploader(url, url);

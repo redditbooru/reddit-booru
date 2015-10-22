@@ -1,12 +1,11 @@
 import Backbone from 'backbone';
+import $ from 'jquery';
 import _ from 'underscore';
 
 const EVT_UPDATE = 'update';
 
 export default Backbone.View.extend({
 
-    collection: null,
-    $el: null,
     $sources: null,
     $sizes: null,
 
@@ -15,9 +14,7 @@ export default Backbone.View.extend({
         'change input[type="checkbox"]': 'handleCheckChange'
     },
 
-    initialize: function($el, collection) {
-        this.collection = collection;
-        this.$el = $el;
+    initialize: function(collection) {
         this.$sources = this.$el.find('[name="sources"]');
         this.$sizes = this.$el.find('[name="sizes"]');
         this.render();
