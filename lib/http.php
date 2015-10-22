@@ -26,10 +26,9 @@ namespace Lib {
             curl_setopt($c, CURLOPT_USERAGENT, HTTP_UA);
             curl_setopt($c, CURLOPT_FOLLOWLOCATION, true);
 
-            // Not the most ethical thing, but fake a referer for pixiv to get around the 403
-            if (strpos($url, 'pixiv.net')) {
-                curl_setopt($c, CURLOPT_REFERER, 'http://pixiv.net');
-            }
+            // Not the most ethical thing, but fake the referer as being from the host root
+            $bits = parse_url($url);
+            curl_setopt($c, CURLOPT_REFERER, 'http://' . $bits['host']);
 
             curl_setopt($c, CURLOPT_PROGRESSFUNCTION, 'self::_progress');
             curl_setopt($c, CURLOPT_NOPROGRESS, false);
