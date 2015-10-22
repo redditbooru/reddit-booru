@@ -1,28 +1,26 @@
-(function (undefined) {
+import App from '../App';
 
-    RB.SidebarView = Backbone.View.extend({
+export default Backbone.View.extend({
 
-        $sidebar: $('#supporting'),
+    $sidebar: $('#supporting'),
 
-        initialize: function() {
+    initialize: function() {
 
-        },
+    },
 
-        populate: function(html, owner) {
-            this.$sidebar.html(html).addClass('hasContent');
+    populate: function(html, owner) {
+        this.$sidebar.html(html).addClass('hasContent');
 
-            // TODO - this should probably be event controlled
-            RB.App.views.images.calculateWindowColumns();
-            RB.App.views.images.render();
-        },
+        // TODO - this should probably be event controlled
+        App.views.images.calculateWindowColumns();
+        App.views.images.render();
+    },
 
-        dismiss: function() {
-            this.$sidebar.html('').removeClass('hasContent');
-            // TODO - this should probably be event controlled
-            RB.App.views.images.calculateWindowColumns();
-            RB.App.views.images.render();
-        }
+    dismiss: function() {
+        this.$sidebar.html('').removeClass('hasContent');
+        // TODO - this should probably be event controlled
+        App.views.images.calculateWindowColumns();
+        App.views.images.render();
+    }
 
-    });
-
-}());
+});

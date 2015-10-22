@@ -1,49 +1,52 @@
-(function(undefined) {
+import Backbone from 'backbone';
+import $ from 'jquery';
+import _ from 'underscore';
 
-    var GALLERY = 'gallery';
+import App from '../App';
+import gallery from '../../../../views/gallery.handlebars';
 
-    RB.GalleryView = Backbone.View.extend({
+var GALLERY = 'gallery';
 
-        initialize: function(router, sidebar) {
-            this.sidebar = sidebar;
-            router.addRoute('galleryNew', '/gallery/:id/:title', _.bind(this.handleRoute, this));
-            router.addRoute('galleryOld', '/gallery/:id', _.bind(this.handleRoute, this));
-        },
+export default Backbone.View.extend({
 
-        handleRoute: function(data) {
-            this.sidebar.dismiss();
+    initialize: function(router, sidebar) {
+        this.sidebar = sidebar;
+        router.addRoute('galleryNew', '/gallery/:id/:title', _.bind(this.handleRoute, this));
+        router.addRoute('galleryOld', '/gallery/:id', _.bind(this.handleRoute, this));
+    },
 
-            if (data instanceof Array) {
+    handleRoute: function(data) {
+        this.sidebar.dismiss();
 
-            } else {
-                if ('id' in data) {
+        if (data instanceof Array) {
 
-                    var id = data.id;
+        } else {
+            if ('id' in data) {
 
-                    // If there's a title, base convert the ID from 36 back to 10
-                    if ('title' in data) {
-                        id = parseInt(id, 36);
-                    }
+                var id = data.id;
 
-                    $.ajax({
-                        url: '/images/?postId=' + id,
-                        dataType: 'json',
-                        success: _.bind(this.displayGallery, this)
-                    });
+                // If there's a title, base convert the ID from 36 back to 10
+                if ('title' in data) {
+                    id = parseInt(id, 36);
                 }
-            }
 
-        },
-
-        displayGallery: function(data) {
-            if (data instanceof Array && data.length > 0) {
-                RB.App.setTitle(data[0].title);
-                $('#images')
-                    .addClass(GALLERY)
-                    .html(RB.Templates.gallery({ images: data }));
+                $.ajax({
+                    url: '/images/?postId=' + id,
+                    dataType: 'json',
+                    success: _.bind(this.displayGallery, this)
+                });
             }
         }
 
-    });
+    },
 
-}());
+    displayGallery: function(data) {
+        if (data instanceof Array && data.length > 0) {
+            App.setTitle(data[0].title);
+            $('#images')
+                .addClass(GALLERY)
+                .html(gallery({ images: data }));
+        }
+    }
+
+});

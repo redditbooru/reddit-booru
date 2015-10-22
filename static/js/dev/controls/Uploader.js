@@ -1,118 +1,125 @@
-(function(undefined) {
+import $ from 'jquery';
 
-    var $globalUpload = $('#globalUpload'),
-        $upload = $globalUpload.find('[type="file"]'),
-        $globalProgress = $('#globalUploaderProgress'),
-        progress = new RB.ProgressCircle($globalProgress, 100, 260, '#e94e77', 20),
+import ProgressCircle from './ProgressCircle';
 
-        ACCEPTED_FORMATS = [
-            'image/jpeg',
-            'image/gif',
-            'image/png'
-        ],
+var $globalUpload = $('#globalUpload'),
+    $upload = $globalUpload.find('[type="file"]'),
+    $globalProgress = $('#globalUploaderProgress'),
+    progress = new ProgressCircle($globalProgress, 100, 260, '#e94e77', 20),
 
-        triggerFileDialog = function() {
-            var self = this;
-            $upload
-                .on('change', function(evt) {
-                    uploadChange.call(self, evt);
-                })
-                .click();
-        },
+    ACCEPTED_FORMATS = [
+        'image/jpeg',
+        'image/gif',
+        'image/png'
+    ],
 
-        uploadFile = function(file) {
-            var xhr = new XMLHttpRequest(),
-                self = this,
-                formData = new FormData();
+    triggerFileDialog = function() {
+        var self = this;
+        $upload
+            .on('change', function(evt) {
+                uploadChange.call(self, evt);
+            })
+            .click();
+    },
 
-            this.onBegin(this.uploadId, file.name);
+    uploadFile = function(file) {
+        var xhr = new XMLHttpRequest(),
+            self = this,
+            formData = new FormData();
 
-            if (this.showProgress) {
-                progress.progress(0);
-                $globalProgress.fadeIn();
-            }
+        this.onBegin(this.uploadId, file.name);
 
-            // Validate the type
-            if (ACCEPTED_FORMATS.indexOf(file.type) === -1) {
-                alert('Image must be a JPEG, GIF, or PNG');
-                return;
-            }
+        if (this.showProgress) {
+            progress.progress(0);
+            $globalProgress.fadeIn();
+        }
 
-            if (typeof this.onProgress === 'function') {
-                xhr.upload.addEventListener('progress', function(evt) {
-                    var percent = Math.round(evt.loaded / evt.total * 100);
-                    if (self.showProgress) {
-                        progress.progress(percent);
-                    }
-                    self.onProgress(percent, self.uploadId);
-                });
-            }
+        // Validate the type
+        if (ACCEPTED_FORMATS.indexOf(file.type) === -1) {
+            alert('Image must be a JPEG, GIF, or PNG');
+            return;
+        }
 
-            xhr.addEventListener('readystatechange', function() {
-                if (xhr.readyState === 4) {
-                    try {
-                        self.onComplete(JSON.parse(xhr.responseText));
-                    } catch (e) {
-                        // do nothing because I hate error management. Someday...
-                    }
-
-                    if (self.showProgress) {
-                        $globalProgress.fadeOut();
-                    }
-
+        if (typeof this.onProgress === 'function') {
+            xhr.upload.addEventListener('progress', function(evt) {
+                var percent = Math.round(evt.loaded / evt.total * 100);
+                if (self.showProgress) {
+                    progress.progress(percent);
                 }
+                self.onProgress(percent, self.uploadId);
             });
+        }
 
-            xhr.open('POST', this.endpoint, true);
-            xhr.setRequestHeader('X-FileName', file.name);
-            formData.append('upload', file);
-            formData.append('uploadId', this.uploadId);
-            xhr.send(formData);
+        xhr.addEventListener('readystatechange', function() {
+            if (xhr.readyState === 4) {
+                try {
+                    self.onComplete(JSON.parse(xhr.responseText));
+                } catch (e) {
+                    // do nothing because I hate error management. Someday...
+                }
 
-            $upload.off('change');
-
-        },
-
-        uploadChange = function(evt) {
-            var files = evt.target.files,
-                file;
-
-            if (files.length > 0) {
-
-                file = files[0];
-
-                // Kick off the upload
-                uploadFile.call(this, file);
+                if (self.showProgress) {
+                    $globalProgress.fadeOut();
+                }
 
             }
-        };
+        });
 
-    RB.Uploader = function(onBegin, onComplete, onProgress, file, endpoint, showProgress) {
-        this.onBegin = onBegin;
-        this.onComplete = onComplete;
-        this.onProgress = onProgress || null;
-        this.uploadId = Date.now();
-        this.endpoint = endpoint || '/upload/?action=upload';
-        this.showProgress = showProgress || false;
+        xhr.open('POST', this.endpoint, true);
+        xhr.setRequestHeader('X-FileName', file.name);
+        formData.append('upload', file);
+        formData.append('uploadId', this.uploadId);
+        xhr.send(formData);
 
-        if (!file) {
-            triggerFileDialog.call(this);
-        } else {
+        $upload.off('change');
+
+    },
+
+    uploadChange = function(evt) {
+        var files = evt.target.files,
+            file;
+
+        if (files.length > 0) {
+
+            file = files[0];
+
+            // Kick off the upload
             uploadFile.call(this, file);
 
         }
     };
 
-    RB.Uploader.showGlobalProgress = function() {
-        $globalProgress.show();
-    };
+var Uploader = function(onBegin, onComplete, onProgress, file, endpoint, showProgress) {
+    this.onBegin = onBegin;
+    this.onComplete = onComplete;
+    this.onProgress = onProgress || null;
+    this.uploadId = Date.now();
+    this.endpoint = endpoint || '/upload/?action=upload';
+    this.showProgress = showProgress || false;
 
-    RB.Uploader.hideGlobalProgress = function() {
-        $globalProgress.hide();
-    };
+    if (!file) {
+        triggerFileDialog.call(this);
+    } else {
+        uploadFile.call(this, file);
 
-    RB.Uploader.getGlobalProgress = function() {
-        return progress;
-    };
+    }
+};
 
-}());
+Uploader.showGlobalProgress = function() {
+    $globalProgress.show();
+};
+
+Uploader.hideGlobalProgress = function() {
+    $globalProgress.hide();
+};
+
+Uploader.getGlobalProgress = function() {
+    return progress;
+};
+
+// TODO - setup a singelton utility
+if (!window._Uploader) {
+    window._Uploader = Uploader;
+}
+
+export default window._Uploader;

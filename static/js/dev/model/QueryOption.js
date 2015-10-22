@@ -1,17 +1,12 @@
-/**
- * Query option
- */
-(function(undefined) {
+import Backbone from 'backbone';
 
-    RB.QueryOption = Backbone.Model.extend({
-        defaults: function() {
-            return {
-                title: '',
-                value: '',
-                name: '',
-                checked: false
-            };
-        }
-    });
-
-}());
+export default Backbone.Model.extend({
+    defaults: function() {
+        return {
+            title: '',
+            value: '',
+            name: '',
+            checked: false
+        };
+    }
+});

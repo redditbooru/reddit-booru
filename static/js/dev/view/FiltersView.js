@@ -1,70 +1,68 @@
-/**
- * Filters View
- */
-(function(undefined) {
+import Backbone from 'backbone';
+import _ from 'underscore';
 
-    var EVT_UPDATE = 'update';
+import queryOptionItem from '../../../../views/queryOptionItem.handlebars';
 
-    RB.FiltersView = Backbone.View.extend({
+const EVT_UPDATE = 'update';
 
-        collection: null,
-        $el: null,
-        $sources: null,
-        $sizes: null,
-        template: RB.Templates.queryOptionItem,
+export default Backbone.View.extend({
 
-        events: {
-            'click button': 'handleRefreshClick',
-            'change input[type="checkbox"]': 'handleCheckChange'
-        },
+    collection: null,
+    $el: null,
+    $sources: null,
+    $sizes: null,
+    template: queryOptionItem,
 
-        initialize: function($el, collection) {
-            this.collection = collection;
-            this.$el = $el;
-            this.$sources = this.$el.find('[name="sources"]');
-            this.$sizes = this.$el.find('[name="sizes"]');
-            this.render();
-            _.extend(this, Backbone.Events);
-        },
+    events: {
+        'click button': 'handleRefreshClick',
+        'change input[type="checkbox"]': 'handleCheckChange'
+    },
 
-        handleRefreshClick: function(evt) {
-            console.log(evt);
-            var values = {};
-            var changed = false;
-            this.$sources.each(function(index, item) {
-                values[item.getAttribute('value')] = !!item.checked;
-            });
+    initialize: function($el, collection) {
+        this.collection = collection;
+        this.$el = $el;
+        this.$sources = this.$el.find('[name="sources"]');
+        this.$sizes = this.$el.find('[name="sizes"]');
+        this.render();
+        _.extend(this, Backbone.Events);
+    },
 
-            this.collection.each(function(item) {
-                var value = values[item.attributes.value];
-                changed = changed || item.attributes.checked === value;
-                item.attributes.checked = value;
-            });
+    handleRefreshClick: function(evt) {
+        console.log(evt);
+        var values = {};
+        var changed = false;
+        this.$sources.each(function(index, item) {
+            values[item.getAttribute('value')] = !!item.checked;
+        });
 
-            if (changed) {
-                this.trigger(EVT_UPDATE);
-            }
+        this.collection.each(function(item) {
+            var value = values[item.attributes.value];
+            changed = changed || item.attributes.checked === value;
+            item.attributes.checked = value;
+        });
 
-        },
-
-        handleCheckChange: function(evt) {
-            var $target = $(evt.currentTarget);
-            var selector = '[name="' + $target.attr('name') + '"]';
-            var $set = this.$el.find(selector);
-            var checked = $target.is(':checked');
-
-            if ($target.val() === 'all') {
-                $set.prop('checked', checked);
-            } else {
-                // If only one checkbox isn't checked, it's the "all", so check it
-                if (checked && this.$el.find(selector + ':not(:checked)').length === 1) {
-                    this.$el.find(selector + '[value="all"]').prop('checked', checked);
-                } else {
-                    this.$el.find(selector + '[value="all"]').prop('checked', false);
-                }
-            }
+        if (changed) {
+            this.trigger(EVT_UPDATE);
         }
 
-    });
+    },
 
-}());
+    handleCheckChange: function(evt) {
+        var $target = $(evt.currentTarget);
+        var selector = '[name="' + $target.attr('name') + '"]';
+        var $set = this.$el.find(selector);
+        var checked = $target.is(':checked');
+
+        if ($target.val() === 'all') {
+            $set.prop('checked', checked);
+        } else {
+            // If only one checkbox isn't checked, it's the "all", so check it
+            if (checked && this.$el.find(selector + ':not(:checked)').length === 1) {
+                this.$el.find(selector + '[value="all"]').prop('checked', checked);
+            } else {
+                this.$el.find(selector + '[value="all"]').prop('checked', false);
+            }
+        }
+    }
+
+});

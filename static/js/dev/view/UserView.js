@@ -1,16 +1,15 @@
-(function(undefined) {
-    
-    RB.UserView = Backbone.View.extend({
+import Backbone from 'backbone';
+import _ from 'underscore';
 
-        initialize: function(sidebar, imageCollection, router) {
-            this.imageCollection = imageCollection;
-            router.on('route:user', _.bind(this.onRoute, this));
-        },
+export default Backbone.View.extend({
 
-        onRoute: function(userName) {
-            this.imageCollection.setQueryOption('user', userName, true);
-        }
+    initialize: function(sidebar, imageCollection, router) {
+        this.imageCollection = imageCollection;
+        router.on('route:user', _.bind(this.onRoute, this));
+    },
 
-    });
+    onRoute: function(userName) {
+        this.imageCollection.setQueryOption('user', userName, true);
+    }
 
-}());
+});

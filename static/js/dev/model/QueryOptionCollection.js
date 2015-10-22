@@ -1,12 +1,7 @@
-/**
- * Query option collection
- */
-(function(undefined) {
+import Backbone from 'backbone';
 
-    RB.QueryOptionCollection = Backbone.Collection.extend({
+import QueryOption from './QueryOption';
 
-        model: RB.QueryOption
-
-    });
-
-}());
+export default Backbone.Collection.extend({
+    model: QueryOption
+});

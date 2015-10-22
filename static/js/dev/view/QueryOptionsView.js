@@ -1,58 +1,57 @@
-/**
- * QueryOptions view
- */
-(function(undefined) {
+import Backbone from 'backbone';
 
-    var EVT_UPDATE = 'update';
+import queryOptionItem from '../../../../views/queryOptionItem.handlebars';
 
-    RB.QueryOptionsView = Backbone.View.extend({
+var EVT_UPDATE = 'update';
 
-        collection: null,
-        $el: null,
-        template: RB.Templates.queryOptionItem,
+export default Backbone.View.extend({
 
-        events: {
-            'change .queryOption': 'handleQueryOptionChange'
-        },
+    collection: null,
+    $el: null,
+    template: queryOptionItem,
 
-        initialize: function($el, collection) {
-            this.collection = collection;
-            this.$el = $el;
-            this.name = $el.attr('id');
-            this.render();
-            _.extend(this, Backbone.Events);
-        },
+    events: {
+        'change .queryOption': 'handleQueryOptionChange'
+    },
 
-        render: function() {
-            var tplData = {
-                type: 'checkbox',
-                items: this.collection.toJSON(),
-                name: this.name
-            };
-            this.$el.html(this.template(tplData));
-        },
+    initialize: function($el, collection) {
+        this.collection = collection;
+        this.$el = $el;
+        this.name = $el.attr('id');
+        this.render();
+        _.extend(this, Backbone.Events);
+    },
 
-        handleQueryOptionChange: function(evt) {
-            var value = evt.target.value,
-                checked = evt.target.checked,
-                item = this._getItemForValue(value);
-            
-            if (null !== item) {
-                item.attributes.checked = checked;
-                this.trigger(EVT_UPDATE, item);
-            }
-        },
+    render: function() {
+        /*
+        var tplData = {
+            type: 'checkbox',
+            items: this.collection.toJSON(),
+            name: this.name
+        };
+        this.$el.html(this.template(tplData));
+        */
+    },
 
-        _getItemForValue: function(value) {
-            var retVal = null;
-            this.collection.each(function(item) {
-                if (item.attributes.value == value) {
-                    retVal = item;
-                }
-            });
-            return retVal;
+    handleQueryOptionChange: function(evt) {
+        var value = evt.target.value,
+            checked = evt.target.checked,
+            item = this._getItemForValue(value);
+
+        if (null !== item) {
+            item.attributes.checked = checked;
+            this.trigger(EVT_UPDATE, item);
         }
+    },
 
-    });
+    _getItemForValue: function(value) {
+        var retVal = null;
+        this.collection.each(function(item) {
+            if (item.attributes.value == value) {
+                retVal = item;
+            }
+        });
+        return retVal;
+    }
 
-}());
+});
