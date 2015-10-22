@@ -1,8 +1,6 @@
 import Backbone from 'backbone';
 import _ from 'underscore';
 
-import queryOptionItem from '../../../../views/queryOptionItem.handlebars';
-
 const EVT_UPDATE = 'update';
 
 export default Backbone.View.extend({
@@ -11,7 +9,6 @@ export default Backbone.View.extend({
     $el: null,
     $sources: null,
     $sizes: null,
-    template: queryOptionItem,
 
     events: {
         'click button': 'handleRefreshClick',
@@ -31,11 +28,11 @@ export default Backbone.View.extend({
         console.log(evt);
         var values = {};
         var changed = false;
-        this.$sources.each(function(index, item) {
+        this.$sources.each((index, item) => {
             values[item.getAttribute('value')] = !!item.checked;
         });
 
-        this.collection.each(function(item) {
+        this.collection.each((item) => {
             var value = values[item.attributes.value];
             changed = changed || item.attributes.checked === value;
             item.attributes.checked = value;

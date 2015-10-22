@@ -2,7 +2,7 @@ import Backbone from 'backbone';
 import $ from 'jquery';
 import _ from 'underscore';
 
-RB.MyGalleriesView = Backbone.View.extend({
+export default Backbone.View.extend({
 
     uploadForm: null,
     router: null,

@@ -23,12 +23,12 @@ var ProgressCircle = function($el, max, diameter, color, lineThickness) {
 
 };
 
-RB.ProgressCircle.prototype.progress = function(value) {
+ProgressCircle.prototype.progress = function(value) {
     this.value = value;
     this._draw();
 };
 
-RB.ProgressCircle.prototype._draw = function() {
+ProgressCircle.prototype._draw = function() {
     var canvas = this.canvas,
         context = this.context,
         arc = this.value / this.max;

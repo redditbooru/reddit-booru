@@ -1,4 +1,4 @@
-import Handlebars from 'handlebars';
+import Handlebars from 'handlebars/runtime';
 import _ from 'underscore';
 
 var MINUTE_SECONDS = 60,
@@ -50,3 +50,7 @@ Handlebars.registerHelper('sep', function(context) {
         return context.fn(context, {});
     }
 });
+
+// Lazily adding an export so this can be included and picked up during compile-time
+// TODO - something less shitty
+export default null;

@@ -1,3 +1,6 @@
+import Backbone from 'backbone';
+import $ from 'jquery';
+
 import App from '../App';
 
 export default Backbone.View.extend({

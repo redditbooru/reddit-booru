@@ -20,7 +20,7 @@ var Router = function(handleCurrentState) {
 
 };
 
-RB.Router.prototype.addRoute = function(name, path, callback) {
+Router.prototype.addRoute = function(name, path, callback) {
 
     this._routes[name] = {
         path: path,
@@ -36,13 +36,13 @@ RB.Router.prototype.addRoute = function(name, path, callback) {
 
 };
 
-RB.Router.prototype.on = function(route, callback) {
+Router.prototype.on = function(route, callback) {
     if (route in this._routes) {
         this._routes[route].callbacks.push(callback);
     }
 };
 
-RB.Router.prototype.go = function(route, params) {
+Router.prototype.go = function(route, params) {
 
     var url,
         oldUrl,
@@ -91,7 +91,7 @@ RB.Router.prototype.go = function(route, params) {
     }
 };
 
-RB.Router.prototype._getRouteFromPath = function(path) {
+Router.prototype._getRouteFromPath = function(path) {
 
     var i, result, route,
         params = {};
@@ -117,7 +117,7 @@ RB.Router.prototype._getRouteFromPath = function(path) {
 /**
  * Generates a regular expression so that a path can be tracked back to its route
  */
-RB.Router.prototype._compilePath = function(path) {
+Router.prototype._compilePath = function(path) {
     var regEx = '^',
         paramName = '',
         mode = MODE_STANDARD,

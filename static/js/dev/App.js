@@ -2,6 +2,7 @@ import Backbone from 'backbone';
 import $ from 'jquery';
 
 import Router from './controls/Routes.js';
+import TplHelpers from './controls/TplHelpers';
 import QueryOptionCollection from './model/QueryOptionCollection';
 import ImageCollection from './model/ImageCollection';
 import FiltersView from './view/FiltersView';

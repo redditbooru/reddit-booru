@@ -76,7 +76,6 @@ export default Backbone.View.extend({
 
                 itemsToRender.reset();
                 newItems = 0;
-                count = 0;
             }
         }, this);
 

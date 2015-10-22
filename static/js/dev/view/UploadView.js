@@ -42,7 +42,6 @@ export default Backbone.View.extend({
 
         this.router = router;
         this._loadForm();
-
     },
 
     /**
