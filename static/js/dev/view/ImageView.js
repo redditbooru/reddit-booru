@@ -36,7 +36,7 @@ export default Backbone.View.extend({
 
         $('body').on('click', '.more-row button', _.bind(this.handleMoreClick, this));
 
-        this.collection.on('updated', this.render);
+        this.collection.on('updated', () => { this.render() });
         this.collection.on('reset', () => {
             this.$el.empty();
         });
