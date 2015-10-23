@@ -4,37 +4,39 @@ import _ from 'underscore';
 
 import track from '../controls/GaTracker';
 import ImageCollection from '../model/ImageCollection';
+import { initOverlay, showOverlay, hideOverlay } from '../controls/overlay';
 
 import imageView from '../../../../views/imageView.handlebars';
 
-var SCREENSAVER = 'screensaver',
-    LOADING = 'loading',
-    SLIDE_DELAY = 4000,
-    OUTER_PADDING = 40,
+const SCREENSAVER = 'screensaver';
+const OPEN_CLASS = 'open';
+const LOADING = 'loading';
+const SLIDE_DELAY = 4000;
+const OUTER_PADDING = 40;
 
-    UPVOTE = 'upvote',
-    DOWNVOTE = 'downvote',
-    NOVOTE = 'no-vote',
+const UPVOTE = 'upvote';
+const DOWNVOTE = 'downvote';
+const NOVOTE = 'no-vote';
 
-    TRACK_VIEWER = 'viewer',
+const TRACK_VIEWER = 'viewer';
 
-    TRACKING = {
-        LAUNCH: 'launch',
-        NEXT: 'next',
-        PREVIOUS: 'previous',
-        SCREENSAVER: 'screensaver',
-        CLOSE: 'close',
-        UPVOTE: 'upvote',
-        DOWNVOTE: 'downvote',
-        UNVOTE: 'unvote'
-    },
+const TRACKING = {
+    LAUNCH: 'launch',
+    NEXT: 'next',
+    PREVIOUS: 'previous',
+    SCREENSAVER: 'screensaver',
+    CLOSE: 'close',
+    UPVOTE: 'upvote',
+    DOWNVOTE: 'downvote',
+    UNVOTE: 'unvote'
+};
 
-    KEYS = {
-        UP: 38,
-        DOWN: 40,
-        LEFT: 37,
-        RIGHT: 39
-    };
+const KEYS = {
+    UP: 38,
+    DOWN: 40,
+    LEFT: 37,
+    RIGHT: 39
+};
 
 export default Backbone.View.extend({
 
@@ -46,6 +48,8 @@ export default Backbone.View.extend({
     initialize: function(router, imageCollection) {
         router.addRoute('view', '/view/:id', _.bind(this.navigateToImage, this));
         this.router = router;
+
+        initOverlay(this.el);
 
         $('body')
             .on('click', 'a.image', _.bind(this._handleImageClick, this))
@@ -198,15 +202,18 @@ export default Backbone.View.extend({
     },
 
     _show: function() {
-        this.$el.fadeIn();
-        this._resize();
+        showOverlay(this.el, () => {
+            this.$el.addClass(OPEN_CLASS);
+            this._resize();
+        });
     },
 
     _hide: function() {
         this._killSlideshow();
         this.$el
             .removeClass(SCREENSAVER)
-            .fadeOut();
+            .removeClass(OPEN_CLASS);
+        hideOverlay(this.el);
         track(TRACK_VIEWER, TRACKING.CLOSE);
     },
 

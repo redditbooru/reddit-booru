@@ -4,21 +4,24 @@ import _ from 'underscore';
 
 import ProgressCircle from '../controls/ProgressCircle';
 import Uploader from '../controls/Uploader';
+import { initOverlay, showOverlay, hideOverlay } from '../controls/overlay';
 
 import uploadImageInfo from '../../../../views/uploadImageInfo.handlebars';
 import uploadRepost from '../../../../views/uploadRepost.handlebars';
 import uploading from '../../../../views/uploading.handlebars';
 
-var SAVE_KEY = 'RB_Uploads',
-    SAVE_DELAY = 500,
-    KEY_ENTER = 13,
-
-    PROGRESS_BAR_THICKNESS = 20;
+const SAVE_KEY = 'RB_Uploads';
+const SAVE_DELAY = 500;
+const KEY_ENTER = 13;
+const PROGRESS_BAR_THICKNESS = 20;
+const OPEN_CLASS = 'open';
+const MODAL_OPEN_CLASS = 'modal-open';
 
 export default Backbone.View.extend({
 
     el: '#upload',
     $albumTitle: null,
+    $body: $('body'),
 
     progressTimer: null,
     delayTimer: null,
@@ -35,9 +38,10 @@ export default Backbone.View.extend({
     },
 
     initialize: function(router) {
-        $('body').on('click', '.upload', _.bind(this.handleNavClick, this));
-
+        this.$body.on('click', '.upload', _.bind(this.handleNavClick, this));
         this.$albumTitle = this.$el.find('.albumTitle');
+
+        initOverlay(this.el);
 
         this.router = router;
         this._loadForm();
@@ -210,11 +214,16 @@ export default Backbone.View.extend({
     },
 
     _showDialog: function() {
-        this.$el.fadeIn();
+        showOverlay(this.el, () => {
+            this.$el.addClass(OPEN_CLASS);
+            this.$body.addClass(MODAL_OPEN_CLASS);
+        });
     },
 
     _hideDialog: function() {
-        this.$el.fadeOut();
+        this.$el.removeClass(OPEN_CLASS);
+        this.$body.removeClass(MODAL_OPEN_CLASS);
+        hideOverlay(this.el);
 
         // If editing, revert back to the previous state
         if (this.editingPostId) {
