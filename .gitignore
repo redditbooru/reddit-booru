@@ -8,6 +8,7 @@
 /node_modules
 /bower_components
 composer.lock
+/vendor
 
 # misc
 /.sass-cache
