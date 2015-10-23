@@ -378,13 +378,6 @@ namespace Api {
             return $retVal;
         }
 
-        private static function _log($name, $data) {
-            $log = new stdClass;
-            $log->name = 'Image_' . $name;
-            $log->data = $data;
-            Lib\Logger::log($log);
-        }
-
     }
 
 }

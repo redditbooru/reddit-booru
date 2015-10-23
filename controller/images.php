@@ -172,8 +172,6 @@ namespace Controller {
 
             }
 
-            self::_log('getByQuery', $vars, $retVal);
-
             if (self::$_showRedditControls) {
                 $retVal = Api\PostData::getVotesForPosts($retVal, Api\User::getCurrentUser());
             }
@@ -194,7 +192,8 @@ namespace Controller {
             $retVal->original = $vars['imageUri'];
             $retVal->preview = Thumb::createThumbFilename($retVal->original);
             $retVal->view = 'search';
-            if (count($retVal->results) > 0) {
+
+            if (is_array($retVal->results) && count($retVal->results) > 0) {
                 // A match is considered "identical" when the distance, rounded to the tens place, is 0
                 $identicals = [];
                 foreach ($retVal->results as $result) {
@@ -210,8 +209,6 @@ namespace Controller {
                 }
 
             }
-
-            self::_log('getByImage', $vars, $retVal);
 
             return $retVal;
         }
@@ -272,7 +269,7 @@ namespace Controller {
             // If there's more than one image, setup an album
             if (count($retVal->images) > 1) {
                 $post = new Api\Post();
-                $post->title = Lib\Url::Post('albumTitle');
+                $post->title = htmlentities(Lib\Url::Post('albumTitle'), ENT_COMPAT | ENT_HTML5, 'UTF-8');
                 $post->setKeywordsFromTitle();
                 $post->dateCreated = time();
                 $post->link = 'http://' . $_SERVER['HTTP_HOST'];
@@ -319,8 +316,6 @@ namespace Controller {
             }
 
             if ($post->userId !== $user->id) {
-                // Log this attempt
-                self::_log('editGallery', [ 'postId' => $postId, 'userId' => $user->id, 'userIp' => $_SERVER['REMOTE_ADDR'] ], null);
                 return self::_generateErrorResponse('You can only edit galleries you have created.');
             }
 
@@ -381,17 +376,6 @@ namespace Controller {
             $retVal->error = true;
             $retVal->message = $message;
             return $retVal;
-        }
-
-        /**
-         * Logs the input and output of a function
-         */
-        private static function _log($name, $vars, $result) {
-            $log = new stdClass;
-            $log->name = 'Images_' . $name;
-            $log->data = $vars;
-            $log->result = null == $result;
-            Lib\Logger::log('controller', $log);
         }
 
         private static function _saveSources($sources) {

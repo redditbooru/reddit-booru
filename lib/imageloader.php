@@ -4,7 +4,6 @@ namespace Lib {
 
     use Api;
     use stdClass;
-    use MongoGridFS;
 
     define('IMAGE_TYPE_JPEG', 'jpg');
     define('IMAGE_TYPE_PNG', 'png');
@@ -347,7 +346,6 @@ namespace Lib {
 
             if (!$file) {
                 Events::fire(IMGEVT_DOWNLOAD_ERROR, 'Unable to download file');
-                self::_log('downloadImage_fail', [ 'url' => $url, 'message' => Http::getLastError() ]);
             } else {
                 $type = self::_getImageType($file);
 
@@ -357,14 +355,12 @@ namespace Lib {
                     $retVal->type = $type;
                     $retVal->timestamp = time();
                     $retVal->data = $file;
-                    self::_log('downloadImage_success', $url);
 
                     // Cache the image
                     self::_saveCacheFile($url, $retVal);
 
 
                 } else {
-                    self::_log('downloadImage_invalid', $url);
                     Events::fire(IMGEVT_DOWNLOAD_ERROR, 'Invalid image type');
                 }
             }
@@ -374,7 +370,7 @@ namespace Lib {
         }
 
         /**
-         * Attempts to retrieve an image from mongocache
+         * Attempts to retrieve an image from long term cache
          */
         private static function _fetchFromCache($url) {
 
@@ -432,29 +428,18 @@ namespace Lib {
                 $retVal = self::_fetchFromCache($url);
             }
 
-            // If nothing was found in the mongo cache, go fetch it the old fashioned way
+            // If nothing was found in the cache, go fetch it the old fashioned way
             if (null === $retVal) {
                 $retVal = self::_downloadImage($url);
             }
 
 
             if (null !== $retVal) {
-                self::_log('fetchImage_success', $url);
                 Events::fire(IMGEVT_DOWNLOAD_COMPLETE);
             }
 
             return $retVal;
 
-        }
-
-        /**
-         * Mongo logging helper function
-         */
-        private static function _log($name, $data) {
-            $log = new stdClass;
-            $log->name = 'ImageLoader_' . $name;
-            $log->data = $data;
-            //Logger::log($log);
         }
 
     }
