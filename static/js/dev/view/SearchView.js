@@ -112,7 +112,7 @@ export default Backbone.View.extend({
         if (data.results) {
             this.imageCollection.reset(data.results);
             this.sidebar.populate(imageSearchDetails(data), this);
-            App.setTitle('Similar images');
+            App.setTitle('Similar images in ' + this._generateTitleForSources(data.sources));
             this.$clearSearch.show();
         }
     },
@@ -199,17 +199,38 @@ export default Backbone.View.extend({
 
         // We're going to hijack the usual request chain so that reverse image search specific logic can be done
         images.reset();
-        images.loadNext(function(data, type) {
+        images.loadNext((data, type) => {
             var data = JSON.parse(data),
                 results = data.results;
             clearTimeout(timer);
+            App.setTitle('Similar images in ' + this._generateTitleForSources(data.sources));
+            this.$clearSearch.show();
             self.sidebar.populate(imageSearchDetails(data), self);
             Uploader.hideGlobalProgress();
             return JSON.stringify(results);
         });
 
-        App.setTitle('Similar images');
-        this.$clearSearch.show();
+    },
+
+    _generateTitleForSources: function(sources) {
+        let retVal = '<span class="link filters-link">' + sources.length + '</span> sources';
+        if (sources.length <= 6) {
+            let sourceNames = sources.map((source) => {
+                return source.name.replace('r/', '');
+            });
+
+            // XMessage would be nice about now...
+            let lastSource = sourceNames.length - 1;
+            if (sourceNames.length === 1) {
+                retVal = sourceNames[0];
+            } else if (sourceNames.length === 2) {
+                retVal = sourceNames[0] + ' and ' + sourceNames[1];
+            } else {
+                sourceNames[lastSource] = 'and ' + sourceNames[lastSource];
+                retVal = sourceNames.join(', ');
+            }
+        }
+        return retVal;
     },
 
     // not really a bread crumb, but naming things is hard

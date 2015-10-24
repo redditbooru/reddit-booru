@@ -79,26 +79,8 @@ namespace Controller {
 
             // At this point, a username search will return all source results. We'll figure the rest out later
             if (!$userName) {
-
-                // If there were no sources, get the user's default ones
-                if (is_array($sources) && count($sources) === 0) {
-                    $enabledSources = QueryOption::getSources();
-                    foreach ($enabledSources as $source) {
-                        if ($source->checked) {
-                            $sources[] = $source->value;
-                        }
-                    }
-
-                } else  if (is_string($sources)) {
-                    $sources = strpos($sources, ',') !== false ? explode(',', $sources) : $sources;
-                }
-                $sources = is_numeric($sources) ? [ $sources ] : $sources;
-
-                // For the cache key
-                $var['sources'] = $sources;
-
-                self::_saveSources($sources);
-
+                $var['sources'] = self::_processSources($sources);
+                self::_saveSources($var['sources']);
             } else {
                 $sources === null;
             }
@@ -186,12 +168,22 @@ namespace Controller {
 
             $retVal = new stdClass;
 
-            // self::_saveSources();
+            $vars['sources'] = self::_processSources($vars['sources']);
+            self::_saveSources($vars['sources']);
 
             $retVal->results = Api\PostData::reverseImageSearch($vars);
             $retVal->original = $vars['imageUri'];
             $retVal->preview = Thumb::createThumbFilename($retVal->original);
             $retVal->view = 'search';
+
+            // We're going to decorate the sources by do an individual request
+            // for each source ID. This flies in the face of standard convention,
+            // but getById is a hot code path AND cached out the ass. This should
+            // be the most performant way of going about things
+            $retVal->sources = [];
+            foreach ($vars['sources'] as $sourceId) {
+                $retVal->sources[] = Api\Source::getById($sourceId);
+            }
 
             if (is_array($retVal->results) && count($retVal->results) > 0) {
                 // A match is considered "identical" when the distance, rounded to the tens place, is 0
@@ -353,7 +345,7 @@ namespace Controller {
             }
 
             $retVal = new stdClass;
-            $retVal->route = Api\Post::createGalleryUrl($post->id, $post->title);;
+            $retVal->route = Api\Post::createGalleryUrl($post->id, $post->title);
             return $retVal;
 
         }
@@ -383,6 +375,31 @@ namespace Controller {
             if (Lib\Url::GetBool('saveSources') && is_array($sources) && count($sources) > 0) {
                 setcookie('sources', implode(',', $sources), strtotime('+5 years'), '/');
             }
+        }
+
+        private static function _processSources($sources) {
+            // If there were no sources, get the user's default ones
+            if (is_array($sources) && count($sources) === 0) {
+                $enabledSources = QueryOption::getSources();
+                foreach ($enabledSources as $source) {
+                    if ($source->checked) {
+                        $sources[] = $source->value;
+                    }
+                }
+            } else  if (is_string($sources)) {
+                $sources = strpos($sources, ',') !== false ? explode(',', $sources) : $sources;
+            } else if (!$sources) {
+                // Default to awwnime
+                $sources = 1;
+            }
+            $sources = is_numeric($sources) ? [ $sources ] : $sources;
+
+            // Filter out anything non-numeric
+            $sources = array_filter($sources, function($item) {
+                return is_numeric($item);
+            });
+
+            return $sources;
         }
 
     }
