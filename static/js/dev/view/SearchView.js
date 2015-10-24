@@ -173,6 +173,7 @@ export default Backbone.View.extend({
         var images = this.imageCollection,
             self = this,
             progress = Uploader.getGlobalProgress(),
+            timer = null,
 
             updateRequest = function() {
                 $.ajax({
@@ -189,18 +190,19 @@ export default Backbone.View.extend({
                 }
 
                 if (data !== null) {
-                    setTimeout(updateRequest, 250);
+                    timer = setTimeout(updateRequest, 250);
                 }
             };
 
         Uploader.showGlobalProgress();
-        setTimeout(updateRequest, 1000);
+        timer = setTimeout(updateRequest, 1000);
 
         // We're going to hijack the usual request chain so that reverse image search specific logic can be done
         images.reset();
         images.loadNext(function(data, type) {
             var data = JSON.parse(data),
                 results = data.results;
+            clearTimeout(timer);
             self.sidebar.populate(imageSearchDetails(data), self);
             Uploader.hideGlobalProgress();
             return JSON.stringify(results);
