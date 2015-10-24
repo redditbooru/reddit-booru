@@ -129,7 +129,7 @@ export default Backbone.View.extend({
         }
     },
 
-    _handleSourcesUpdate: function(saveSources) {
+    _handleSourcesUpdate: function(saveFilters) {
         var collections = this.imageCollection,
             self = this,
             sources = self.sources.collection.where({ checked: true }),
