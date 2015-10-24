@@ -17,9 +17,10 @@ import MyGalleriesView from './view/MyGalleriesView';
 import ImageViewer from './view/ImageViewer';
 
 // Amount of time to wait on user to stop making changes before firing off requests
-var UPDATE_DELAY = 1000,
-    HAS_CONTENT = 'hasContent',
-    HIDDEN = 'hidden';
+const UPDATE_DELAY = 1000;
+const HAS_CONTENT = 'hasContent';
+const HIDDEN = 'hidden';
+const MODAL_OPEN_CLASS = 'modal-open';
 
 var AppView = Backbone.View.extend({
 
@@ -27,6 +28,7 @@ var AppView = Backbone.View.extend({
     collections: {},
     router: new Router(),
 
+    $body: $('body'),
     $title: $('#title'),
     $sidebar: $('#supporting'),
 
@@ -96,6 +98,10 @@ var AppView = Backbone.View.extend({
             this.$sidebar.removeClass(HAS_CONTENT).empty();
         }
         this.views.images.calculateWindowColumns();
+    },
+
+    toggleModalMode(modalOpen) {
+        this.$body.toggleClass(MODAL_OPEN_CLASS, modalOpen);
     }
 
 });

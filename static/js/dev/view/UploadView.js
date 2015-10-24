@@ -2,6 +2,7 @@ import Backbone from 'backbone';
 import $ from 'jquery';
 import _ from 'underscore';
 
+import App from '../App';
 import ProgressCircle from '../controls/ProgressCircle';
 import Uploader from '../controls/Uploader';
 import { initOverlay, showOverlay, hideOverlay } from '../controls/overlay';
@@ -15,7 +16,6 @@ const SAVE_DELAY = 500;
 const KEY_ENTER = 13;
 const PROGRESS_BAR_THICKNESS = 20;
 const OPEN_CLASS = 'open';
-const MODAL_OPEN_CLASS = 'modal-open';
 
 export default Backbone.View.extend({
 
@@ -216,13 +216,13 @@ export default Backbone.View.extend({
     _showDialog: function() {
         showOverlay(this.el, () => {
             this.$el.addClass(OPEN_CLASS);
-            this.$body.addClass(MODAL_OPEN_CLASS);
+            App.toggleModalMode(true);
         });
     },
 
     _hideDialog: function() {
         this.$el.removeClass(OPEN_CLASS);
-        this.$body.removeClass(MODAL_OPEN_CLASS);
+        App.toggleModalMode(false);
         hideOverlay(this.el);
 
         // If editing, revert back to the previous state
