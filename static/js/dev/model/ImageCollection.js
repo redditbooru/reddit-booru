@@ -17,7 +17,7 @@ export default Backbone.Collection.extend({
 
     url: function() {
         var separator = this.queryUrl.indexOf('?') !== -1 ? '&' : '?',
-            params = [ 'saveSources=true' ];
+            params = [];
 
         if (this.lastDate > 0) {
             params = [ 'afterDate=' + this.lastDate ];
@@ -27,17 +27,16 @@ export default Backbone.Collection.extend({
     },
 
     initialize: function(router) {
-        var self = this;
 
         _.extend(this, Backbone.Events);
-        this.on('add', function(item) {
-            self._checkLastDate.call(self, item);
+        this.on('add', (item) => {
+            this._checkLastDate(item);
         });
 
-        this.on('reset', function(stuff) {
-            self.lastDate = 0;
-            _.each(self.models, function(item) {
-                self._checkLastDate.call(self, item);
+        this.on('reset', () => {
+            this.lastDate = 0;
+            _.each(this.models, (item) => {
+                this._checkLastDate(item);
             });
         });
 
@@ -99,11 +98,9 @@ export default Backbone.Collection.extend({
 
     _buildQueryUrl: function() {
         var retVal = [];
-        for (var i in this.queryOptions) {
-            if (_.has(this.queryOptions, i)) {
-                retVal.push(i + '=' + this.queryOptions[i]);
-            }
-        }
+        Object.keys(this.queryOptions).forEach((option) => {
+            retVal.push(encodeURIComponent(option) + '=' + encodeURIComponent(this.queryOptions[option]));
+        });
         return API_PATH + '?' + retVal.join('&');
     },
 
