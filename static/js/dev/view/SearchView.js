@@ -9,6 +9,8 @@ import Uploader from '../controls/Uploader';
 import imageSearchDetails from '../../../../views/imageSearchDetails.handlebars';
 import breadcrumb from '../../../../views/breadcrumb.handlebars';
 
+const SEARCH_RESULTS_CLASS = 'search-results';
+
 var KEY_ENTER = 13,
     UPDATE_DELAY = 1000,
 
@@ -19,7 +21,6 @@ var KEY_ENTER = 13,
 
 export default Backbone.View.extend({
 
-    $clearSearch: $('#clearSearch'),
     $searchInput: $('input[name="search"]'),
     $body: $('body'),
     currentParams: {},
@@ -31,7 +32,6 @@ export default Backbone.View.extend({
         this.sidebar = sidebar;
         this.router = router;
         this.$searchInput.on('keypress', _.bind(this._handleSearch, this));
-        this.$clearSearch.on('click', _.bind(this.clearSearch, this));
 
         if (typeof window.filters === 'object') {
             this.currentParams = window.filters;
@@ -41,6 +41,8 @@ export default Backbone.View.extend({
                 self._buildBreadCrumb();
             }, 10);
         }
+
+        this.$body.on('click', '.clear-search', _.bind(this.clearSearch, this));
 
         // Global catch for source select links
         this.$body.on('click', '.singleSourceSearch', _.bind(this.singleSourceSearch, this));
@@ -91,7 +93,7 @@ export default Backbone.View.extend({
         this.imageCollection.clearQueryOptions();
         App.setTitle('');
         this.$searchInput.val('');
-        this.$clearSearch.hide();
+        this.$body.removeClass(SEARCH_RESULTS_CLASS);
     },
 
     singleSourceSearch: function(evt) {
@@ -113,7 +115,7 @@ export default Backbone.View.extend({
             this.imageCollection.reset(data.results);
             this.sidebar.populate(imageSearchDetails(data), this);
             App.setTitle('Similar images in ' + this._generateTitleForSources(data.sources));
-            this.$clearSearch.show();
+            this.$body.addClass(SEARCH_RESULTS_CLASS);
         }
     },
 
@@ -204,7 +206,7 @@ export default Backbone.View.extend({
                 results = data.results;
             clearTimeout(timer);
             App.setTitle('Similar images in ' + this._generateTitleForSources(data.sources));
-            this.$clearSearch.show();
+            this.$body.addClass(SEARCH_RESULTS_CLASS);
             self.sidebar.populate(imageSearchDetails(data), self);
             Uploader.hideGlobalProgress();
             return JSON.stringify(results);
@@ -213,7 +215,7 @@ export default Backbone.View.extend({
     },
 
     _generateTitleForSources: function(sources) {
-        let retVal = '<span class="link filters-link">' + sources.length + '</span> sources';
+        let retVal = '<span class="link show-filters">' + sources.length + '</span> sources';
         if (sources.length <= 6) {
             let sourceNames = sources.map((source) => {
                 return source.name.replace('r/', '');
@@ -237,7 +239,7 @@ export default Backbone.View.extend({
     _buildBreadCrumb: function() {
         if ('q' in this.currentParams || 'user' in this.currentParams) {
             App.setTitle(breadcrumb(this.currentParams));
-            this.$clearSearch.show();
+            this.$body.addClass(SEARCH_RESULTS_CLASS);
         }
     }
 

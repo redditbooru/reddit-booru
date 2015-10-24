@@ -2,27 +2,35 @@ import Backbone from 'backbone';
 import $ from 'jquery';
 import _ from 'underscore';
 
+import App from '../App';
+
 const EVT_UPDATE = 'update';
+const MODAL_CLASS = 'modal';
 
 export default Backbone.View.extend({
 
     $sources: null,
     $sizes: null,
+    $saveFilters: null,
+    $body: $('body'),
+
+    isModal: false,
 
     events: {
         'click button': 'handleRefreshClick',
         'change input[type="checkbox"]': 'handleCheckChange'
     },
 
-    initialize: function(collection) {
+    initialize(collection) {
         this.$sources = this.$el.find('[name="sources"]');
         this.$sizes = this.$el.find('[name="sizes"]');
+        this.$saveFilters = this.$el.find('#save-filters');
+        this.$body.on('click', '.show-filters', _.bind(this.showFiltersModal, this));
         this.render();
         _.extend(this, Backbone.Events);
     },
 
-    handleRefreshClick: function(evt) {
-        console.log(evt);
+    handleRefreshClick(evt) {
         var values = {};
         var changed = false;
         this.$sources.each((index, item) => {
@@ -36,12 +44,25 @@ export default Backbone.View.extend({
         });
 
         if (changed) {
-            this.trigger(EVT_UPDATE);
+            this.trigger(EVT_UPDATE, this.$saveFilters.is(':checked'));
+        }
+
+        if (this.isModal) {
+            this.$el.removeClass(MODAL_CLASS);
+            this.$el.detach().appendTo($('#sources'));
+            App.toggleModalMode(false);
         }
 
     },
 
-    handleCheckChange: function(evt) {
+    showFiltersModal(evt) {
+        let $el = this.$el.addClass(MODAL_CLASS).detach();
+        App.toggleModalMode(true);
+        this.$body.append($el);
+        this.isModal = true;
+    },
+
+    handleCheckChange(evt) {
         var $target = $(evt.currentTarget);
         var selector = '[name="' + $target.attr('name') + '"]';
         var $set = this.$el.find(selector);

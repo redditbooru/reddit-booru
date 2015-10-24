@@ -25,7 +25,10 @@
         <section id="content">
             <div class="contentTitle">
                 <h2 id="title"{{#unless title}} class="hidden"{{/unless}}>{{title}}</h2>
-                <button id="clearSearch">Cancel Search</button>
+                <div class="search-controls">
+                    <button class="show-filters search-button">Change Filters</button>
+                    <button class="clear-search search-button primary">Cancel Search</button>
+                </div>
             </div>
             <section id="images"{{#if imagesDisplay}} class="{{imagesDisplay}}"{{/if}}>
                 {{{body}}}

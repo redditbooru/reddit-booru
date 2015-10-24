@@ -8,9 +8,23 @@
   cursor: default;
   @include border-box();
 
+  &.modal {
+    position: absolute;
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+    top: 200px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+    z-index: 101;
+  }
+
   h3 {
     font: 18px 'MG Regular', sans-serif;
     margin-bottom: 8px;
+  }
+
+  label {
+    cursor: pointer;
   }
 
   input[type="checkbox"] {
@@ -82,6 +96,7 @@
     float: right;
     button {
       color: #fff;
+      border-color: transparent;
       margin-left: 20px;
       background-color: $PINK;
     }
