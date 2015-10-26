@@ -78,17 +78,9 @@
       clear: both;
       width: 100%;
     }
-
-    .fancy-filters& {
-      width: 50%;
-    }
   }
 
   .filters-section {
-    .fancy-filters& {
-      width: 75%;
-      float: left;
-    }
 
     &.sizes-filter {
       width: 25%;
@@ -108,6 +100,16 @@
       background-color: $PINK;
     }
 
+  }
+
+  &.fancy-filters {
+    li {
+      width: 50%;
+    }
+    .filters-section {
+      width: 75%;
+      float: left;
+    }
   }
 
 }
