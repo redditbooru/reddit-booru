@@ -16,8 +16,8 @@ namespace Lib {
 
         public static function init() {
             self::$_hbEngine = new Handlebars([
-                'loader' => new \Handlebars\Loader\FilesystemLoader(__DIR__ . '/../views/'),
-                'partials_loader' => new \Handlebars\Loader\FilesystemLoader(__DIR__ . '/../views/partials/')
+                'loader' => new \Handlebars\Loader\FilesystemLoader(__DIR__ . '/../views/', [ 'extension' => 'hbs' ]),
+                'partials_loader' => new \Handlebars\Loader\FilesystemLoader(__DIR__ . '/../views/partials/', [ 'extension' => 'hbs' ])
             ]);
             self::addKey(KEY_CLIENT_DATA, new stdClass);
             self::_addStandardHelpers();
@@ -27,7 +27,7 @@ namespace Lib {
          * Renders the page
          **/
         public static function render() {
-            echo self::$_hbEngine->render('layouts/' . self::$_layout . '.handlebars', self::$_tplData);
+            echo self::$_hbEngine->render('layouts/' . self::$_layout . '.hbs', self::$_tplData);
         }
 
         // Displays an error message and halts rendering

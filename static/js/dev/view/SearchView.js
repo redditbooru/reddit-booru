@@ -6,8 +6,8 @@ import App from '../App';
 import Cookie from '../controls/Cookie';
 import Uploader from '../controls/Uploader';
 
-import imageSearchDetails from '../../../../views/imageSearchDetails.handlebars';
-import breadcrumb from '../../../../views/breadcrumb.handlebars';
+import imageSearchDetails from '../../../../views/imageSearchDetails.hbs';
+import breadcrumb from '../../../../views/breadcrumb.hbs';
 
 const SEARCH_RESULTS_CLASS = 'search-results';
 

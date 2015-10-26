@@ -3,7 +3,7 @@ import $ from 'jquery';
 import _ from 'underscore';
 
 import App from '../App';
-import gallery from '../../../../views/gallery.handlebars';
+import gallery from '../../../../views/gallery.hbs';
 
 var GALLERY = 'gallery';
 

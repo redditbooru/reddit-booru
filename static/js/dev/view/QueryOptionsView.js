@@ -1,6 +1,6 @@
 import Backbone from 'backbone';
 
-import queryOptionItem from '../../../../views/queryOptionItem.handlebars';
+import queryOptionItem from '../../../../views/queryOptionItem.hbs';
 
 var EVT_UPDATE = 'update';
 

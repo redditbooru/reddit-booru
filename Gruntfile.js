@@ -32,7 +32,7 @@ module.exports = function(grunt) {
                 ]
             },
             dist: {
-                src: [ './static/js/dev/App.js', './views/*.handlebars' ],
+                src: [ './static/js/dev/App.js', './views/**/*.hbs' ],
                 dest: './static/js/<%= pkg.name %>.js'
             }
         },
@@ -46,7 +46,7 @@ module.exports = function(grunt) {
             js: {
                 files: [
                     './static/js/dev/**/*.js',
-                    './views/**/*.handlebars'
+                    './views/**/*.hbs'
                 ],
                 tasks: [ 'browserify' ],
             },

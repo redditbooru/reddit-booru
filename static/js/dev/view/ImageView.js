@@ -4,8 +4,8 @@ import _ from 'underscore';
 
 import ImageCollection from '../model/ImageCollection';
 
-import imagesRow from '../../../../views/imagesRow.handlebars';
-import moreRow from '../../../../views/moreRow.handlebars';
+import imagesRow from '../../../../views/imagesRow.hbs';
+import moreRow from '../../../../views/moreRow.hbs';
 
 var $window = $(window),
 
