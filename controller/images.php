@@ -79,8 +79,8 @@ namespace Controller {
 
             // At this point, a username search will return all source results. We'll figure the rest out later
             if (!$userName) {
-                $var['sources'] = self::_processSources($sources);
-                self::_saveSources($var['sources']);
+                $vars['sources'] = self::_processSources($sources);
+                self::_saveSources($vars['sources']);
             } else {
                 $sources === null;
             }
