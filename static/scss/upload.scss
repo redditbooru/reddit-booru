@@ -1,0 +1,196 @@
+@import "mixins";
+
+#upload {
+  @include modal();
+  background: #fff;
+  z-index: $NAV_INDEX + 1;
+
+  opacity: 0;
+  transform: translateY(30px) rotateX(30deg);
+  -webkit-transition: transform 0.5s, opacity 0.5s;
+  transition: transform 0.5s, opacity 0.5s;
+
+  &.open {
+    opacity: 1;
+    transform: translateY(0) rotateX(0);
+  }
+
+  h2 {
+    padding: 20px;
+    background: $PINK;
+    color: #fff;
+    font: 30px/1 'MG Thin', sans-serif;
+  }
+
+  .form {
+    padding: 10px 20px;
+    background: $GREY;
+
+    fieldset {
+      display: inline;
+      border: 0;
+      position: relative;
+    }
+
+    legend {
+      display: none;
+    }
+
+    .finalize {
+      padding-left: 20px;
+      &:before {
+        content: '';
+        display: block;
+        position: absolute;
+        top: 5px;
+        bottom: 5px;
+        left: 8px;
+        border-left: 1px solid $DARK_GREY;
+      }
+    }
+
+  }
+
+  .urlUpload {
+    position: relative;
+    padding-right: 25px;
+    &:after {
+      font: bold 24px sans-serif;
+      content: '\00b7';
+      display: block;
+      position: absolute;
+      right: 10px;
+      top: -7px;
+      color: $DARK_GREY;
+    }
+  }
+
+  .repost {
+    .actions {
+      float: left;
+    }
+
+    p {
+      font: 18px/1 'MG Thin', sans-serif;
+      margin-bottom: 10px;
+    }
+
+    button {
+      display: inline-block;
+      margin-right: 10px;
+    }
+  }
+
+  .uploads {
+    list-style: none;
+    position: absolute;
+    left: 20px;
+    right: 20px;
+    top: 130px;
+    bottom: 20px;
+    overflow: scroll;
+    overflow-x: hidden;
+
+    > li {
+      position: relative;
+      padding: 20px 0;
+      border-top: 1px dotted $GREY;
+      overflow: hidden;
+      &:first-child {
+        border-top: 0;
+      }
+
+      &.uploading {
+        font: 18px/1 'MG Thin', sans-serif;
+        overflow: hidden;
+        canvas {
+          float: left;
+        }
+      }
+
+      > img {
+        @include image-shadow();
+        float: left;
+        margin-right: 20px;
+        width: 150px;
+        height: 150px;
+      }
+
+    }
+
+  }
+
+  .caption {
+    display: block;
+    margin-bottom: 10px;
+  }
+
+  .remove {
+    display: block;
+    border: 0;
+    background: transparent;
+    padding-left: 0;
+    margin-top: 10px;
+    color: $PINK;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  .close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    font-size: 36px;
+    padding: 0 10px;
+    height: 34px;
+  }
+
+  .albumTitle {
+    display: none;
+    &.error {
+      border-color: #f00;
+      color: #f00;
+    }
+  }
+
+  .similar-images {
+    position: absolute;
+    left: 460px;
+    bottom: 20px;
+    border-left: 2px solid $PINK;
+    margin-left: 10px;
+    padding-left: 20px;
+    overflow: hidden;
+
+    h3 {
+      font: 18px 'MG Regular', sans-serif;
+      margin-bottom: 8px;
+    }
+
+    li {
+      display: inline-block;
+      padding-right: 10px;
+      position: relative;
+    }
+
+    span {
+      position: absolute;
+      bottom: 5px;
+      left: 0;
+      right: 10px;
+      background: rgba(0, 0, 0, 0.75);
+      padding: 5px 10px;
+      font: 14px/1 'MG Thin';
+      letter-spacing: 1px;
+      color: #fff;
+    }
+
+    img {
+      width: 75px;
+      height: 75px;
+      @include image-shadow();
+    }
+  }
+
+}

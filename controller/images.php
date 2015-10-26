@@ -168,7 +168,7 @@ namespace Controller {
 
             $retVal = new stdClass;
 
-            $vars['sources'] = self::_processSources($vars['sources']);
+            $vars['sources'] = self::_processSources(isset($vars['sources']) ? $vars['sources'] : []);
             self::_saveSources($vars['sources']);
 
             $retVal->results = Api\PostData::reverseImageSearch($vars);

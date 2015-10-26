@@ -1,6 +1,24 @@
 <li data-id="{{uploadId}}" class="repost">
     <img src="{{thumb}}_150_150.jpg" alt="thumbnail" />
     <p>It looks like this image has already been posted to {{#each identical}}{{.}}{{#sep}}, {{/sep}}{{/each}}. Would you like to add it anyways?</p>
-    <button type="button" class="repostImage">Yes</button>
-    <button type="button" class="remove">Remove</button>
+    <div class="actions">
+      <button type="button" class="repostImage">Yes</button>
+      <button type="button" class="remove">Remove</button>
+    </div>
+    {{! TODO - This needs to be a partial but browserify-handlebars doesn't support that currently }}
+    {{#similar}}
+        <div class="similar-images">
+            <h3>Similar Images</h3>
+            <ul>
+              {{#results}}
+                  <li>
+                      <a href="http://redd.it/{{externalId}}">
+                          <img src="{{thumb}}_75_75.jpg" alt="{{title}}" />
+                      </a>
+                      <span>{{sourceName}}</span>
+                  </li>
+              {{/results}}
+            </ul>
+        </div>
+    {{/similar}}
 </li>

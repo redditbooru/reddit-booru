@@ -6,4 +6,20 @@
     <!-- Removing for now until a good way of source searching at scale can be determined -->
     <!-- <button type="button" class="findSource">Find Source</button> -->
     <button type="button" class="remove">Remove</button>
+    {{! TODO - This needs to be a partial but browserify-handlebars doesn't support that currently }}
+    {{#similar}}
+        <div class="similar-images">
+            <h3>Similar Images</h3>
+            <ul>
+              {{#results}}
+                  <li>
+                      <a href="http://redd.it/{{externalId}}">
+                          <img src="{{thumb}}_75_75.jpg" alt="{{title}}" />
+                      </a>
+                      <span>{{sourceName}}</span>
+                  </li>
+              {{/results}}
+            </ul>
+        </div>
+    {{/similar}}
 </li>

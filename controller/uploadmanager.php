@@ -8,6 +8,10 @@ namespace Controller {
 
     class UploadManager implements Page {
 
+        // I'm trying to comprehend why PostData::reverseImageSearch
+        // multiplies count by two... Until then, this number just _looks_ small...
+        const REPOST_CHECK_LIMIT = 2;
+
         public static function render() {
 
             $imageUrl = Lib\Url::Get('imageUrl', null);
@@ -78,7 +82,8 @@ namespace Controller {
 
                 // Do a quick repost check
                 if (!$force) {
-                    $reposts = Images::getByImage([ 'image' => $image, 'imageUri' => $imageUrl ]);
+                    $reposts = Images::getByImage([ 'image' => $image, 'imageUri' => $imageUrl, 'count' => self::REPOST_CHECK_LIMIT ]);
+                    $retVal->similar = $reposts;
                     if ($reposts && $reposts->identical) {
                         $retVal->identical = $reposts->identical;
                     }
