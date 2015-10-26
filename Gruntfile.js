@@ -37,12 +37,25 @@ module.exports = function(grunt) {
             }
         },
         watch: {
-            files: [
-                './static/js/dev/**/*.js',
-                './views/**/*.handlebars',
-                './static/scss/*.scss'
-            ],
-            tasks: ['browserify', 'sass']
+            css: {
+                files: [
+                    './static/scss/*.scss'
+                ],
+                tasks: [ 'sass' ]
+            },
+            js: {
+                files: [
+                    './static/js/dev/**/*.js',
+                    './views/**/*.handlebars'
+                ],
+                tasks: [ 'browserify' ],
+            },
+            configFiles: {
+                files: [ 'Gruntfile.js' ],
+                options: {
+                    reload: true
+                }
+            }
         }
     });
 
