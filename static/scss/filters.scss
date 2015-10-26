@@ -71,18 +71,25 @@
   }
 
   li {
-    width: 50%;
+    width: 33%;
     float: left;
     padding-bottom: 4px;
     &.full-width {
       clear: both;
       width: 100%;
     }
+
+    .fancy-filters& {
+      width: 50%;
+    }
   }
 
   .filters-section {
-    width: 75%;
-    float: left;
+    .fancy-filters& {
+      width: 75%;
+      float: left;
+    }
+
     &.sizes-filter {
       width: 25%;
       li {

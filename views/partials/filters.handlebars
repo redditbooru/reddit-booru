@@ -1,4 +1,4 @@
-<div class="filters">
+<div class="filters{{#inTestBucket key="fancy-filters" value="enabled"}} fancy-filters{{/inTestBucket}}">
     <div class="sources-filter filters-section">
         <h3>Sources</h3>
         <ul>
@@ -14,6 +14,7 @@
             {{/each}}
         </ul>
     </div>
+    {{#inTestBucket key="fancy-filters" value="enabled"}}
     <div class="sizes-filter filters-section">
         <h3>Sizes</h3>
         <ul>
@@ -35,6 +36,7 @@
             </li>
         </ul>
     </div>
+    {{/inTestBucket}}
     <div class="filters-foot">
         <input type="checkbox" name="save-filters" id="save-filters" value="save" checked />
         <label for="save-filters">Save Preferences</label>
