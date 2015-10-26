@@ -42,7 +42,7 @@ namespace Controller {
 
             // First, get all enabled sources from the database
             $sources = Lib\Cache::fetch(function() {
-                return Api\Source::queryReturnAll([ 'enabled' => 1, 'type' => 'subreddit' ]);
+                return Api\Source::queryReturnAll([ 'enabled' => 1, 'type' => 'subreddit' ], [ 'name' => 'asc' ]);
             }, 'Controller_QueryOption_getSources', CACHE_LONG);
 
             $retVal = [];
