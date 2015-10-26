@@ -22,6 +22,7 @@ export default Backbone.View.extend({
     el: '#upload',
     $albumTitle: null,
     $body: $('body'),
+    $uploads: null,
 
     progressTimer: null,
     delayTimer: null,
@@ -40,6 +41,7 @@ export default Backbone.View.extend({
     initialize: function(router) {
         this.$body.on('click', '.upload', _.bind(this.handleNavClick, this));
         this.$albumTitle = this.$el.find('.albumTitle');
+        this.$uploads = this.$el.find('ul.uploads');
 
         initOverlay(this.el);
 
@@ -62,7 +64,7 @@ export default Backbone.View.extend({
     },
 
     loadGallery: function(post) {
-        var $list = this.$el.find('ul');
+        var $list = this.$uploads;
         this._pushForm();
         this.editingPostId = post.id;
 
@@ -310,7 +312,7 @@ export default Backbone.View.extend({
 
     _loadForm: function() {
         var data = window.localStorage[SAVE_KEY],
-            $list = this.$el.find('ul');
+            $list = this.$uploads;
 
         if (data) {
             data = JSON.parse(data);
@@ -326,9 +328,9 @@ export default Backbone.View.extend({
 
     _renderUploader: function(id, url) {
         var $upload = $(uploading({ id: id, url: url })),
-            $list = this.$el.find('ul');
+            $list = this.$uploads;
         $list.append($upload);
-        $upload[0].progress = ProgressCircle($upload.find('.donut-loader'), 100, 150, '#e94e77', PROGRESS_BAR_THICKNESS);
+        $upload[0].progress = new ProgressCircle($upload.find('.donut-loader'), 100, 150, '#e94e77', PROGRESS_BAR_THICKNESS);
         $list.scrollTop($list[0].scrollHeight);
     }
 
