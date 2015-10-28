@@ -68,6 +68,7 @@
   ul {
     list-style: none;
     overflow: hidden;
+    padding-bottom: 10px;
   }
 
   li {
@@ -91,7 +92,6 @@
   }
 
   .filters-foot {
-    clear: both;
     float: right;
     button {
       color: #fff;
