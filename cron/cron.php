@@ -1,5 +1,6 @@
 <?php
 
+require('app-config.php');
 require('lib/aal.php');
 
 define('ARG_SOURCE', 'source');
