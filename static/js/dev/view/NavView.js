@@ -7,16 +7,15 @@ const MENU_OPEN_CLASS = 'menu-open';
 
 export default Backbone.View.extend({
 
-  $body: $('body'),
-  el: 'nav',
+  el: 'header',
 
   initialize() {
     this.$el.on('click', '.open-menu', (evt) => {
-      this.$body.toggleClass(MENU_OPEN_CLASS);
+      App.$body.toggleClass(MENU_OPEN_CLASS);
     });
 
     this.collection.on('updated', (evt) => {
-      this.$body.removeClass(MENU_OPEN_CLASS);
+      App.$body.removeClass(MENU_OPEN_CLASS);
     });
   }
 
