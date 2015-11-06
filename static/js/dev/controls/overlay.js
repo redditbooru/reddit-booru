@@ -1,9 +1,12 @@
 const TRANSITION_END = 'transitionend';
+const IS_FIREFOX = window.navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
 
 function onTransitionEnd(evt) {
   var el = evt.target;
   el.style.display = 'none';
-  el.removeEventListener(TRANSITION_END, onTransitionEnd);
+  if (!IS_FIREFOX) {
+    el.removeEventListener(TRANSITION_END, onTransitionEnd);
+  }
 }
 
 export function initOverlay(el) {
@@ -12,10 +15,20 @@ export function initOverlay(el) {
 
 export function showOverlay(el, callback) {
   el.style.display = 'block';
-  // Async the callback so that the element can be refreshed
-  setTimeout(callback, 0);
+  // Run the callback on the next redraw, unless firefox. Fuck those guys...
+  if (IS_FIREFOX) {
+    callback();
+  } else {
+    window.requestAnimationFrame(callback);
+  }
 }
 
 export function hideOverlay(el) {
-  el.addEventListener(TRANSITION_END, onTransitionEnd);
+  if (IS_FIREFOX) {
+    onTransitionEnd({ target: el });
+  } else {
+    window.requestAnimationFrame(() => {
+      el.addEventListener(TRANSITION_END, onTransitionEnd);
+    });
+  }
 }
