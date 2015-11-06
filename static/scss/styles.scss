@@ -2,28 +2,6 @@
 @import "filters";
 @import "upload";
 
-@font-face {
-    font-family: 'MG Regular';
-    src: url('/static/fonts/mission_gothic_regular-webfont.eot');
-    src: url('/static/fonts/mission_gothic_regular-webfont.eot?#iefix') format('embedded-opentype'),
-         url('/static/fonts/mission_gothic_regular-webfont.woff') format('woff'),
-         url('/static/fonts/mission_gothic_regular-webfont.ttf') format('truetype'),
-         url('/static/fonts/mission_gothic_regular-webfont.svg#mission_gothicregular') format('svg');
-    font-weight: normal;
-    font-style: normal;
-}
-
-@font-face {
-    font-family: 'MG Thin';
-    src: url('/static/fonts/mission_gothic_thin-webfont.eot');
-    src: url('/static/fonts/mission_gothic_thin-webfont.eot?#iefix') format('embedded-opentype'),
-         url('/static/fonts/mission_gothic_thin-webfont.woff') format('woff'),
-         url('/static/fonts/mission_gothic_thin-webfont.ttf') format('truetype'),
-         url('/static/fonts/mission_gothic_thin-webfont.svg#mission_gothicthin') format('svg');
-    font-weight: normal;
-    font-style: normal;
-}
-
 @-webkit-keyframes imageFadeOut {
     0% { opacity: 100%; }
     100% { opacity: 70%; }

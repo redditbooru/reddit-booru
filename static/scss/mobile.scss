@@ -15,6 +15,7 @@ header {
 
     h1 {
         font-size: 24px;
+        position: static;
 
         @include transition(100ms);
 
@@ -92,29 +93,35 @@ header {
     .open-menu {
         display: block;
         position: absolute;
-        right: 10px;
-        top: 14px;
+        padding: 10px;
+        right: 0;
+        top: 4px;
         border: 0;
         border-radius: 0;
-        border-top: 3px solid #fff;
-        border-bottom: 3px solid #fff;
         background: none;
-        height: 0;
-        width: 24px;
-        padding: 11px 0 0;
-        overflow: hidden;
 
         @include transition(100ms);
 
-        &:before {
-            content: '';
+        .hamburger {
             display: block;
-            width: 100%;
-            height: 3px;
-            background: #fff;
-            position: relative;
-            top: -7px;
+            height: 0;
+            border-top: 3px solid #fff;
+            border-bottom: 3px solid #fff;
+            width: 24px;
+            padding: 11px 0 0;
+            overflow: hidden;
+
+            &:before {
+                content: '';
+                display: block;
+                width: 100%;
+                height: 3px;
+                background: #fff;
+                position: relative;
+                top: -7px;
+            }
         }
+
     }
 
     .search {
@@ -140,7 +147,7 @@ body.menu-open {
 
     .open-menu {
         right: 100%;
-        margin-right: -34px;
+        margin-right: -44px;
     }
 
     #content {
