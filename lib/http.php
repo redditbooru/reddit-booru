@@ -4,6 +4,8 @@ namespace Lib {
 
     class Http {
 
+        private $_url;
+
         /**
          * Holds the error message returned by cURL for the last transaction
          */
@@ -16,12 +18,8 @@ namespace Lib {
             return self::curl_get_contents($url);
         }
 
-        /**
-         * A drop in replacement for file_get_contents with some business logic attached
-         * @param string $url Url to retrieve
-         * @return string Data received
-         */
-        private static function curl_get_contents($url) {
+        private function _get($url) {
+            $this->_url = $url;
             $c = curl_init($url);
             curl_setopt($c, CURLOPT_USERAGENT, HTTP_UA);
             curl_setopt($c, CURLOPT_FOLLOWLOCATION, true);
@@ -30,24 +28,33 @@ namespace Lib {
             $bits = parse_url($url);
             curl_setopt($c, CURLOPT_REFERER, 'http://' . $bits['host']);
 
-            curl_setopt($c, CURLOPT_PROGRESSFUNCTION, 'self::_progress');
+            curl_setopt($c, CURLOPT_PROGRESSFUNCTION, [ $this, '_progress' ]);
             curl_setopt($c, CURLOPT_NOPROGRESS, false);
 
             curl_setopt($c, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($c, CURLINFO_HEADER_OUT, true);
             curl_setopt($c, CURLOPT_TIMEOUT, 60);
             curl_setopt($c, CURLOPT_ENCODING, 'gzip');
             $retVal = curl_exec($c);
-            $effectiveUrl = curl_getinfo($c, CURLINFO_EFFECTIVE_URL);
 
             if (null == $retVal) {
                 self::$_lastError = curl_error($c);
             }
 
             curl_close($c);
-
-            self::_requestComplete($effectiveUrl);
+            $this->_requestComplete($url);
 
             return $retVal;
+        }
+
+        /**
+         * A drop in replacement for file_get_contents with some business logic attached
+         * @param string $url Url to retrieve
+         * @return string Data received
+         */
+        private static function curl_get_contents($url) {
+            $request = new Http();
+            return $request->_get($url);
         }
 
         private static function _getCacheKey() {
@@ -64,24 +71,23 @@ namespace Lib {
             return $urls ?: [];
         }
 
-        private static function _setActiveDownloads($urls) {
+        private function _setActiveDownloads($urls) {
             Cache::Set(self::_getCacheKey(), $urls, CACHE_SHORT);
         }
 
         /**
          * A callback function to monitor cURL's download progress for a client
          */
-        private static function _progress($c, $totalBytesDown, $bytesDownloaded, $totalBytesUp, $bytesUploaded) {
+        private function _progress($c, $totalBytesDown, $bytesDownloaded, $totalBytesUp, $bytesUploaded) {
             $urls = self::getActiveDownloads();
-            $url = curl_getinfo($c, CURLINFO_EFFECTIVE_URL);
-            $urls[$url] = $totalBytesDown > 0 ? $bytesDownloaded / $totalBytesDown : 0;
+            $urls[$this->_url] = $totalBytesDown > 0 ? $bytesDownloaded / $totalBytesDown : 0;
             self::_setActiveDownloads($urls);
         }
 
         /**
          * Cleanup operations for when a cURL request completes
          */
-        private static function _requestComplete($url) {
+        private function _requestComplete($url) {
             $urls = self::getActiveDownloads();
             if (isset($urls[$url])) {
                 unset($urls[$url]);
