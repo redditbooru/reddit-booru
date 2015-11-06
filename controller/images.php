@@ -79,7 +79,7 @@ namespace Controller {
 
             // At this point, a username search will return all source results. We'll figure the rest out later
             if (!$userName) {
-                $vars['sources'] = self::_processSources($sources);
+                $vars['sources'] = $sources = self::_processSources($sources);
                 self::_saveSources($vars['sources']);
             } else {
                 $sources === null;
@@ -379,20 +379,22 @@ namespace Controller {
 
         private static function _processSources($sources) {
             // If there were no sources, get the user's default ones
-            if (is_array($sources) && count($sources) === 0) {
-                $enabledSources = QueryOption::getSources();
-                foreach ($enabledSources as $source) {
-                    if ($source->checked) {
-                        $sources[] = $source->value;
-                    }
-                }
-            } else  if (is_string($sources)) {
+            if (is_string($sources)) {
                 $sources = strpos($sources, ',') !== false ? explode(',', $sources) : $sources;
             } else if (!$sources) {
                 // Default to awwnime
                 $sources = 1;
             }
             $sources = is_numeric($sources) ? [ $sources ] : $sources;
+
+            if (!count($sources)) {
+                $enabledSources = QueryOption::getSources();
+                foreach ($enabledSources as $source) {
+                    if ($source->checked) {
+                        $sources[] = $source->value;
+                    }
+                }
+            }
 
             // Filter out anything non-numeric
             $sources = array_filter($sources, function($item) {
