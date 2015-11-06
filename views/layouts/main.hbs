@@ -10,7 +10,7 @@
         <title>
             {{#if pageTitle}}{{pageTitle}}{{else}}redditbooru - a place where cute girls come to meet{{/if}}
         </title>
-        <script src="/static/js/dev/HashRedirect.js"></script>
+        <script src="/static/js/HashRedirect.js"></script>
         <link rel="stylesheet" type="text/css" href="/static/scss/styles.css" />
         <meta name="viewport" content="initial-scale=1.0, width=device-width, height=device-height, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
         <link rel="stylesheet" type="text/css" href="/static/scss/mobile.css" media="(max-width: 568px)" />
@@ -49,7 +49,6 @@
             window.csrfToken = '{{csrfToken}}';
             {{/if}}
         </script>
-        <script src="/static/js/HashRedirect.js"></script>
         <script src="/static/js/RedditBooru.js"></script>
         {{>ga}}
     </body>
