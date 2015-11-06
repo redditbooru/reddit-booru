@@ -6,7 +6,7 @@
 
 // Used to keep track of page generation time
 $_begin = microtime (true);
-
+require_once('app-config.php');
 // Include base libraries
 require_once('./lib/aal.php');
 
