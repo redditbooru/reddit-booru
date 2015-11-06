@@ -15,6 +15,7 @@ import DragDropView from './view/DragDropView';
 import GalleryView from './view/GalleryView';
 import MyGalleriesView from './view/MyGalleriesView';
 import ImageViewer from './view/ImageViewer';
+import NavView from './view/NavView';
 
 // Amount of time to wait on user to stop making changes before firing off requests
 const UPDATE_DELAY = 1000;
@@ -69,7 +70,8 @@ var AppView = Backbone.View.extend({
             upload: upload,
             gallery: new GalleryView(this.router, sidebar),
             myGalleries: new MyGalleriesView(this.router, upload),
-            imageViewer: new ImageViewer(this.router, this.collections.images)
+            imageViewer: new ImageViewer(this.router, this.collections.images),
+            nav: new NavView({ collection: this.collections.images })
         };
 
         // If the startup blob has a specific view associated, kick it off

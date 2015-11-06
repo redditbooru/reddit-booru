@@ -30,6 +30,8 @@ header {
         background: $HEADER_BG;
         padding: 10px;
         color: #fff;
+        overflow: hidden;
+        overflow-y: scroll;
 
         .primary-nav {
             margin: 0;
@@ -46,20 +48,30 @@ header {
                 }
             }
 
+            h3,
+            label,
             a {
-                color: #fff;
+                color: #fff !important;
+            }
+
+            .nav-login,
+            .nav-upload,
+            .nav-screensaver {
+                display: none;
             }
 
             .has-secondary-nav {
-
                 border: 0;
 
                 &:hover {
-                    box-shadow: none;
-                    border: 0;
-                    &:before {
-                        display: none;
-                    }
+                    color: #fff;
+                    background: transparent;
+                }
+
+                &:before,
+                &:after {
+                    content: none !important;
+                    display: none !important;
                 }
 
                 .secondary-nav {
@@ -70,15 +82,11 @@ header {
                     padding: 10px 0 0;
                     width: auto !important;
                     background: none;
-                    &.source-list li {
-                        width: 110px;
-                    }
                 }
 
             }
 
         }
-
     }
 
     .open-menu {
@@ -186,6 +194,31 @@ body.menu-open {
 
     .uploadInput {
         overflow: hidden;
+    }
+
+}
+
+.filters {
+    background: transparent;
+    width: auto;
+    padding: 0 0 0 20px;
+
+    h3 {
+        display: none;
+    }
+
+    li {
+        width: 100%;
+    }
+
+    .filters-foot {
+        float: none;
+
+        button {
+            display: block;
+            margin: 10px 0 0;
+        }
+
     }
 
 }
