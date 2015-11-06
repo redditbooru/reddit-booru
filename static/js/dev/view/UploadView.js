@@ -188,7 +188,7 @@ export default Backbone.View.extend({
             this.$albumTitle.val(titleOverride);
         }
 
-        if (this.$el.find('li').length > 1) {
+        if (this.$el.find('> li').length > 1) {
             this.$albumTitle.show();
         } else {
             this.$albumTitle.hide();
