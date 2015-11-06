@@ -25,7 +25,9 @@ export default Backbone.View.extend({
         this.$sources = this.$el.find('[name="sources"]');
         this.$sizes = this.$el.find('[name="sizes"]');
         this.$saveFilters = this.$el.find('#save-filters');
-        this.$body.on('click', '.show-filters', _.bind(this.showFiltersModal, this));
+        this.$body
+            .on('click', '#content .show-filters', _.bind(this.showFiltersModal, this))
+            .on('click', _.bind(this.closeFiltersModal, this));
         this.render();
         _.extend(this, Backbone.Events);
     },
@@ -48,9 +50,7 @@ export default Backbone.View.extend({
         }
 
         if (this.isModal) {
-            this.$el.removeClass(MODAL_CLASS);
-            this.$el.detach().appendTo($('#sources'));
-            App.toggleModalMode(false);
+            this.hideFiltersModal();
         }
 
     },
@@ -60,6 +60,13 @@ export default Backbone.View.extend({
         App.toggleModalMode(true);
         this.$body.append($el);
         this.isModal = true;
+        evt.stopPropagation();
+    },
+
+    hideFiltersModal() {
+        this.$el.removeClass(MODAL_CLASS);
+        this.$el.detach().appendTo($('#sources'));
+        App.toggleModalMode(false);
     },
 
     handleCheckChange(evt) {
@@ -77,6 +84,12 @@ export default Backbone.View.extend({
             } else {
                 this.$el.find(selector + '[value="all"]').prop('checked', false);
             }
+        }
+    },
+
+    closeFiltersModal(evt) {
+        if (this.isModal && $(evt.target).closest('.filters').length === 0) {
+            this.hideFiltersModal();
         }
     }
 
