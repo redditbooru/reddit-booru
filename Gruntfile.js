@@ -28,11 +28,11 @@ module.exports = function(grunt) {
                 require: [
                     './node_modules/underscore/underscore.js:underscore',
                     './node_modules/jquery/dist/jquery.js:jquery',
-                    './node_modules/backbone/backbone.js:backbone'
+                    './node_modules/backbone/backbone.js:backbone',
                 ]
             },
             dist: {
-                src: [ './static/js/dev/App.js', './views/**/*.hbs' ],
+                src: [ './static/js/dev/App.js', './views/*.hbs' ],
                 dest: './static/js/<%= pkg.name %>.js'
             }
         },
