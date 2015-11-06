@@ -49,7 +49,7 @@
             window.csrfToken = '{{csrfToken}}';
             {{/if}}
         </script>
-        <script src="/static/js/RedditBooru.js"></script>
+        <script src="/static/js/RedditBooru{{#if use_min_js}}.min{{/if}}.js?_{{js_version}}"></script>
         {{>ga}}
     </body>
 </html>

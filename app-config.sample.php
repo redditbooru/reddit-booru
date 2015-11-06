@@ -21,5 +21,8 @@ define('THUMBNAIL_STORAGE', '/FULL/PATH/TO/THUMBNAILS');
 
 define('CACHE_PREFIX', 'RedditBooru');
 
+define('USE_MIN_JS', true);
+define('JS_VERSION', 1);
+
 // Set the time zone
 date_default_timezone_set('America/Chicago');
