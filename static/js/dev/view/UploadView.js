@@ -16,6 +16,7 @@ const SAVE_DELAY = 500;
 const KEY_ENTER = 13;
 const PROGRESS_BAR_THICKNESS = 20;
 const OPEN_CLASS = 'open';
+const IMAGE_UPLOAD_CLASS = '.image-upload';
 
 export default Backbone.View.extend({
 
@@ -82,7 +83,7 @@ export default Backbone.View.extend({
         evt.preventDefault();
 
         this.$albumTitle.removeClass('error');
-        if (this.$el.find('li').length > 1 && $.trim(this.$albumTitle.val()).length === 0) {
+        if (this.$uploads.find(IMAGE_UPLOAD_CLASS).length > 1 && $.trim(this.$albumTitle.val()).length === 0) {
             this.$albumTitle.addClass('error');
             return;
         }
@@ -117,7 +118,10 @@ export default Backbone.View.extend({
     },
 
     handleRemoveClick: function(evt) {
-        $(evt.currentTarget).closest('li').remove();
+        $(evt.currentTarget).closest(IMAGE_UPLOAD_CLASS).remove();
+        if (this.$uploads.find(IMAGE_UPLOAD_CLASS).length <= 1) {
+            this.$albumTitle.hide();
+        }
         this._saveForm();
     },
 
@@ -147,7 +151,7 @@ export default Backbone.View.extend({
     },
 
     handleRepostClick: function(evt) {
-        var $parent = $(evt.currentTarget).closest('li');
+        var $parent = $(evt.currentTarget).closest(IMAGE_UPLOAD_CLASS);
         this._urlUpload($parent.attr('data-id'), true);
         $parent.remove();
     },
@@ -188,7 +192,7 @@ export default Backbone.View.extend({
             this.$albumTitle.val(titleOverride);
         }
 
-        if (this.$el.find('> li').length > 1) {
+        if (this.$uploads.find(IMAGE_UPLOAD_CLASS).length > 1) {
             this.$albumTitle.show();
         } else {
             this.$albumTitle.hide();
@@ -241,7 +245,7 @@ export default Backbone.View.extend({
      */
     _clearForm: function() {
         this.$albumTitle.val('').hide();
-        this.$el.find('li').remove();
+        this.$uploads.find(IMAGE_UPLOAD_CLASS).remove();
         this._saveForm();
     },
 
@@ -251,7 +255,7 @@ export default Backbone.View.extend({
     _pushForm: function() {
         this._saveForm();
         this.$albumTitle.val('').hide();
-        this.$el.find('li').remove();
+        this.$uploads.find(IMAGE_UPLOAD_CLASS).remove();
     },
 
     _checkProgress: function() {
@@ -262,17 +266,24 @@ export default Backbone.View.extend({
         });
     },
 
-    _progressCallback: function(data) {
-        var i,
-            $item = null;
+    _progressCallback(data) {
+        let $item = null;
+        let itemsUpdated = false;
 
         if (null !== data) {
 
-            for (i in data) {
-                this.$el.find('[data-id="' + i + '"]').get(0).progress.progress(Math.round(data[i] * 100));
+            for (let i in data) {
+                $item = this.$el.find('[data-id="' + i + '"]');
+                if ($item.length) {
+                    $item.get(0).progress.progress(Math.round(data[i] * 100));
+                    itemsUpdated = true;
+                }
             }
 
-            setTimeout(_.bind(this._checkProgress, this), 250);
+            // Only return if something actually caught our eye
+            if (itemsUpdated) {
+                setTimeout(_.bind(this._checkProgress, this), 250);
+            }
         }
 
     },
@@ -290,7 +301,7 @@ export default Backbone.View.extend({
             title: this.$albumTitle.val()
         };
 
-        this.$el.find('li').each(function() {
+        this.$uploads.find(IMAGE_UPLOAD_CLASS).each(function() {
             var $this = $(this),
                 item = {
                     id: $this.data('id'),
