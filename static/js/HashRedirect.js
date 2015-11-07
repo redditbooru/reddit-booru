@@ -12,9 +12,11 @@
         },
 
         displayUploadDialog = function(url) {
-            setTimeout(function() {
-                RB.App.views.upload.openWithUpload(url);
-            }, 1000);
+            if (!window._App) {
+                setTimeout(() => { displayUploadDialog(url); }, 10);
+            } else {
+                window._App.views.upload.openWithUpload(url);
+            }
         },
 
         parseQueryString = function(qs) {
