@@ -14,6 +14,9 @@ namespace Controller {
 
             $action = Lib\Url::Get('action');
 
+            Lib\Display::addKey('use_min_js', USE_MIN_JS);
+            Lib\Display::addKey('js_version', JS_VERSION);
+
             switch ($action) {
                 case 'user':
                     self::_userGalleries();
