@@ -381,9 +381,6 @@ namespace Controller {
             // If there were no sources, get the user's default ones
             if (is_string($sources)) {
                 $sources = strpos($sources, ',') !== false ? explode(',', $sources) : $sources;
-            } else if (!$sources) {
-                // Default to awwnime
-                $sources = 1;
             }
             $sources = is_numeric($sources) ? [ $sources ] : $sources;
 
