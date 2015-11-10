@@ -86,7 +86,7 @@ var AppView = Backbone.View.extend({
     setTitle: function(title) {
         if (title) {
             this.$title.html(title).removeClass(HIDDEN);
-            document.title = title + ' - redditbooru';
+            document.title = this.$title.text() + ' - redditbooru';
         } else {
             this.$title.html('').addClass(HIDDEN);
             document.title = 'redditbooru - a place where cute girls come to meet';
