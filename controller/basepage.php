@@ -48,6 +48,7 @@ namespace Controller {
 
             self::addTestToOutput('enableMobile');
             self::addTestToOutput('showRedditControls');
+            self::addTestToOutput('sourceFinder');
 
             Lib\Display::addKey('sources', $sources);
             Lib\Display::addKey('tests', self::$tests);
