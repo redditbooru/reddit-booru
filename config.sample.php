@@ -20,7 +20,7 @@ define('VIEW_PATH', './view/');
 
 define('HTTP_UA', 'moe downloader by /u/dxprog');
 
-define('SAUCENAO_KEY', 'SAUCENAO_API_KEY');
+define('SAUCENAO_PORT', 'SAUCENAO_SERVICE_PORT');
 
 define('RB_BOT', 'ai-tan');
 

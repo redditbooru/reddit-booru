@@ -9,11 +9,11 @@ var timerHandle = null;
 
 // Technically, SauceNAO's paid limit is 12 requests per 30
 // seconds, but I want a little bit of leeway.
-var MAX_REQUESTS = 8;
+var MAX_REQUESTS = 10;
 var TIME_SPAN = 30000;
 var QUEUE_INTERVAL = 1000;
 var HEALTH_CHECK_INTERVAL = 100;
-var SAUCENAO_KEY = 'SAUCE_NOW_KEY_HERE';
+var SAUCENAO_KEY = process.env.SVC_SAUCENAO_KEY;
 var SAUCENAO_URL = 'https://saucenao.com/search.php?db=999&output_type=2&testmode=1&numres=16&url={{URL}}&api_key=' + SAUCENAO_KEY;
 
 /**
@@ -169,5 +169,5 @@ var server = http.createServer(function(req, res) {
 
 });
 
-server.listen(9000);
+server.listen(process.env.SVC_SAUCENAO_PORT);
 timerHandle = setTimeout(manageQueue, QUEUE_INTERVAL);

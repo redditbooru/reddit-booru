@@ -15,7 +15,7 @@ namespace Controller {
         }
 
         public static function getSource($url) {
-            $data = file_get_contents('http://localhost:9000/' . urlencode($url));
+            $data = file_get_contents('http://localhost:' . SAUCENAO_PORT . '/' . urlencode($url));
 
             $data = $data ? json_decode($data) : null;
             if ($data && isset($data->results) && count($data->results)) {
