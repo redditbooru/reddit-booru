@@ -3,8 +3,11 @@
     <input type="hidden" name="imageId[]" value="{{imageId}}" />
     <input type="text" name="caption[]" placeholder="Image Caption" class="caption" value="{{caption}}" />
     <input type="text" name="source[]" placeholder="Image Source URL" value="{{sourceUrl}}" />
+    <input type="hidden" name="imageUrl" value="{{imageUrl}}" />
     <!-- Removing for now until a good way of source searching at scale can be determined -->
-    <!-- <button type="button" class="findSource">Find Source</button> -->
+    {{#inTestBucket key="sourceFinder" value="enabled"}}
+    <button type="button" class="findSource">Find Source</button>
+    {{/inTestBucket}}
     <button type="button" class="remove">Remove</button>
     {{! TODO - This needs to be a partial but browserify-handlebars doesn't support that currently }}
     {{#similar}}

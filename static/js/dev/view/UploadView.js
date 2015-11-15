@@ -17,6 +17,12 @@ const KEY_ENTER = 13;
 const PROGRESS_BAR_THICKNESS = 20;
 const OPEN_CLASS = 'open';
 const IMAGE_UPLOAD_CLASS = '.image-upload';
+const SOURCE_SELECTOR = '[name="source[]"]';
+const CAPTION_SELECTOR = '[name="caption[]"]';
+const IMAGE_URL_SELECTOR = '[name="imageUrl"]';
+const SOURCE_FAIL_MESSAGE = 'Unable to find source';
+
+// TODO - The individual image rows need to be refactored out as separate views
 
 export default Backbone.View.extend({
 
@@ -36,7 +42,8 @@ export default Backbone.View.extend({
         'click .remove': 'handleRemoveClick',
         'click .repostImage': 'handleRepostClick',
         'keypress form': 'handleTextChange',
-        'submit form': 'handleSubmit'
+        'submit form': 'handleSubmit',
+        'click .findSource': 'handleFindSourceClick'
     },
 
     initialize: function(router) {
@@ -128,6 +135,31 @@ export default Backbone.View.extend({
     handleNavClick: function(evt) {
         evt.preventDefault();
         this._showDialog();
+    },
+
+    handleFindSourceClick(evt) {
+        var $parent = $(evt.currentTarget).closest(IMAGE_UPLOAD_CLASS);
+        var $source = $parent.find(SOURCE_SELECTOR);
+        var $caption = $parent.find(CAPTION_SELECTOR);
+        var imageUrl = $parent.find(IMAGE_URL_SELECTOR).val();
+
+        $source.val('Getting source, one sec...');
+
+        $.ajax('/find-source/?url=' + encodeURIComponent(imageUrl), {
+            dataType: 'json'
+        }).done((data) => {
+            if (data) {
+                if (!$caption.val().length) {
+                    $caption.val(data.title);
+                }
+                $source.val(data.url);
+                this._saveForm();
+            } else {
+                $source.val(SOURCE_FAIL_MESSAGE);
+            }
+        }).fail(() => {
+            $source.val(SOURCE_FAIL_MESSAGE);
+        });
     },
 
     beginUpload: function(evt) {
@@ -308,7 +340,8 @@ export default Backbone.View.extend({
                     thumb: $this.find('img').attr('src'),
                     caption: $this.find('[name="caption[]"]').val(),
                     sourceUrl: $this.find('[name="source[]"]').val(),
-                    imageId: $this.find('[name="imageId[]"]').val()
+                    imageId: $this.find('[name="imageId[]"]').val(),
+                    imageUrl: $this.find('[name="imageUrl"]').val()
                 };
 
             if (item.imageId) {

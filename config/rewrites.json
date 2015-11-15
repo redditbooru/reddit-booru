@@ -101,5 +101,9 @@
     {
         "rule": "^upload/$",
         "replace": "page=uploadmanager"
+    },
+    {
+        "rule": "^find-source/$",
+        "replace": "page=saucenao"
     }
 ]
