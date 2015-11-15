@@ -93,7 +93,8 @@ namespace Controller {
                     // Sync to the database and save
                     if ($image->sync()) {
                         $retVal->imageId = $image->id;
-                        $retVal->thumb = Thumb::createThumbFilename($image->getFilename(true));
+                        $retVal->imageUrl = $image->getFilename(true);
+                        $retVal->thumb = Thumb::createThumbFilename($retVal->imageUrl);
                     } else {
                         $retVal->error = true;
                         $retVal->message = 'Error syncing image to database';
