@@ -678,6 +678,7 @@ button.singleSourceSearch {
     h2 {
         font: 24px 'MG Regular', sans-serif;
         color: #fff;
+        margin-bottom: 15px;
     }
 
     h3 {
@@ -727,16 +728,18 @@ button.singleSourceSearch {
 
     }
 
+    .info {
+        padding-left: 50px;
+        position: relative;
+    }
+
     .voter {
 
-        margin-top: 15px;
         display: block;
-        float: left;
+        position: absolute;
+        left: 0;
+        top: 0;
         width: 40px;
-
-        &.no-data {
-            display: none;
-        }
 
         .score {
             display: block;
@@ -758,6 +761,8 @@ button.singleSourceSearch {
             margin: 0 auto;
             position: relative;
             color: transparent;
+            visibility: hidden;
+            font-size: 1px;
         }
 
         .upvote:before {
@@ -811,6 +816,13 @@ button.singleSourceSearch {
                 &:before {
                     border-top-color: $DOWN_VOTE;
                 }
+            }
+        }
+
+        .logged-in & {
+            margin-top: 15px;
+            button {
+                visibility: visible;
             }
         }
 

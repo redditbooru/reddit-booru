@@ -3,21 +3,21 @@
 </div>
 <div class="post-content">
     <h2>{{title}}</h2>
-    {{#inTestBucket key="showRedditControls" value="enabled"}}
+    <div class="info">
         <span class="voter {{voteStatus userVote}}">
             <button type="button" class="upvote">Upvote</button>
             <span class="score">{{score}}</span>
             <button type="button" class="downvote">Downvote</button>
         </span>
-    {{/inTestBucket}}
-    <h3>Posted {{#if userName}}by <a href="/user/{{userName}}">{{userName}}</a> {{/if}} {{#if sourceName}}to <a href="/r/{{sourceName}}" target="_blank">{{sourceName}}</a>{{/if}} {{relativeTime dateCreated}} ago</h3>
-    {{#if caption}}
-        <p>{{caption}}</p>
-    {{/if}}
-    {{#if externalId}}
-        <p><a href="http://redd.it/{{externalId}}" target="_blank">View on reddit</a></p>
-    {{/if}}
-    {{#if sourceUrl}}
-        <p><a href="{{sourceUrl}}" target="_blank">Source</a></p>
-    {{/if}}
+        <h3>Posted {{#if userName}}by <a href="/user/{{userName}}">{{userName}}</a> {{/if}} {{#if sourceName}}to <a href="/r/{{sourceName}}" target="_blank">{{sourceName}}</a>{{/if}} {{relativeTime dateCreated}} ago</h3>
+        {{#if caption}}
+            <p>{{caption}}</p>
+        {{/if}}
+        {{#if externalId}}
+            <p><a href="http://redd.it/{{externalId}}" target="_blank">View on reddit</a></p>
+        {{/if}}
+        {{#if sourceUrl}}
+            <p><a href="{{sourceUrl}}" target="_blank">Source</a></p>
+        {{/if}}
+    </div>
 </div>
