@@ -10,10 +10,14 @@ export default Backbone.View.extend({
 
     initialize: function(uploadView, searchView) {
 
-        var body = document.getElementsByTagName('body')[0];
+        var body = document.documentElement;
+
+        // Temporary hack to get around what seems to be backbone returning the wrong element
+        this.el = document.getElementById('dragdrop');
+        this.$el = $(this.el);
 
         body.addEventListener('dragover', _.bind(this.handleDragOver, this));
-        body.addEventListener('dragleave', _.bind(this.handleDragLeave, this))
+        body.addEventListener('dragleave', _.bind(this.handleDragLeave, this));
         body.addEventListener('drop', _.bind(this.handleDrop, this));
 
         this.$el.find('.search').on('drop', _.bind(this.handleDrop, this));
