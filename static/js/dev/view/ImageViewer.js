@@ -262,11 +262,11 @@ export default Backbone.View.extend({
         }
 
         // Update any other item with this reddit ID with the new vote value
-        _.each(this.allImages.filter(function(post) {
+        _.each(this.allImages.filter((post) => {
             return post.attributes.externalId === image.externalId;
-        }), function(post) {
+        }), (post) => {
             post.attributes.score = image.score;
-            post.attributes.userVote = dir;
+            post.attributes.userVote = submitDir;
         });
 
     }
