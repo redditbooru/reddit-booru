@@ -714,6 +714,27 @@ button.singleSourceSearch {
         background-repeat: no-repeat;
     }
 
+    .hideNsfw & .nsfw {
+        @include image-label('NSFW. Click + hold to view or enable "Show NSFW"', center);
+        .post-image {
+            filter: url(/static/scss/filters.svg#nsfwBlur);
+            -ms-filter: blur(15px);
+            -webkit-filter: blur(15px);
+        }
+
+        &:active {
+            &:before {
+                display: none;
+            }
+            .post-image {
+                filter: none;
+                -ms-filter: none;
+                -webkit-filter: none;
+            }
+        }
+
+    }
+
     &.loading {
         background-image: url(/static/images/loading.gif);
         background-repeat: no-repeat;

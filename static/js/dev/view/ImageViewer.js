@@ -53,7 +53,7 @@ export default Backbone.View.extend({
 
         $('body')
             .on('click', 'a.image', _.bind(this._handleImageClick, this))
-            .on('click', '.screensaver', _.bind(this.startScreensaver, this));
+            .on('click', 'nav .screensaver', _.bind(this.startScreensaver, this));
 
         this.$window = $(window).on('resize', _.bind(this._resize, this));
         this.$content = this.$el.find('.viewer-content');
@@ -89,32 +89,32 @@ export default Backbone.View.extend({
     },
 
     render: function(image) {
-        var self = this,
-            displayImage = function(force) {
-                if (self._screenSaver || force) {
-                    self.$content.html(imageView(image.attributes));
-                    self._show();
-                    self.currentIndex = self.allImages.indexOf(image);
-                    self.$voter = self.$el.find('.voter');
-
-                    if (self._screenSaver) {
-                        clearTimeout(self._timer); // just out of caution
-                        self._timer = setTimeout(_.bind(self._nextSlide, self), SLIDE_DELAY);
-                        self.$el.removeClass(LOADING);
-                    }
-                }
-            };
-
         // We don't want to appear to hang while in normal browsing mode
         if (this._screenSaver) {
             this.$el.addClass(LOADING);
             this.imageLoader = new Image();
-            this.imageLoader.onload = displayImage;
+            this.imageLoader.onload = () => this.displayImage(image);
             this.imageLoader.src = image.attributes.cdnUrl;
         } else {
-            displayImage(true);
+            this.displayImage(image, true);
         }
 
+    },
+
+    displayImage(image, force) {
+        if (this._screenSaver || force) {
+            this.$content.html(imageView(image.attributes));
+            this.$content.toggleClass('nsfw', image.attributes.nsfw);
+            this._show();
+            this.currentIndex = this.allImages.indexOf(image);
+            this.$voter = this.$el.find('.voter');
+
+            if (this._screenSaver) {
+                clearTimeout(this._timer); // just out of caution
+                this._timer = setTimeout(this._nextSlide.bind(this), SLIDE_DELAY);
+                this.$el.removeClass(LOADING);
+            }
+        }
     },
 
     _nextSlide: function() {
