@@ -189,7 +189,7 @@ namespace Controller {
                 // A match is considered "identical" when the distance, rounded to the tens place, is 0
                 $identicals = [];
                 foreach ($retVal->results as $result) {
-                    if ((int) ($result->distance * 100) === 0 && $result->sourceId) {
+                    if ((int) ($result->distance * 1000) < 20 && $result->sourceId) {
                         $identicals[$result->sourceName] = true;
                         $result->identical = true;
                     }
