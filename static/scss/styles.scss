@@ -192,6 +192,10 @@ header {
                 padding: 10px;
                 box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.5);
 
+                a {
+                  color: #000;
+                }
+
                 &.user-actions {
                     width: 150px;
                     li {
