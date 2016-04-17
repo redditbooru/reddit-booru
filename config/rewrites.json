@@ -1,109 +1,113 @@
 [
-    {
-        "rule": "^api/images/$",
-        "replace": "page=images"
-    },
-    {
-        "rule": "^upload.php?url=([^&]+)",
-        "replace": "/?dialog=upload&imageUri=$1",
-        "redirect": true
-    },
-    {
-        "rule": "^sources/$",
-        "replace": "page=queryoption&action=sources"
-    },
-    {
-        "rule": "^search/$",
-        "replace": "page=redditbooru"
-    },
-    {
-        "redirect": true,
-        "rule": "^u/([^/.]+)$",
-        "replace": "/user/$1/"
-    },
-    {
-        "redirect": true,
-        "rule": "^user/([^/.]+)$",
-        "replace": "/user/$1/"
-    },
-    {
-        "redirect": true,
-		"rule": "^u/([^/.]+)/$",
-		"replace": "/user/$1/"
-    },
-    {
-		"rule": "^user/([^/.]+)/$",
-        "replace": "action=user&user=$1"
-    },
-    {
-        "rule": "^login/$",
-        "replace": "page=uas&action=login"
-    },
-    {
-        "rule": "^logout/$",
-        "replace": "page=uas&action=logout"
-    },
-    {
-        "rule": "^uas/$",
-        "replace": "page=uas"
-    },
-    {
-        "rule": "^authenticate/$",
-        "replace": "page=uas&action=authenticate"
-    },
-    {
-        "rule": "^gallery/mine$",
-        "redirect": true,
-        "replace": "/gallery/mine/"
-    },
-    {
-        "rule": "^gallery/mine/$",
-        "replace": "page=gallery&action=user"
-    },
-    {
-		"rule": "^r/([^/.]+)/comments/([^/.]+)/(.+)?$",
-        "replace": "page=gallery&post=$2&from=reddit"
-    },
-    {
-		"redirect": true,
-        "rule": "^gallery/([\\d]+)$",
-        "replace": "/gallery/$1/"
-    },
-    {
-		"rule": "^gallery/([\\d]+)/$",
-        "replace": "page=gallery&post=$1"
-    },
-    {
-        "redirect": true,
-        "rule": "^gallery/([\\w]+)/([\\w-]+)$",
-        "replace": "/gallery/$1/$2/"
-    },
-    {
-        "rule": "^gallery/([\\w]+)/([\\w-]+)/$",
-        "replace": "page=gallery&post=$1&new=true"
-    },
-    {
-        "rule": "^images/$",
-        "replace": "page=images"
-    },
-    {
-        "rule": "^cache/([^/.]+)",
-        "replace": "page=thumb&file=$1"
-    },
-    {
-        "rule": "^stats/",
-        "replace": "page=stats"
-    },
-    {
-        "rule": "^single/([\\w]+)$",
-        "replace": "action=single&file=$1"
-    },
-    {
-        "rule": "^upload/$",
-        "replace": "page=uploadmanager"
-    },
-    {
-        "rule": "^find-source/$",
-        "replace": "page=saucenao"
-    }
+  {
+    "rule": "^api/images/$",
+    "replace": "page=images"
+  },
+  {
+    "rule": "^upload.php?url=([^&]+)",
+    "replace": "/?dialog=upload&imageUri=$1",
+    "redirect": true
+  },
+  {
+    "rule": "^sources/$",
+    "replace": "page=queryoption&action=sources"
+  },
+  {
+    "rule": "^search/$",
+    "replace": "page=redditbooru"
+  },
+  {
+    "redirect": true,
+    "rule": "^u/([^/.]+)$",
+    "replace": "/user/$1/"
+  },
+  {
+    "redirect": true,
+    "rule": "^user/([^/.]+)$",
+    "replace": "/user/$1/"
+  },
+  {
+    "redirect": true,
+    "rule": "^u/([^/.]+)/$",
+    "replace": "/user/$1/"
+  },
+  {
+    "rule": "^user/([^/.]+)/$",
+    "replace": "action=user&user=$1"
+  },
+  {
+    "rule": "^login/$",
+    "replace": "page=uas&action=login"
+  },
+  {
+    "rule": "^logout/$",
+    "replace": "page=uas&action=logout"
+  },
+  {
+    "rule": "^uas/$",
+    "replace": "page=uas"
+  },
+  {
+    "rule": "^authenticate/$",
+    "replace": "page=uas&action=authenticate"
+  },
+  {
+    "rule": "^gallery/mine$",
+    "redirect": true,
+    "replace": "/gallery/mine/"
+  },
+  {
+    "rule": "^gallery/mine/$",
+    "replace": "page=gallery&action=user"
+  },
+  {
+    "rule": "^r/([^/.]+)/comments/([^/.]+)/(.+)?$",
+    "replace": "page=gallery&post=$2&from=reddit"
+  },
+  {
+    "redirect": true,
+    "rule": "^gallery/([\\d]+)$",
+    "replace": "/gallery/$1/"
+  },
+  {
+    "rule": "^gallery/([\\d]+)/$",
+    "replace": "page=gallery&post=$1"
+  },
+  {
+    "redirect": true,
+    "rule": "^gallery/([\\w]+)/([\\w-]+)$",
+    "replace": "/gallery/$1/$2/"
+  },
+  {
+    "rule": "^gallery/([\\w]+)/([\\w-]+)/$",
+    "replace": "page=gallery&post=$1&new=true"
+  },
+  {
+    "rule": "^images/$",
+    "replace": "page=images"
+  },
+  {
+    "rule": "^cache/([^/.]+)",
+    "replace": "page=thumb&file=$1"
+  },
+  {
+    "rule": "^stats/",
+    "replace": "page=stats"
+  },
+  {
+    "rule": "^single/([\\w]+)$",
+    "replace": "action=single&file=$1"
+  },
+  {
+    "rule": "^upload/$",
+    "replace": "page=uploadmanager"
+  },
+  {
+    "rule": "^find-source/$",
+    "replace": "page=saucenao"
+  },
+  {
+    "rule": "^histogram/([^/.]+)$",
+    "replace": "page=histogram&image=$1"
+  }
 ]
