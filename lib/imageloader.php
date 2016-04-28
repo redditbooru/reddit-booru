@@ -115,14 +115,14 @@ namespace Lib {
          * Gets a list of image URLs from an imgur album
          */
         public static function getImgurAlbum($id) {
-            $data = Http::get('http://api.imgur.com/2/album/' . $id . '.json');
+            $data = Http::get('http://api.imgur.com/3/album/' . $id . '.json');
             $retVal = null;
             if (strlen($data) > 0) {
                 $data = json_decode($data);
-                if (isset($data->album) && isset($data->album->images)) {
+                if (isset($data->data) && isset($data->data->images)) {
                     $retVal = [];
-                    foreach ($data->album->images as $image) {
-                        $retVal[] = $image->links->original;
+                    foreach ($data->data->images as $image) {
+                        $retVal[] = $image->link;
                     }
                 }
             }
