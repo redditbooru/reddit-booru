@@ -155,7 +155,9 @@ namespace Controller {
             }
 
             if (self::$_showRedditControls) {
-                $retVal = Api\PostData::getVotesForPosts($retVal, Api\User::getCurrentUser());
+                if ($retVal) {
+                    $retVal = Api\PostData::getVotesForPosts($retVal, Api\User::getCurrentUser());
+                }
             }
 
             return $retVal;
@@ -197,7 +199,9 @@ namespace Controller {
                 $retVal->identical = count($identicals) > 0 ? array_keys($identicals) : false;
 
                 if (self::$_showRedditControls) {
-                    $retVal->results = Api\PostData::getVotesForPosts($retVal->results, Api\User::getCurrentUser());
+                    if ($retVal->results) {
+                        $retVal->results = Api\PostData::getVotesForPosts($retVal->results, Api\User::getCurrentUser());
+                    }
                 }
 
             }
