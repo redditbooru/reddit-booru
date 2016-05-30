@@ -14,11 +14,11 @@ namespace Lib {
             return self::$_lastError;
         }
 
-        public static function get($url) {
-            return self::curl_get_contents($url);
+        public static function get($url, $headers = null) {
+            return self::curl_get_contents($url, $headers);
         }
 
-        private function _get($url) {
+        private function _get($url, $headers = null) {
             $this->_url = $url;
             $c = curl_init($url);
             curl_setopt($c, CURLOPT_USERAGENT, HTTP_UA);
@@ -30,6 +30,10 @@ namespace Lib {
 
             curl_setopt($c, CURLOPT_PROGRESSFUNCTION, [ $this, '_progress' ]);
             curl_setopt($c, CURLOPT_NOPROGRESS, false);
+
+            if (is_array($headers)) {
+                curl_setopt($c, CURLOPT_HTTPHEADER, $headers);
+            }
 
             curl_setopt($c, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($c, CURLINFO_HEADER_OUT, true);
@@ -52,9 +56,9 @@ namespace Lib {
          * @param string $url Url to retrieve
          * @return string Data received
          */
-        private static function curl_get_contents($url) {
+        private static function curl_get_contents($url, $headers = null) {
             $request = new Http();
-            return $request->_get($url);
+            return $request->_get($url, $headers);
         }
 
         private static function _getCacheKey() {

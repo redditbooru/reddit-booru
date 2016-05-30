@@ -22,6 +22,8 @@ define('HTTP_UA', 'moe downloader by /u/dxprog');
 
 define('SAUCENAO_PORT', 'SAUCENAO_SERVICE_PORT');
 
+define('IMGUR_CLIENT_ID', 'REGISTERED_APP_ID');
+
 define('RB_BOT', 'ai-tan');
 
 define('REDIS_SERVER', 'tcp://127.0.0.1:6379');
