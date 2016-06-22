@@ -37,14 +37,16 @@ module.exports = class SauceNaoRequest {
     this.startTime = Date.now();
     console.log(`Request started for ${decodeURIComponent(this.url)}`);
     request(`${SAUCENAO_URL}${this.url}`, (err, res, body) => {
-      if (!err) {
+      if (!err && !this.done) {
         console.log(`Request finished successfully for ${decodeURIComponent(this.url)}`);
         this.res.write(body);
       } else {
         console.log(`Request failed for ${decodeURIComponent(this.url)}`);
       }
-      this.res.end();
-      this.done = true;
+      if (!this.done) {
+        this.res.end();
+        this.done = true;
+      }
       clearTimeout(this.timerHandle);
       this.fire('complete');
     });
