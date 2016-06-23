@@ -86,7 +86,7 @@ namespace Lib {
         /**
          * Performs a generic query against the database
          */
-        public static function query($conditions = null, $sort = null, $limit = null, $offset = null) {
+        public static function query(array $conditions = null, $sort = null, $limit = null, $offset = null) {
 
             $retVal = null;
 
@@ -96,83 +96,10 @@ namespace Lib {
                 $query = 'SELECT `' . implode('`, `', array_values($obj->_dbMap)) . '` FROM `' . $obj->_dbTable . '`';
 
                 // Add WHERE
-                $params = null;
-                if (is_array($conditions)) {
-
-                    $where = [];
-                    $params = [];
-
-                    foreach ($conditions as $col => $info) {
-
-                        // Verify that the property actually exists in the map. Ensures constraint and prevents SQLi
-                        if (isset($obj->_dbMap[$col])) {
-                            if (is_array($info)) {
-
-                                foreach ($info as $operator => $options) {
-
-                                    $comparison = '=';
-                                    $oper = 'AND';
-                                    $value = ':' . $operator . '_' . $col;
-
-                                    switch (strtolower($operator)) {
-                                        case 'in':
-                                            $value = [];
-                                            for ($i = 0, $count = count($options); $i < $count; $i++) {
-                                                $param = ':' . $col . $i;
-                                                $params[$param] = $options[$i];
-                                                $value[] = $param;
-                                            }
-                                            $value = '(' . implode(', ', $value) . ')';
-                                            $comparison = 'IN';
-                                            break;
-
-                                        case 'lt':
-                                            $params[$value] = $options;
-                                            $comparison = '<';
-                                            break;
-
-                                        case 'gt':
-                                            $params[$value] = $options;
-                                            $comparison = '>';
-                                            break;
-
-                                        case 'like':
-                                            $params[$value] = $options;
-                                            $comparison = 'LIKE';
-                                            break;
-
-                                        case 'ne':
-                                            $params[$value] = $options;
-                                            $comparison = '!=';
-                                            break;
-
-                                        case 'null':
-                                            $comparison = 'IS' . ($options ? '' : ' NOT');
-                                            $value = 'NULL';
-                                            break;
-
-                                    }
-
-                                    $where[] = $oper . ' `' . $obj->_dbMap[$col] . '` ' . $comparison . ' ' . $value;
-
-                                }
-
-                            // If an array wasn't passed, assume testing equality on the value with AND logic
-                            } else {
-                                $where[] = 'AND `' . $obj->_dbMap[$col] . '` = :' . $col;
-                                $params[':' . $col] = $info;
-                            }
-                        } else {
-                            throw new Exception('Property "' . $col . '" does not exist in DB map for table "' . $obj->_dbTable . '"');
-                        }
-
-                    }
-
-                    // Remove the logic operator from the first item
-                    $where[0] = substr($where[0], strpos($where[0], ' ') + 1);
-
-                    $query .= ' WHERE ' . implode(' ', $where);
-
+                $params = [];
+                $where = self::_buildWhere($obj, $conditions, $params);
+                if ($where) {
+                    $query .= ' WHERE ' . $where;
                 }
 
                 // Add ORDER BY
@@ -210,12 +137,36 @@ namespace Lib {
                     $query .= $limit;
                 }
 
+                $params = count($params) ? $params : null;
                 $retVal = Db::Query($query, $params);
 
             }
 
             return $retVal;
 
+        }
+
+        /**
+         * Given a list of conditions, returns the count of matching items in the database
+         */
+        public static function getCount($conditions = null) {
+            $obj = self::_instantiateThisObject();
+            $retVal = 0;
+            if (self::_verifyProperties($obj)) {
+                $query = 'SELECT COUNT(1) AS total FROM `' . $obj->_dbTable . '`';
+                $params = [];
+                $where = self::_buildWhere($obj, $conditions, $params);
+                if ($where) {
+                    $query .= ' WHERE ' . $where;
+                }
+                $params = count($params) ? $params : null;
+                $result = Db::Query($query, $params);
+                if ($result && $result->count) {
+                    $row = Db::Fetch($result);
+                    $retVal = (int) $row->total;
+                }
+            }
+            return $retVal;
         }
 
         /**
@@ -303,6 +254,86 @@ namespace Lib {
         private static function _verifyProperties($obj = null) {
             $obj = null === $obj ? self::_instantiateThisObject() : $obj;
             return property_exists($obj, '_dbTable') && property_exists($obj, '_dbMap') && property_exists($obj, '_dbPrimaryKey');
+        }
+
+        /**
+         * Given an array of conditions, builds a WHERE clause
+         */
+        private static function _buildWhere($obj, array $conditions = null, &$params) {
+            $where = [];
+            if (is_array($conditions)) {
+                foreach ($conditions as $col => $info) {
+
+                    // Verify that the property actually exists in the map. Ensures constraint and prevents SQLi
+                    if (isset($obj->_dbMap[$col])) {
+                        if (is_array($info)) {
+
+                            foreach ($info as $operator => $options) {
+
+                                $comparison = '=';
+                                $oper = 'AND';
+                                $value = ':' . $operator . '_' . $col;
+
+                                switch (strtolower($operator)) {
+                                    case 'in':
+                                        $value = [];
+                                        for ($i = 0, $count = count($options); $i < $count; $i++) {
+                                            $param = ':' . $col . $i;
+                                            $params[$param] = $options[$i];
+                                            $value[] = $param;
+                                        }
+                                        $value = '(' . implode(', ', $value) . ')';
+                                        $comparison = 'IN';
+                                        break;
+
+                                    case 'lt':
+                                        $params[$value] = $options;
+                                        $comparison = '<';
+                                        break;
+
+                                    case 'gt':
+                                        $params[$value] = $options;
+                                        $comparison = '>';
+                                        break;
+
+                                    case 'like':
+                                        $params[$value] = $options;
+                                        $comparison = 'LIKE';
+                                        break;
+
+                                    case 'ne':
+                                        $params[$value] = $options;
+                                        $comparison = '!=';
+                                        break;
+
+                                    case 'null':
+                                        $comparison = 'IS' . ($options ? '' : ' NOT');
+                                        $value = 'NULL';
+                                        break;
+
+                                }
+
+                                $where[] = $oper . ' `' . $obj->_dbMap[$col] . '` ' . $comparison . ' ' . $value;
+
+                            }
+
+                        // If an array wasn't passed, assume testing equality on the value with AND logic
+                        } else {
+                            $where[] = 'AND `' . $obj->_dbMap[$col] . '` = :' . $col;
+                            $params[':' . $col] = $info;
+                        }
+                    } else {
+                        throw new Exception('Property "' . $col . '" does not exist in DB map for table "' . $obj->_dbTable . '"');
+                    }
+
+                }
+
+                // Remove the logic operator from the first item
+                $where[0] = substr($where[0], strpos($where[0], ' ') + 1);
+
+            }
+
+            return implode(' ', $where);
         }
 
 	}
