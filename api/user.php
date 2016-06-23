@@ -167,7 +167,9 @@ namespace Api {
             $auth = new OAuth2\Strategy\AuthCode($client);
 
             try {
+                $client->connection->setDefaultOption('headers/User-Agent', HTTP_UA);
                 $token = $auth->getToken($code, [ 'redirect_uri' => REDDIT_OAUTH_HANDLER ]);
+
                 if ($token) {
                     $response = $token->get('https://oauth.reddit.com/api/v1/me.json');
                     if ($response) {
