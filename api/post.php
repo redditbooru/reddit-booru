@@ -126,7 +126,9 @@ namespace Api {
             $retVal = new Post();
             $retVal->externalId = $obj->id;
             $retVal->title = $obj->title;
-            $retVal->link = $obj->url;
+
+            // Reddit is entity encoding their URLs... don't know why, but they are...
+            $retVal->link = html_entity_decode($obj->url);
 
             if ($obj->author !== '[deleted]') {
                 $userId = User::getByName($obj->author);
