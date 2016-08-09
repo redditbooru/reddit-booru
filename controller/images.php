@@ -391,7 +391,6 @@ namespace Controller {
             $count = count($sources);
             if ($count === 1 && $sources[0] == -1) {
                 // Passing -1 will use all enabled sources
-                echo 'I am here'; exit;
                 $sources = QueryOption::getSources();
                 $sources = array_map(function($item) {
                     return $item->value;

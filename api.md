@@ -9,14 +9,14 @@
   Note: the trailing '/' is required
 
 * ***Method:***
-  
+
   GET
 
 * ***Success Response:***
-  
+
   * ***Code:*** 200 <br />
   *  ***Content:*** `[{ "name" : "r\/awwnime", "title":"awwnime","value":"1","checked":true }, ...`
- 
+
 * ***Error Response:***
 
   The only error that should be returned is a 404 if the url was malformed, in which case it will return the default webpage
@@ -35,18 +35,18 @@
 * ***URL:*** `images/`
 
 * ***Method:***
-  
+
   `GET, POST`
 
 *  ***URL Params***
 
    ***Optional:***
 
- 
+
  *  `imageUri` -- URL to an image; returns visually similar results. _Default: empty_
-   
- *  `sources` -- a comma delimited list of sources to search through. Empty searches all sources. _Default: empty_
-   
+
+ *  `sources` -- a comma delimited list of sources to search through. If not passed, will default to sources in cookie or source ID 1. Pass -1 to search all sources. _Default: empty_
+
  *  `limit` -- The max number of images to return. _Default: 30_
 
  *  `afterId` -- For paging; only fetches results after the image ID (currently buggy with albums). _Default: null_
@@ -71,7 +71,7 @@
 
   * ***Code:*** 200 <br />
     ***Content:*** _Varies with query._ Will most likely be an array of image objects
- 
+
 * ***Error Response:***
 
   * ***Code:*** 500 INTERNAL SERVER Error <br />
@@ -86,4 +86,4 @@
 
   `curl http://redditbooru.com/api/images/?sources=1&limit=5&user=chiefnoah&q=alice`
 
-  
+
