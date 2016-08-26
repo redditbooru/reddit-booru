@@ -954,3 +954,34 @@ button.singleSourceSearch {
         display: block;
     }
 }
+
+.paging {
+    display: flex;
+    justify-content: center;
+    list-style: none;
+    li {
+        @include border-box();
+        text-align: center;
+        font: 14px/1 'MG Thin', sans-serif;
+        margin: 5px;
+        min-width: 26px;
+        &.current {
+            color: #fff;
+            background: $PINK;
+            padding: 6px;
+        }
+    }
+    a {
+        @include border-box();
+        display: block;
+        color: $PINK;
+        text-decoration: none;
+        border: 1px solid $PINK;
+        padding: 5px;
+        min-width: 26px;
+    }
+
+    // Stupid, but the only spot with paging right now is the gallery page
+    // which looks kinda funky with no footer, so add some spaace
+    margin-bottom: 100px;
+}

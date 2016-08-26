@@ -10,6 +10,11 @@ namespace Api {
     class Post extends Lib\Dal {
 
         /**
+         * Number of user galleries to display per page
+         */
+        const GALLERIES_PER_PAGE = 15;
+
+        /**
          * Object property to table map
          */
         protected $_dbMap = array(
@@ -189,6 +194,79 @@ namespace Api {
         }
 
         /**
+         * Returns all posts that link to the post in question
+         */
+        public function getLinkedPosts() {
+            $id = $this->id;
+            return Lib\Cache::fetch(function() use ($id) {
+
+                $retVal = null;
+
+                $result = Lib\Db::Query('CALL proc_GetLinkedPosts(:id)', [ ':id' => $id ]);
+                if ($result && $result->count) {
+                    $retVal = [];
+                    while ($row = Lib\Db::Fetch($result)) {
+                        $retVal[] = new PostData($row);
+                    }
+                }
+
+                return $retVal;
+
+            }, 'Api::Post::getLinkedPosts_' . $id);
+        }
+
+        /**
+         * Returns a list of galleries (and their images) created by a user
+         */
+        public static function getUserGalleries($userId, $page = 1) {
+
+            $page = is_numeric($page) ? $page : 1;
+            $cacheKey = 'Api:PostData:getUserGalleries_' . $userId . '_' . $page;
+            $retVal = Lib\Cache::get($cacheKey);
+
+            if (false === $retVal) {
+                $numGalleries = Post::getCount([ 'userId' => $userId, 'link' => [ 'LIKE' => '%redditbooru.com%' ] ]);
+                $numPages = ceil($numGalleries / self::GALLERIES_PER_PAGE);
+                $page = $page > $numGalleries ? $numGalleries : $page;
+
+                // Get the correct set of posts plus an image for each
+                $query = 'SELECT p.*, i.* FROM `posts` p INNER JOIN `post_images` pi ON pi.`post_id` = p.`post_id` ';
+                $query .= 'INNER JOIN `images` i ON i.`image_id` = pi.`image_id` WHERE p.`user_id` = :userId AND ';
+                $query .= 'p.`post_link` LIKE "%.redditbooru.com%" GROUP BY p.`post_id` ORDER BY p.`post_date` DESC ';
+                $query .= 'LIMIT ' . (($page - 1) * self::GALLERIES_PER_PAGE) . ', ' . self::GALLERIES_PER_PAGE;
+
+                $posts = [];
+                $result = Lib\Db::Query($query, [ ':userId' => $userId ]);
+                if ($result && $result->count) {
+                    while ($row = Lib\Db::Fetch($result)) {
+                        $post = new Post($row);
+                        if ($post->isSelfLinked()) {
+                            $post->linkedPosts = $post->getLinkedPosts();
+                            $post->galleryLink = $post->getGalleryUrl();
+                            $image = new Image($row);
+                            $post->posterImage = $image->getFilename(true);
+                            $posts[] = $post;
+                        }
+                    }
+                }
+
+                $retVal = (object)[
+                    'results' => $posts,
+                    'paging' => (object)[
+                        'current' => $page,
+                        'total' => $numPages
+                    ]
+                ];
+
+                Lib\Cache::Set($cacheKey, $retVal);
+
+            }
+
+            return $retVal;
+
+        }
+
+        /**
          * Extracts the post ID from a redditbooru link
          */
         public static function getPostIdFromUrl($url) {
@@ -211,6 +289,13 @@ namespace Api {
         public function isSelfLinked() {
             $id = self::getPostIdFromUrl($this->link);
             return $this->id == $id;
+        }
+
+        /**
+         * Gets the gallery URL for this post
+         */
+        public function getGalleryUrl() {
+            return self::createGalleryUrl($this->id, $this->title);
         }
 
         /**

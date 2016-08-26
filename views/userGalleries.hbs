@@ -14,8 +14,23 @@
             {{/each}}
             <a href="{{link}}" class="view-gallery" target="_blank">View Gallery</a>
         </li>
-        <script>
-            window.galleries['{{id}}'] = {{{jsonBlob .}}};
-        </script>
     {{/galleries}}
 </ul>
+
+{{#with paging}}
+    <ul class="paging">
+        {{#if hasPrev}}
+            <li><a href="/gallery/mine/?p={{prev}}">&laquo; Previous</a></li>
+        {{/if}}
+        {{#each pages}}
+            {{#if current}}
+                <li class="current">{{page}}</li>
+            {{else}}
+                <li><a href="/gallery/mine/?p={{page}}">{{page}}</a></li>
+            {{/if}}
+        {{/each}}
+        {{#if hasNext}}
+            <li><a href="/gallery/mine/?p={{next}}">Next &raquo;</a></li>
+        {{/if}}
+    </ul>
+{{/with}}

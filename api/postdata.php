@@ -465,64 +465,6 @@ namespace Api {
 
         }
 
-        /**
-         * Returns a list of galleries (and their images) created by a user
-         */
-        public static function getUserGalleries($userId) {
-
-            $cacheKey = 'Api:PostData:getUserGalleries_' . $userId;
-            $retVal = Lib\Cache::get($cacheKey);
-
-            if (false === $retVal) {
-                $query = 'SELECT pd.*, p.post_link FROM `post_data` pd ';
-                $query .= 'INNER JOIN `posts` p ON p.`post_id` = pd.`post_id` WHERE pd.`post_id` IN (';
-                $query .= 'SELECT pd.`post_id` FROM `post_data` pd ';
-                $query .= 'INNER JOIN `posts` p ON p.`post_id` = pd.`post_id`  WHERE pd.`user_id` = :userId ';
-                $query .= 'AND p.`post_link` LIKE "%redditbooru.com%" GROUP BY pd.`post_id` HAVING COUNT(1) > 1) ';
-                $query .= 'ORDER BY `post_date` DESC';
-
-                $result = Lib\Db::Query($query, [ ':userId' => $userId ]);
-                $retVal = [];
-                if ($result && $result->count) {
-                    while ($row = Lib\Db::Fetch($result)) {
-                        $post = new Post($row);
-                        if ($post->isSelfLinked()) {
-                            $image = new PostData($row);
-                            $image->linkedPosts = self::getLinkedPosts($image->postId);
-                            $retVal[] = $image;
-                        }
-                    }
-                }
-
-                Lib\Cache::Set($cacheKey, $retVal);
-
-            }
-
-            return $retVal;
-
-        }
-
-        /**
-         * Returns all posts that link to the post in question
-         */
-        public static function getLinkedPosts($id) {
-            return Lib\Cache::fetch(function() use ($id) {
-
-                $retVal = null;
-
-                $result = Lib\Db::Query('CALL proc_GetLinkedPosts(:id)', [ ':id' => $id ]);
-                if ($result && $result->count) {
-                    $retVal = [];
-                    while ($row = Lib\Db::Fetch($result)) {
-                        $retVal[] = new PostData($row);
-                    }
-                }
-
-                return $retVal;
-
-            }, 'Api::Post::getLinkedPosts_' . $id);
-        }
-
         public static function invalidateCacheForGallery(Post $post) {
             Lib\Cache::Set('Api:PostData:getGallery_' . $post->id, false);
             Lib\Cache::Set('Api:PostData:getUserGalleries_' . $post->userId, false);

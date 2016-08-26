@@ -82,30 +82,27 @@ namespace Controller {
                 exit;
             }
 
-            $images = Api\PostData::getUserGalleries($user->id);
-            $galleries = [];
-            foreach ($images as $image) {
-                if (!isset($galleries[$image->postId])) {
-                    $post = new stdClass;
-                    $post->id = $image->postId;
-                    $post->externalId = $image->externalId;
-                    $post->title = $image->title;
-                    $post->dateCreated = $image->dateCreated;
-                    $post->age = $image->age;
-                    $post->sourceName = $image->sourceName;
-                    $post->link = Api\Post::createGalleryUrl($post->id, $post->title);
-                    $post->images = [];
-                    $post->linkedPosts = $image->linkedPosts;
-                    $galleries[$image->postId] = $post;
-                }
-
-                unset($image->linkedPosts);
-                $galleries[$image->postId]->images[] = $image;
-
-            }
-
-            self::$renderKeys['galleries'] = $galleries;
+            $page = Lib\Url::GetInt('p', 1);
+            $galleries = Api\Post::getUserGalleries($user->id, $page);
+            self::$renderKeys['galleries'] = $galleries->results;
             $userProfile = Api\PostData::getUserProfile($user->name);
+
+            // Build up the paging links
+            $currentPage = $galleries->paging->current;
+            $pages = [];
+            for ($i = 0; $i < $galleries->paging->total; $i++) {
+                $pages[] = [
+                    'page' => $i + 1,
+                    'current' => ($i + 1) === $currentPage
+                ];
+            }
+            self::$renderKeys['paging'] = [
+                'hasPrev' => $currentPage > 1,
+                'hasNext' => $currentPage < $galleries->paging->total,
+                'next' => $currentPage + 1,
+                'prev' => $currentPage - 1,
+                'pages' => $pages
+            ];
 
             Lib\Display::addKey('title', 'My Galleries');
             Lib\Display::renderAndAddKey('supporting', 'userProfile', $userProfile);

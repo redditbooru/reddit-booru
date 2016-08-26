@@ -20,7 +20,20 @@ export default Backbone.View.extend({
     handleEditClick: function(evt) {
         var $parent = $(evt.currentTarget).closest('li'),
             galleryId = $parent.data('id');
-        this.uploadForm.loadGallery(window.galleries[galleryId]);
+        $.getJSON(`/api/images/?postId=${galleryId}`).then(data => {
+            if (data.length) {
+                const first = data[0];
+                const editData = {
+                    age: first.age,
+                    dateCreate: first.dateCreated,
+                    id: first.postId,
+                    externalId: first.externalId,
+                    title: first.title,
+                    images: data
+                };
+                this.uploadForm.loadGallery(editData);
+            }
+        });
     }
 
 });
