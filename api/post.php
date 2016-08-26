@@ -222,18 +222,18 @@ namespace Api {
         public static function getUserGalleries($userId, $page = 1) {
 
             $page = is_numeric($page) ? $page : 1;
-            $cacheKey = 'Api:PostData:getUserGalleries_' . $userId . '_' . $page;
+            $cacheKey = 'Api:Post:getUserGalleries_' . $userId . '_' . $page;
             $retVal = Lib\Cache::get($cacheKey);
 
             if (false === $retVal) {
-                $numGalleries = Post::getCount([ 'userId' => $userId, 'link' => [ 'LIKE' => '%redditbooru.com%' ] ]);
+                $numGalleries = self::getUserGalleriesCount($userId);
                 $numPages = ceil($numGalleries / self::GALLERIES_PER_PAGE);
                 $page = $page > $numGalleries ? $numGalleries : $page;
 
                 // Get the correct set of posts plus an image for each
                 $query = 'SELECT p.*, i.* FROM `posts` p INNER JOIN `post_images` pi ON pi.`post_id` = p.`post_id` ';
                 $query .= 'INNER JOIN `images` i ON i.`image_id` = pi.`image_id` WHERE p.`user_id` = :userId AND ';
-                $query .= 'p.`post_link` LIKE "%.redditbooru.com%" GROUP BY p.`post_id` ORDER BY p.`post_date` DESC ';
+                $query .= 'p.`post_link` LIKE "%redditbooru.com%" GROUP BY p.`post_id` ORDER BY p.`post_date` DESC ';
                 $query .= 'LIMIT ' . (($page - 1) * self::GALLERIES_PER_PAGE) . ', ' . self::GALLERIES_PER_PAGE;
 
                 $posts = [];
@@ -266,6 +266,22 @@ namespace Api {
 
             return $retVal;
 
+        }
+
+        /**
+         * Returns the total number of galleries a user has created
+         */
+        public static function getUserGalleriesCount($userId) {
+            return Lib\Cache::fetch(function() use ($userId) {
+                $galleries = Post::queryReturnAll([ 'userId' => $userId, 'link' => [ 'LIKE' => '%redditbooru.com%' ] ]);
+                $retVal = 0;
+                foreach ($galleries as $gallery) {
+                    if ($gallery->isSelfLinked()) {
+                        $retVal++;
+                    }
+                }
+                return $retVal;
+            }, 'Api:Post:getUserGalleriesCount_' . $userId, CACHE_LONG);
         }
 
         /**
