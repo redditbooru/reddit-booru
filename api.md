@@ -1,6 +1,6 @@
 # RedditBooru API Endpoints
 
-**Sources**
+## Sources
 ----
   Returns a list of all enabled subreddit sources.
 
@@ -28,7 +28,7 @@
 
 
 
-**Images**
+## Images
 ----
   Returns images. If this is POSTed to with an image file, it will honor all of these settings while doing a reverse image search on the file supplied.
 
@@ -45,7 +45,7 @@
 
  *  `imageUri` -- URL to an image; returns visually similar results. _Default: empty_
 
- *  `sources` -- a comma delimited list of sources to search through. If not passed, will default to sources in cookie or source ID 1. Pass -1 to search all sources. _Default: empty_
+ *  `sources` -- a comma delimited list of sources to search through. If not passed, will default to source via subdomain, cookie, or source ID 1. Pass -1 to search all sources. _Default: empty_
 
  *  `limit` -- The max number of images to return. _Default: 30_
 
@@ -86,4 +86,9 @@
 
   `curl http://redditbooru.com/api/images/?sources=1&limit=5&user=chiefnoah&q=alice`
 
-
+### A Note About Sources
+Sources can be specified in a few ways with each having its own order of precedence, listed here from highest to lowest:
+- API call via source subdomain (eg: http://awwnime.redditbooru.com/images/)
+- Query string (comma delimited list or -1 for all)
+- Cookies
+- Default: source ID 1

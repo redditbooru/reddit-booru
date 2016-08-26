@@ -12,7 +12,7 @@ namespace Controller {
      * GPLv3
      */
 
-    class Images implements Page {
+    class Images extends BasePage {
 
         private static $_showRedditControls = false;
 
@@ -382,7 +382,16 @@ namespace Controller {
         }
 
         private static function _processSources($sources) {
-            // If there were no sources, get the user's default ones
+            // First, check for a source subdomain
+            $domain = static::getPageSubdomain();
+            if ($domain && $domain !== 'www' && $domain !== 'beta') {
+                $domainSource = Api\Source::getBySubdomain([ 'domain' => $domain ]);
+                if ($domainSource) {
+                    $sources = $domainSource->id;
+                }
+            }
+
+            // Failing that, check for sources specified on the query string
             if (is_string($sources)) {
                 $sources = strpos($sources, ',') !== false ? explode(',', $sources) : $sources;
             }
@@ -395,7 +404,7 @@ namespace Controller {
                 $sources = array_map(function($item) {
                     return $item->value;
                 }, $sources);
-            } else if (!count($sources)) {
+            } else if (!$count) {
                 $enabledSources = QueryOption::getSources();
                 foreach ($enabledSources as $source) {
                     if ($source->checked) {

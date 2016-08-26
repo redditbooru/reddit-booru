@@ -30,8 +30,8 @@ namespace Controller {
             Lib\Display::addClientData('upload_name', ini_get('session.upload_progress.name'));
 
             // Check to see if we got a specific subdomain
-            if (preg_match('/([\w]+)\.(redditbooru|awwni)\.[\w]{2,3}/is', $_SERVER['HTTP_HOST'], $matches)) {
-                $domain = $matches[1];
+            $domain = static::getPageSubdomain();
+            if ($domain) {
                 if ($domain === 'moesaic') {
                     self::_renderMoesaic();
                 } else if ($domain === 'myfirst') {
