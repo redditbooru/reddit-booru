@@ -89,36 +89,6 @@ namespace Lib {
 			return $retVal;
 		}
 
-		/**
-		 * Data fetcher/setter for long cache (redis)
-		 */
-		public static function fetchLongCache($method, $cacheKey, $force = false) {
-			self::_redisConnect();
-			$cacheKey = CACHE_PREFIX . ':' . $cacheKey;
-			$force = DISABLE_CACHE ?: $force;
-
-			$retVal = self::$_redis->get($cacheKey);
-			if (null === $retVal || $force || self::$_disabled) {
-				$retVal = $method();
-				self::setLongCache($cacheKey, $retVal);
-			} else {
-				$retVal = unserialize($retVal);
-			}
-			return $retVal;
-		}
-
-		public static function setLongCache($cacheKey, $data) {
-			self::_redisConnect();
-			$cacheKey = CACHE_PREFIX . ':' . $cacheKey;
-			self::$_redis->set($cacheKey, serialize($data));
-		}
-
-		private static function _redisConnect() {
-			if (!self::$_redis) {
-				self::$_redis = new Predis\Client(REDIS_SERVER);
-			}
-		}
-
 	}
 
 }
