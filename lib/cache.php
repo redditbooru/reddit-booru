@@ -29,7 +29,11 @@ namespace Lib {
 			if (!self::$_memcache->pconnect($host, $port)) {
 				self::$_memcache = null;
 			}
-			self::setDisabled(isset($_GET['flushCache']));
+
+			// Since this is self-running, we don't yet have the benefit of the URL
+			// parser having run. Pluck this out of the query string.
+			$requestUri = explode('?', $_SERVER['REQUEST_URI']);
+			self::setDisabled(strpos(end($requestUri), 'flushCache') !== false);
 		}
 
 		public static function Set($key, $val, $expiration = 600) {
@@ -73,7 +77,7 @@ namespace Lib {
 		 */
 		public static function fetch($method, $cacheKey, $duration = CACHE_MEDIUM) {
 			$retVal = self::Get($cacheKey);
-			if (!$retVal && is_callable($method)) {
+			if ($retVal === false && is_callable($method)) {
 				$retVal = $method();
 				self::Set($cacheKey, $retVal, $duration);
 			}
