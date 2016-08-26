@@ -2,6 +2,7 @@
 
 namespace Api {
 
+    use Controller;
     use Lib;
     use stdClass;
 
@@ -244,7 +245,8 @@ namespace Api {
                             $post->linkedPosts = $post->getLinkedPosts();
                             $post->galleryLink = $post->getGalleryUrl();
                             $image = new Image($row);
-                            $post->posterImage = $image->getFilename(true);
+                            // I really need to sort this stuff out. Thumbs should probably be an "api"
+                            $post->posterImage = Controller\Thumb::createThumbFilename($image->getFilename(true));
                             $posts[] = $post;
                         }
                     }
