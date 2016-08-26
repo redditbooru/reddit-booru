@@ -9,6 +9,7 @@
                 {{title}}
                 <button class="edit-album">Edit Album</button>
             </h3>
+            <time>Created on {{formatStandardDate dateCreated}}</time>
             {{#each linkedPosts}}
                 <p>Posted to {{sourceName}} as <a href="http://redd.it/{{externalId}}">"{{title}}"</a> {{relativeTime dateCreated}} ago</p>
             {{/each}}

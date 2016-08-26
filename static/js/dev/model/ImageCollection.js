@@ -46,7 +46,7 @@ export default Backbone.Collection.extend({
         }
 
         if (typeof window.filters === 'object') {
-            this.queryOptions = window.filters;
+            this.queryOptions = window.filters || {};
             this.queryUrl = this._buildQueryUrl();
         }
 

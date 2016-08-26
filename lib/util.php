@@ -40,6 +40,10 @@ namespace Lib {
 
         }
 
+        public static function formatStandardDate($timestamp) {
+            return date('F j, Y', $timestamp);
+        }
+
     }
 
 }

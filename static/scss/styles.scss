@@ -603,6 +603,15 @@ button.singleSourceSearch {
 
     list-style: none;
 
+    time {
+        color: $DARK_GREY;
+        font: 16px/1.2 'MG Thin', sans-serif;
+        &:after {
+            content: '|';
+            padding: 0 5px;
+        }
+    }
+
     li {
         overflow: hidden;
         margin-bottom: 20px;

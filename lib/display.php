@@ -84,6 +84,10 @@ namespace Lib {
                 return Util::relativeTime($context->get($args));
             });
 
+            self::addHelper('formatStandardDate', function($template, $context, $args, $source) {
+                return Util::formatStandardDate($context->get($args));
+            });
+
             // Idea lifted right out of dust.js
             self::addHelper('sep', function($template, $context, $args, $source) {
                 if (!$context->get('@last')) {
