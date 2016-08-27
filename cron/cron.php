@@ -167,7 +167,7 @@ function addPost(Api\Post $post) {
 
                 // Save off denormalized versions of the data
                 _log($logHead . 'Denormalizing data...');
-                if (Api\PostData::denormalizeForPost($post->id)) {
+                if (Api\PostData::updateDenormalizedPostData($post->id)) {
                     _log($logHead . 'DONE');
                 } else {
                     _log($logHead . 'Error saving denormalized data');

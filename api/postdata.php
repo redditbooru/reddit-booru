@@ -175,31 +175,6 @@ namespace Api {
         }
 
         /**
-         * Given an post ID, creates a denormalized record in the database
-         * @return boolean Success of insert operation
-         */
-        public static function denormalizeForPost($id) {
-
-            $retVal = null;
-
-            if (is_numeric($id)) {
-
-                $query =  'INSERT INTO post_data (';
-                $query .= 'post_id, image_id, image_width, image_height, image_caption, image_source, image_type, source_id, source_name, post_title';
-                $query .= ', post_keywords, post_nsfw, post_date, post_external_id, post_score, post_visible, user_id, user_name) ';
-                $query .= 'SELECT p.post_id, i.image_id, i.image_width, i.image_height, i.image_caption, i.image_source, i.image_type, p.source_id, s.source_name';
-                $query .= ', p.post_title, p.post_keywords, p.post_nsfw, p.post_date, p.post_external_id, p.post_score, p.post_visible, p.user_id, u.user_name ';
-                $query .= 'FROM post_images x INNER JOIN images i ON i.image_id = x.image_id INNER JOIN posts p ON p.post_id = x.post_id ';
-                $query .= 'LEFT JOIN sources s ON s.source_id = p.source_id LEFT JOIN users u ON u.user_id = p.user_id WHERE x.post_id = :id';
-                $retVal = null !== Lib\Db::Query($query, [ ':id' => $id ]);
-
-            }
-
-            return $retVal;
-
-        }
-
-        /**
          * Updates denormalized data for a post based upon source of truth tables
          */
         public static function updateDenormalizedPostData($id) {

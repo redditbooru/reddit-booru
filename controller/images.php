@@ -281,7 +281,7 @@ namespace Controller {
                     $post->link = 'http://' . $_SERVER['HTTP_HOST'] . $path;
 
                     // Perform image assignment and data denormalization
-                    if (Api\PostImages::assignImagesToPost($retVal->images, $post) && Api\PostData::denormalizeForPost($post->id)) {
+                    if (Api\PostImages::assignImagesToPost($retVal->images, $post) && Api\PostData::updateDenormalizedPostData($post->id)) {
                         // Update the link. This is technically non-critical, so we won't error if something goes wrong here
                         $post->sync();
                         $retVal->route = $path;
@@ -343,7 +343,7 @@ namespace Controller {
                 }
 
                 Api\PostImages::rebuildPostAssociations($images, $post);
-                Api\PostData::denormalizeForPost($post->id);
+                Api\PostData::updateDenormalizedPostData($post->id);
                 Api\PostData::invalidateCacheForGallery($post);
 
             }
