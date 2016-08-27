@@ -88,9 +88,7 @@ RedditBooru can be setup to run multiple frontends with a single backend (though
 
 You can happily run the entirety of RedditBooru from the same directory. If you want split up backend and front-end, here's what you need to know:
 
-##### Backend
-
-In a split configuration, none of this is accessible to the outside world.
+##### Backend (not accessible by web server)
 
 - `api/`
 - `cache/` - Writable directory for temporary image cache. This can be symlinked to the thumbnail cache on the front end.
@@ -104,7 +102,7 @@ In a split configuration, none of this is accessible to the outside world.
 - `views/`
 - `config.php`
 
-##### Frontend
+##### Frontend (point your web server here)
 - `static/`
 - `app-config.php`
 - `index.php`
