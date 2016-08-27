@@ -32,8 +32,13 @@ namespace Lib {
 
 			// Since this is self-running, we don't yet have the benefit of the URL
 			// parser having run. Pluck this out of the query string.
-			$requestUri = explode('?', $_SERVER['REQUEST_URI']);
-			self::setDisabled(strpos(end($requestUri), 'flushCache') !== false);
+			if (isset($_SERVER['REQUEST_URI'])) {
+				$requestUri = explode('?', $_SERVER['REQUEST_URI']);
+				self::setDisabled(strpos(end($requestUri), 'flushCache') !== false);
+			} else {
+				// In a CLI environment, don't bother with cache
+				self::setDisabled(true);
+			}
 		}
 
 		public static function Set($key, $val, $expiration = 600) {
