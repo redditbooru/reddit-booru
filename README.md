@@ -35,10 +35,17 @@ If you want to get RedditBooru up and running for yourself, follow these steps.
 You will need the following to run RedditBooru:
 
 - A webserver that can do URL rewriting. I personally use [nginx](https://www.nginx.com/resources/wiki/start/topics/tutorials/install/), but anything should be fine
-- [PHP 5.4+](http://us3.php.net/downloads.php) or [HHVM](http://hhvm.com/). PHP7 may not work yet due to reliance on the old Memcache module
+- [PHP 5.4+](http://us3.php.net/downloads.php) or [HHVM](http://hhvm.com/). PHP7 may not work yet due to reliance on the old Memcache module. You'll also need the following modules:
+  - Memcache
+  - Imagick
+  - GD2
+  - MySQL
+  - curl
+  - json
+  - cli (for running cron jobs)
 - [composer](https://getcomposer.org/) for installing PHP packages
 - MySQL/[MariaDB 5.0+](https://mariadb.org/download/)
-- [memcache](https://memcached.org/downloads) and the [Memcache](http://us3.php.net/manual/en/book.memcache.php) module for PHP
+- [memcache](https://memcached.org/downloads)
 - [nodejs](https://nodejs.org/en/) for services and front-end build pipeline
 
 ### Initial Setup
@@ -102,6 +109,16 @@ In a split configuration, none of this is accessible to the outside world.
 - `app-config.php`
 - `index.php`
 - `upload.php` - Deprecated. To be removed soon
+
+#### URL Rewrites
+
+RedditBooru expects the entire URL path to be passed in as the query string parameter `_q` and handles additional query string paremeters/routing itself. Example of nginx setup:
+
+```
+location / {
+  try_files $uri $uri/ /index.php?_q=$uri;
+}
+```
 
 ### Adding a Source
 
