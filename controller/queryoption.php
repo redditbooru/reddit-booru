@@ -49,10 +49,12 @@ namespace Controller {
             $cookieSources = isset($_COOKIE[QS_SOURCES]) ? explode(',', $_COOKIE[QS_SOURCES]) : [ 1 ];
 
             // Create QueryOption objects for the outgoing items and check anything that's in the user cookie
-            foreach($sources as $source) {
-                $obj = new QueryOption($source);
-                $obj->checked = array_search($source->id, $cookieSources) !== false;
-                $retVal[] = $obj;
+            if ($sources) {
+                foreach($sources as $source) {
+                    $obj = new QueryOption($source);
+                    $obj->checked = array_search($source->id, $cookieSources) !== false;
+                    $retVal[] = $obj;
+                }
             }
 
             return $retVal;

@@ -30,6 +30,13 @@ namespace Controller {
             $sources = QueryOption::getSources();
             $enabledSources = [];
 
+            // If there are no sources, kill everything now and show a friendly "no sources" page
+            if (!$sources || !count($sources)) {
+                Lib\Display::setLayout('no_sources');
+                Lib\Display::render();
+                exit;
+            }
+
             // nsfw display flag
             Lib\Display::addKey('showNsfw', Lib\Url::GetBool('showNsfw', $_COOKIE));
 
