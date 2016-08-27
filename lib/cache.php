@@ -44,6 +44,8 @@ namespace Lib {
 		public static function Set($key, $val, $expiration = 600) {
 			$retVal = false;
 			if (null != self::$_memcache && is_string($key)) {
+				// Hash the key to obfuscate and to avoid the cache-key size limit
+				$key = md5($key);
 				$retVal = self::$_memcache->set(CACHE_PREFIX . ':' . $key, $val, null, time() + $expiration);
 			}
 			return $retVal;
@@ -53,6 +55,7 @@ namespace Lib {
 			$retVal = false;
 			$fetchFromCache = null != self::$_memcache && is_string($key) && ($forceCacheGet || !self::$_disabled);
 			if ($fetchFromCache) {
+				$key = md5($key);
 				$retVal = self::$_memcache->get(CACHE_PREFIX . ':' . $key);
 			}
 			return $retVal;
