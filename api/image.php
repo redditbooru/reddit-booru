@@ -3,6 +3,7 @@
 namespace Api {
 
     use Aws\S3\S3Client;
+    use ImgHasher;
     use Lib;
     use stdClass;
 
@@ -52,6 +53,9 @@ namespace Api {
             'histB2' => 'image_hist_b2',
             'histB3' => 'image_hist_b3',
             'histB4' => 'image_hist_b4',
+            'dHashR' => 'image_dhashr',
+            'dHashG' => 'image_dhashg',
+            'dHashB' => 'image_dhashb',
             'type' => 'image_type'
         );
 
@@ -156,6 +160,13 @@ namespace Api {
         public $histB4;
 
         /**
+         * dHash of the image (for the future)
+         */
+        public $dHashR;
+        public $dHashG;
+        public $dHashB;
+
+        /**
          * Image type
          */
         public $type;
@@ -206,6 +217,12 @@ namespace Api {
                 $retVal = new Image();
                 $retVal->width = imagesx($image);
                 $retVal->height = imagesy($image);
+
+                // Do the dHash as well
+                $hash = ImgHasher\CalcHash::dHashRGB($image);
+                $retVal->dHashR = $hash['r'];
+                $retVal->dHashG = $hash['g'];
+                $retVal->dHashB = $hash['b'];
 
                 $resampled = imagecreatetruecolor(IMG_RESAMPLE_WIDTH, IMG_RESAMPLE_HEIGHT);
                 imagecopyresampled($resampled, $image, 0, 0, 0, 0, IMG_RESAMPLE_WIDTH, IMG_RESAMPLE_HEIGHT, $retVal->width, $retVal->height);
