@@ -4,7 +4,6 @@ namespace Api {
 
     use Lib;
     use stdClass;
-    use OAuth2;
 
     // For posts made within the last 24 hours, cache for 3 hours
     define('VOTE_SHORT_CACHE', 3600 * 3);
@@ -149,12 +148,10 @@ namespace Api {
          */
         public static function getLoginUrl($redirect = '') {
             $client = self::_createOAuth2();
-            $auth = new OAuth2\Strategy\AuthCode($client);
-            return $auth->authorizeUrl([
-                'scope' => 'identity,vote,read',
-                'state' => md5(rand()),
-                'duration' => 'permanent',
-                'redirect_uri' => REDDIT_OAUTH_HANDLER
+            return $client->getLoginUrl('permanent', [
+                'identity',
+                'vote',
+                'read'
             ]);
         }
 
@@ -164,79 +161,34 @@ namespace Api {
         public static function authenticateUser($code) {
             $retVal = false;
             $client = self::_createOAuth2();
-            $auth = new OAuth2\Strategy\AuthCode($client);
 
-            try {
-                $client->connection->setDefaultOption('headers/User-Agent', HTTP_UA);
-                $token = $auth->getToken($code, [ 'redirect_uri' => REDDIT_OAUTH_HANDLER ]);
-
-                if ($token) {
-                    $response = $token->get('https://oauth.reddit.com/api/v1/me.json');
-                    if ($response) {
-                        $data = json_decode($response->body());
-
-                        if (isset($data->name)) {
-                            $user = self::getByName($data->name);
-                            if ($user) {
-                                $user->csrfToken = bin2hex(openssl_random_pseudo_bytes(USER_CSRF_ENTRPOY));
-                                $user->refreshToken = $token->getRefreshToken();
-                                $user->token = $token;
-                                // subtract a minute to safely account for any latency
-                                $user->tokenExpires = time() + $token->getExpiresIn();
-                                $user->saveUserSession();
-                            }
+            if ($client->getToken($code)) {
+                $data = $client->call('api/v1/me');
+                if ($data) {
+                    if (isset($data->name)) {
+                        $user = self::getByName($data->name);
+                        if ($user) {
+                            $user->csrfToken = bin2hex(openssl_random_pseudo_bytes(USER_CSRF_ENTRPOY));
+                            $user->saveUserSession($client);
                         }
-
                     }
                 }
-            } catch (Exception $e) {
-
             }
 
             return $retVal;
         }
 
-        /**
-         * Returns an auth token refreshing when needed
-         */
-        public function getAuthToken() {
-            $retVal = null;
-            if (time() < $this->tokenExpires) {
-                $retVal = $this->token;
-            } else {
-                try {
-                    $client = self::_createOAuth2();
-                    $token = $client->getToken([
-                        'client_id' => REDDIT_TOKEN,
-                        'client_secret' => REDDIT_SECRET,
-                        'grant_type' => 'refresh_token',
-                        'refresh_token' => $this->refreshToken,
-                        'scope' => 'identity,vote,read',
-                        'state' => md5(rand()),
-                        'duration' => 'permanent',
-                        'redirect_uri' => REDDIT_OAUTH_HANDLER
-                    ]);
+        private static function _createOAuth2(User $user = null) {
+            $retVal = new Lib\RedditOAuth(REDDIT_TOKEN, REDDIT_SECRET, HTTP_UA, REDDIT_OAUTH_HANDLER);
 
-                    if ($token) {
-                        $retVal = $token;
-                        $this->token = $token;
-                        $this->tokenExpires = time() + $token->getExpiresIn();
-                        $this->saveUserSession();
-                    }
-
-                } catch (Exception $e) {
-                    // do nothing for now
-                }
+            // If we have stashed tokens, set those up as well
+            if ($user && $user->token && $user->refreshToken && $user->tokenExpires) {
+                $retVal->setToken($user->token);
+                $retVal->setRefreshToken($user->refreshToken);
+                $retVal->setExpiration($user->tokenExpires);
             }
-            return $retVal;
-        }
 
-        private static function _createOAuth2() {
-            return new OAuth2\Client(REDDIT_TOKEN, REDDIT_SECRET, [
-                'site' => 'https://ssl.reddit.com/api/v1',
-                'authorize_url' => '/authorize',
-                'token_url' => '/access_token'
-            ]);
+            return $retVal;
         }
 
         private static function _createUserFromRedditData($data) {
@@ -278,26 +230,30 @@ namespace Api {
         /**
          * Saves the user session or clears it
          */
-        public function saveUserSession($end = false) {
+        public function saveUserSession($client = null, $end = false) {
+            // Check for token changes
+            if ($client) {
+                $this->token = $client->getToken();
+                $this->expiration = $client->getExpiration();
+                $this->refreshToken = $client->getRefreshToken();
+            }
             Lib\Session::set('user', $end ? null : $this);
         }
 
         public function logout() {
-            $this->saveUserSession(true);
+            $this->saveUserSession(null, true);
         }
 
         public function vote($postId, $dir) {
             if ($postId && is_numeric($dir)) {
                 // Check for vote constraints
                 if ($dir >= -1 && $dir <= 1) {
-                    $token = $this->getAuthToken();
-                    if ($token) {
-                        $row = Post::queryReturnAll([ 'externalId' => $postId ]);
-                        if ($row) {
-                            $response = $token->post('https://oauth.reddit.com/api/vote', [ 'body' => implode('&', [ 'id=t3_' . $postId, 'dir=' . $dir ]) ]);
-                            $this->setVoteForPost($row[0], $dir);
-                            $this->saveUserSession();
-                        }
+                    $client = self::_createOAuth2($this);
+                    $row = Post::queryReturnAll([ 'externalId' => $postId ]);
+                    if ($row) {
+                        $response = $client->call('api/vote', [ 'id' => 't3_' . $postId, 'dir' => $dir ]);
+                        $this->setVoteForPost($row[0], $dir);
+                        $this->saveUserSession($client);
                     }
                 }
 
