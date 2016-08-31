@@ -8,7 +8,7 @@
     "require": {
         "xamin/handlebars.php": "dev-master",
         "dxprog/img-hasher": "dev-master",
-        "aws/aws-sdk-php": "*",
+        "aws/aws-sdk-php": "2.8.30",
         "amazonwebservices/aws-sdk-for-php": "*",
         "keeguon/oauth2-php": ">=1.0.0"
     }
