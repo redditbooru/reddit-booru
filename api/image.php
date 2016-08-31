@@ -338,7 +338,14 @@ namespace Api {
 
                         // Upload to AWS
                         if (AWS_ENABLED) {
-                            $s3 = S3Client::factory([ 'key' => AWS_KEY, 'secret' => AWS_SECRET ]);
+                            $s3 = S3Client::factory([
+                                'credentials' => [
+                                    'key' => AWS_KEY,
+                                    'secret' => AWS_SECRET
+                                ],
+                                'region' => AWS_REGION,
+                                'version' => 'latest'
+                            ]);
 
                             // Figure out the MIME type
                             $mime = '';

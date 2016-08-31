@@ -14,6 +14,7 @@ define('AWS_KEY', 'KEY');
 define('AWS_SECRET', 'SECRET');
 define('AWS_BUCKET', 'BUCKET');
 define('AWS_PATH', 'PATH/');
+define('AWS_REGION', 'us-east-1');
 
 // Call me pessimistic, but I don't expect awwnime nor reddit to exist in 20 years
 define('AWS_EXPIRATION', 630720000);
