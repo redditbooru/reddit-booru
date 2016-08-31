@@ -31,7 +31,7 @@ namespace Lib {
       // use what's already available
       $retVal = $this->token && !$code ? $this->token : false;
 
-      if (!$retVal) {
+      if (!$retVal && $code) {
 
         $response = $this->_post('access_token', [
           'grant_type' => 'authorization_code',
@@ -97,24 +97,8 @@ namespace Lib {
       return $retVal;
     }
 
-    private function _refreshToken() {
-      $retVal = false;
-
-      if ($this->refreshToken) {
-        $response = $this->_post('access_token', [
-          'grant_type' => 'refresh_token',
-          'refresh_token' => $this->refreshToken
-        ], false);
-
-        $this->_updateToken($response);
-        $retVal = $this->token;
-      }
-
-      return $retVal;
-    }
-
     private function _updateToken($response) {
-      if ($response && $response->access_token) {
+      if ($response && isset($response->access_token)) {
         $this->token = $response->access_token;
         if (isset($response->refresh_token)) {
           $this->refreshToken = $response->refresh_token;

@@ -164,13 +164,11 @@ namespace Api {
 
             if ($client->getToken($code)) {
                 $data = $client->call('api/v1/me');
-                if ($data) {
-                    if (isset($data->name)) {
-                        $user = self::getByName($data->name);
-                        if ($user) {
-                            $user->csrfToken = bin2hex(openssl_random_pseudo_bytes(USER_CSRF_ENTRPOY));
-                            $user->saveUserSession($client);
-                        }
+                if ($data && isset($data->name)) {
+                    $user = self::getByName($data->name);
+                    if ($user) {
+                        $user->csrfToken = bin2hex(openssl_random_pseudo_bytes(USER_CSRF_ENTRPOY));
+                        $user->saveUserSession($client);
                     }
                 }
             }
@@ -234,9 +232,10 @@ namespace Api {
             // Check for token changes
             if ($client) {
                 $this->token = $client->getToken();
-                $this->expiration = $client->getExpiration();
+                $this->tokenExpires = $client->getExpiration();
                 $this->refreshToken = $client->getRefreshToken();
             }
+
             Lib\Session::set('user', $end ? null : $this);
         }
 
