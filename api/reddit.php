@@ -77,7 +77,7 @@ namespace Api {
 		/**
 		 * Logs the user in and saves the hash/cookie for later sessions
 		 */
-		private function _login() {
+		public function login() {
 			$retVal = false;
 			$obj = $this->_doPost('login/' . $this->_userName, array('user'=>$this->_userName, 'passwd'=>$this->_password, 'api_type'=>'json'));
 			if (is_string($obj)) {
