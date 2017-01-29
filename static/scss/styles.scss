@@ -93,6 +93,12 @@ a {
 
 }
 
+.sr-only {
+    position: absolute;
+    left: -9999px;
+    top: -9999px;
+}
+
 header {
 
     position: fixed;
@@ -140,7 +146,13 @@ header {
             background: $DARK_GREY;
             color: #fff;
             border: 0;
-            padding-top: 7px;
+            padding: 6px 10px;
+            position: relative;
+            top: 2px;
+            .icon svg {
+                width: 24px;
+                height: 24px;
+            }
         }
 
     }
