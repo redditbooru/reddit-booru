@@ -65,7 +65,7 @@ namespace Lib {
 
             // Twitter
             } else if ($domain === 'twitter.com' && strpos($path, '/status/')) {
-                $retVal = self::getTwitterImage($url);
+                $retVal[] = self::getTwitterImage($url);
 
             // Everything else
             } else {
