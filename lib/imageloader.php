@@ -62,6 +62,11 @@ namespace Lib {
             // gfycat
             } else if ($domain === 'gfycat.com' && strpos($path, '.gif') === false) {
                 $retVal[] = self::getGfycatImage($url);
+
+            // Twitter
+            } else if ($domain === 'twitter.com' && strpos($path, '/status/')) {
+                $retVal = self::getTwitterImage($url);
+
             // Everything else
             } else {
                 $retVal[] = $url;
@@ -258,6 +263,18 @@ namespace Lib {
                 }
             }
 
+            return $retVal;
+        }
+
+        /**
+         * Fetches an image from a tweet
+         */
+        public static function getTwitterImage($url) {
+            $retVal = null;
+            $data = @file_get_contents($url);
+            if ($data && preg_match('/data-image-url=\"([^\"]+)\"/', $data, $matches)) {
+                $retVal = $matches[1];
+            }
             return $retVal;
         }
 
