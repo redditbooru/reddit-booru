@@ -3,7 +3,8 @@
 const request = require('request');
 
 const SAUCENAO_KEY = process.env.SVC_SAUCENAO_KEY;
-const SAUCENAO_URL = `https://saucenao.com/search.php?db=999&output_type=2&testmode=1&numres=16&api_key=${SAUCENAO_KEY}&url=`;
+const SAUCENAO_DB = 5; // Currently, only search for pixiv sources
+const SAUCENAO_URL = `https://saucenao.com/search.php?db=${SAUCENAO_DB}&output_type=2&testmode=1&numres=16&api_key=${SAUCENAO_KEY}&url=`;
 const TIMEOUT = 60000;
 
 module.exports = class SauceNaoRequest {
