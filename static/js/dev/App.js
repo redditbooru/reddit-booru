@@ -76,7 +76,7 @@ var AppView = Backbone.View.extend({
 
         // If the startup blob has a specific view associated, kick it off
         setTimeout(function() {
-            if ('view' in window.startUp) {
+            if (window.startUp && 'view' in window.startUp) {
                 self.views[window.startUp.view].initData(window.startUp);
             }
         }, 10);

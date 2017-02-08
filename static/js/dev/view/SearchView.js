@@ -239,7 +239,7 @@ export default Backbone.View.extend({
 
     // not really a bread crumb, but naming things is hard
     _buildBreadCrumb: function() {
-        if ('q' in this.currentParams || 'user' in this.currentParams) {
+        if (this.currentParams && ('q' in this.currentParams || 'user' in this.currentParams)) {
             App.setTitle(breadcrumb(this.currentParams));
             this.$body.addClass(SEARCH_RESULTS_CLASS);
         }
