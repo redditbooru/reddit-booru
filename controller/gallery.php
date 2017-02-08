@@ -69,9 +69,12 @@ namespace Controller {
                 self::setOgData($retVal[0]->title, $retVal[0]->cdnUrl);
             }
 
-            self::$renderKeys['images'] = $retVal;
+            self::$renderKeys['images'] = [
+                'view' => 'gallery',
+                'images' => $retVal
+            ];
             Lib\Display::addKey('imagesDisplay', 'gallery');
-            Lib\Display::renderAndAddKey('body', 'gallery', self::$renderKeys);
+            Lib\Display::renderAndAddKey('body', 'index', self::$renderKeys);
         }
 
         private static function _userGalleries() {

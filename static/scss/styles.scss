@@ -1006,3 +1006,11 @@ button.singleSourceSearch {
     // which looks kinda funky with no footer, so add some spaace
     margin-bottom: 100px;
 }
+
+#resizeGalleryImages {
+    position: fixed;
+    right: 10px;
+    bottom: 10px;
+    background: $DARK_GREY;
+    color: #fff;
+}

@@ -3,7 +3,7 @@
 {{/if}}
 {{#each images}}
     <div class="gallery-image">
-        <img src="{{cdnUrl}}" />
+        <img src="{{cdnUrl}}" style="max-height: {{height}}px" />
         {{#if caption}}
             <p>{{caption}}{{#if sourceUrl}} [ <a href="{{sourceUrl}}" target="_blank">Source</a> ]{{/if}}</p>
         {{else}}
@@ -11,3 +11,6 @@
         {{/if}}
     </div>
 {{/each}}
+{{#if wasResized}}
+    <button id="resizeGalleryImages">Expand Images</button>
+{{/if}}
