@@ -1,7 +1,7 @@
 <?php
 
 namespace Controller {
-	
+
 	use Lib;
 	use stdClass;
 
@@ -15,24 +15,23 @@ namespace Controller {
             	'maxData',
             	'sourceId'
         	], $_GET);
-			$retVal = Lib\Cache::Get($cacheKey);
+			$retVal = Lib\Cache::getInstance()->fetch(function() {
+                $retVal = null;
+                switch ($action) {
+                    case 'keywordScores':
+                        $retVal = self::getKeywordsScore($_GET);
+                        break;
+                    case 'keywordAvgScores':
+                        $retVal = self::getKeywordsAvgScore($_GET);
+                        break;
+                    case 'keywordRankings':
+                    default:
+                        $retVal = self::getKeywordRanks($_GET);
+                        break;
+                }
+                return $retVal;
+            }, $cacheKey);
 
-			if (false === $retVal) {
-				switch ($action) {
-					case 'keywordScores':
-						$retVal = self::getKeywordsScore($_GET);
-						break;
-					case 'keywordAvgScores':
-						$retVal = self::getKeywordsAvgScore($_GET);
-						break;
-					case 'keywordRankings':
-					default:
-						$retVal = self::getKeywordRanks($_GET);
-						break;
-				}
-				Lib\Cache::Set($cacheKey, $retVal);
-			}
-			
 			header('Content-Type: text/javascript');
 			echo json_encode($retVal);
 			exit;
@@ -66,9 +65,9 @@ namespace Controller {
 				$score = self::_getPhraseScoreSum($data, $phrase);
 				$retVal[$phrase] = $avg ? round($score->score / $score->count) : $score->score;
 			}
-			
+
 			arsort($retVal);
-			return $retVal;	
+			return $retVal;
 		}
 
         private static function _getKeywordsData($vars) {
@@ -83,7 +82,8 @@ namespace Controller {
             	'sourceId'
         	], $vars);
 
-            $retVal = Lib\Cache::Get($cacheKey);
+            $cache = Lib\Cache::getInstance();
+            $retVal = $cache->get($cacheKey);
             if (false === $retVal) {
                 $query = 'SELECT post_id, post_keywords, post_score FROM posts p';
                 $where = [];
@@ -122,7 +122,7 @@ namespace Controller {
                         $obj->score = (int) $row->post_score;
                         $retVal[$row->post_id] = $obj;
                     }
-                    Lib\Cache::Set($cacheKey, $retVal);
+                    $cache->set($cacheKey, $retVal);
                 }
             }
             return $retVal;
@@ -132,7 +132,7 @@ namespace Controller {
          * Returns a list of common phrases in a list of phrases ordered by usage
          */
         private static function _getCommonPhrases($data) {
-    
+
             $phrases = [];
 
             foreach($data as $id => $item) {
@@ -182,12 +182,12 @@ namespace Controller {
                 }
 
                 $phrases = self::_mergePhrases($localPhrases, $phrases);
-                
+
             }
 
             $phrases = array_filter($phrases, function($a) { return $a > 0; });
             arsort($phrases);
-            
+
             return $phrases;
 
         }
@@ -224,7 +224,7 @@ namespace Controller {
         			$retVal->count++;
         		}
         	}
-        	
+
         	return $retVal;
         }
 
