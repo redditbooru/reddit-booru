@@ -85,6 +85,7 @@ namespace Controller {
                 $sources === null;
             }
 
+            $cache = Lib\Cache::getInstance();
             $cacheKey = Lib\Cache::createCacheKey('Images::getByQuery_', [
                 'sources',
                 'limit',
@@ -100,7 +101,7 @@ namespace Controller {
                 'honorVisible',
                 'keywords' ], $vars);
 
-            $retVal = Lib\Cache::Get($cacheKey);
+            $retVal = $cache->get($cacheKey);
 
             if (!$retVal) {
 
@@ -150,7 +151,7 @@ namespace Controller {
 
                 $retVal = Api\PostData::queryReturnAll($query, [ 'dateCreated' => 'desc' ], $limit);
 
-                Lib\Cache::Set($cacheKey, $retVal);
+                $cache->set($cacheKey, $retVal);
 
             }
 

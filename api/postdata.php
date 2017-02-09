@@ -227,8 +227,9 @@ namespace Api {
                 $vars['image'] = md5(json_encode($image));
             }
 
+            $cache = Lib\Cache::getInstance();
             $cacheKey = Lib\Cache::createCacheKey('Api::PostData::reverseImageSearch', [ 'image', 'imageUri', 'count', 'sources', 'getCount', 'maxRating', 'experimental' ], $vars);
-            $retVal = Lib\Cache::Get($cacheKey);
+            $retVal = $cache->get($cacheKey);
 
             if ((null != $file || $image instanceof Image) && false === $retVal) {
 
@@ -304,7 +305,7 @@ namespace Api {
 
                 }
 
-                Lib\Cache::Set($cacheKey, $retVal);
+                $cache->set($cacheKey, $retVal);
 
             }
 
@@ -316,7 +317,7 @@ namespace Api {
          * Returns the generated profile information for the user
          */
         public static function getUserProfile($user) {
-            return Lib\Cache::fetch(function() use ($user) {
+            return Lib\Cache::getInstance()->fetch(function() use ($user) {
 
                 $retVal = User::queryReturnAll([ 'name' => $user ]);
                 if ($retVal) {
@@ -422,9 +423,9 @@ namespace Api {
          *
          */
         public static function getGallery($id, $noRedirect = false) {
-
+            $cache = Lib\Cache::getInstance();
             $cacheKey = 'Api:PostData:getGallery_' . $id;
-            $retVal = Lib\Cache::Get($cacheKey);
+            $retVal = $cache->get($cacheKey);
 
             if (false === $retVal) {
 
@@ -450,7 +451,7 @@ namespace Api {
 
                 }
 
-                Lib\Cache::Set($cacheKey, $retVal);
+                $cache->set($cacheKey, $retVal);
 
             }
 
@@ -459,8 +460,9 @@ namespace Api {
         }
 
         public static function invalidateCacheForGallery(Post $post) {
-            Lib\Cache::Set('Api:PostData:getGallery_' . $post->id, false);
-            Lib\Cache::Set('Api:PostData:getUserGalleries_' . $post->userId, false);
+            $cache = Lib\Cache::getInstance();
+            $cache->set('Api:PostData:getGallery_' . $post->id, false);
+            $cache->set('Api:PostData:getUserGalleries_' . $post->userId, false);
         }
 
         /**

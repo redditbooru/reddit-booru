@@ -218,8 +218,9 @@ namespace Lib {
             $retVal = null;
             if (self::_verifyProperties($this)) {
                 if (is_numeric($id)) {
+                    $cache = Cache::getInstance();
                     $cacheKey = $this->_dbTable . '_getById_' . $id;
-                    $retVal = Cache::Get($cacheKey);
+                    $retVal = $cache->get($cacheKey);
 
                     if (!$retVal) {
                         $query  = 'SELECT `' . implode('`, `', $this->_dbMap) . '` FROM `' . $this->_dbTable . '` ';
@@ -229,7 +230,7 @@ namespace Lib {
                         if (null !== $result && $result->count === 1) {
                             $this->copyFromDbRow(Db::Fetch($result));
                         }
-                        Cache::Set($cacheKey, $retVal);
+                        $cache->set($cacheKey, $retVal);
                     }
                 } else {
                     throw new Exception('ID must be a number');

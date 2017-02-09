@@ -32,7 +32,7 @@ namespace Api {
          * @return array Array of image objects associated to the post
          */
         public static function getImagesForPost(Post $post) {
-            return Lib\Cache::fetch(function() use ($post) {
+            return Lib\Cache::getInstance()->fetch(function() use ($post) {
                 $query = 'SELECT i.* FROM `post_images` pi INNER JOIN `images` i ON i.`image_id` = pi.`image_id` WHERE pi.`post_id` = :postId';
                 $result = Lib\Db::Query($query, [ ':postId' => $post->id ]);
                 $retVal = [];

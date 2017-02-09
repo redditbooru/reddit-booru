@@ -199,7 +199,7 @@ namespace Api {
          */
         public function getLinkedPosts() {
             $id = $this->id;
-            return Lib\Cache::fetch(function() use ($id) {
+            return Lib\Cache::getInstance()->fetch(function() use ($id) {
 
                 $retVal = null;
 
@@ -220,10 +220,10 @@ namespace Api {
          * Returns a list of galleries (and their images) created by a user
          */
         public static function getUserGalleries($userId, $page = 1) {
-
+            $cache = Lib\Cache::getInstance();
             $page = is_numeric($page) ? $page : 1;
             $cacheKey = 'Api:Post:getUserGalleries_' . $userId . '_' . $page;
-            $retVal = Lib\Cache::get($cacheKey);
+            $retVal = $cache->get($cacheKey);
 
             if (false === $retVal) {
                 $numGalleries = self::getUserGalleriesCount($userId);
@@ -260,7 +260,7 @@ namespace Api {
                     ]
                 ];
 
-                Lib\Cache::Set($cacheKey, $retVal);
+                $cache->set($cacheKey, $retVal);
 
             }
 
@@ -272,7 +272,7 @@ namespace Api {
          * Returns the total number of galleries a user has created
          */
         public static function getUserGalleriesCount($userId) {
-            return Lib\Cache::fetch(function() use ($userId) {
+            return Lib\Cache::getInstance()->fetch(function() use ($userId) {
                 $galleries = Post::queryReturnAll([ 'userId' => $userId, 'link' => [ 'LIKE' => '%redditbooru.com%' ] ]);
                 $retVal = 0;
                 foreach ($galleries as $gallery) {

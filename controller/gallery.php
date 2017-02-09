@@ -31,21 +31,15 @@ namespace Controller {
          * Returns a post ID from a reddit ID
          */
         private static function _getFromRedditId($id) {
-
-            $cacheKey = 'Controller:Gallery:_getFromRedditId_' . $id;
-            $retVal = Lib\Cache::Get($cacheKey);
-
-            if (false === $retVal) {
+            return Lib\Cache::getInstance()->fetch(function() use ($id) {
                 $post = Api\Post::query([ 'externalId' => $id ]);
                 $retVal = null;
                 if ($post && $post->count) {
                     $row = new Api\Post(Lib\Db::Fetch($post));
                     $retVal = $row->id;
                 }
-                Lib\Cache::Set($cacheKey, $retVal);
-            }
-
-            return $retVal;
+                return $retVal;
+            }, 'Controller:Gallery:_getFromRedditId_' . $id);
         }
 
         private static function _displayGallery() {

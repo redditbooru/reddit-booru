@@ -7,6 +7,8 @@ namespace Api {
 
 	class Source extends Lib\Dal {
 
+		const UPDATE_INTERVAL = 300;
+
 		/**
 		 * Object property to table map
 		 */
@@ -17,8 +19,8 @@ namespace Api {
 			'type' => 'source_type',
 			'enabled' => 'source_enabled',
 			'subdomain' => 'source_subdomain',
-            'contentRating' => 'source_content_rating',
-            'repostCheck' => 'source_repost_check'
+			'contentRating' => 'source_content_rating',
+			'repostCheck' => 'source_repost_check'
 		);
 
 		/**
@@ -61,15 +63,15 @@ namespace Api {
 		 */
 		public $subdomain;
 
-        /**
-         * Content rating
-         */
-        public $contentRating;
+		/**
+			* Content rating
+			*/
+		public $contentRating;
 
-        /**
-         * If non-zero, the number of seconds in which a repost is banned for this sub
-         */
-       	public $repostCheck;
+		/**
+			* If non-zero, the number of seconds in which a repost is banned for this sub
+			*/
+		public $repostCheck;
 
 		/**
 		 * Constructor
@@ -105,22 +107,22 @@ namespace Api {
 
 		/**
 		 * Returns all sources
+		 * TODO: Unused. Delete.
 		 */
 		public static function getAllEnabled() {
 
 			$cacheKey = 'Source_getAllEnabled';
-			$retVal = Lib\Cache::Get($cacheKey);
-			if (false === $retVal) {
+			return Lib\Cache::getInstance()->fetch(function() {
+				$retVal = null;
 				$result = Lib\Db::Query('SELECT * FROM `sources` WHERE source_enabled = 1');
 				if (null != $result && $result->count > 0) {
-					$retVal = array();
+					$retVal = [];
 					while ($row = Lib\Db::Fetch($result)) {
 						$retVal[] = new Source($row);
 					}
 				}
-				Lib\Cache::Set($cacheKey, $retVal);
-			}
-			return $retVal;
+				return $retVal;
+			}, $cacheKey);
 
 		}
 
@@ -128,21 +130,14 @@ namespace Api {
 		 * Returns a source by subdomain
 		 */
 		public static function getBySubdomain($vars) {
-
 			$domain = Lib\Url::Get('domain', null, $vars);
-			$cacheKey = 'Source::getBySubdomain_' . $domain;
-			$retVal = Lib\Cache::Get($cacheKey);
-			if (false === $retVal) {
+			return Lib\Cache::getInstance()->fetch(function() use ($domain) {
 				$result = Lib\Db::Query('SELECT * FROM `sources` WHERE source_subdomain = :domain', [ 'domain' => $domain ]);
 				$retVal = null;
 				if (null != $result && $result->count > 0) {
 					$retVal = new Source(Lib\Db::Fetch($result));
 				}
-				Lib\Cache::Set($cacheKey, $retVal, 3600);
-			}
-
-			return $retVal;
-
+			}, 'Source::getBySubdomain_' . $domain, 3600);
 		}
 
 		/**

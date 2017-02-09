@@ -96,8 +96,9 @@ namespace Api {
          * @param String $data Data to use to create the user if it doesn't exist. Otherwise, a call to the reddit API is used
          */
         public function getByName($userName, $data = null) {
+            $cache = Lib\Cache::getInstance();
             $cacheKey = 'User::GetByName_' . $userName;
-            $retVal = Lib\Cache::Get($cacheKey);
+            $retVal = $cache->get($cacheKey);
 
             if (!$retVal) {
                 $result = Lib\Db::Query('SELECT * FROM users WHERE user_name = :userName', [ ':userName' => $userName ]);
@@ -124,7 +125,7 @@ namespace Api {
                     }
 
                 }
-                Lib\Cache::Set($cacheKey, $retVal);
+                $cache->set($cacheKey, $retVal);
             }
 
             return $retVal;

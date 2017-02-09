@@ -62,7 +62,7 @@ namespace Lib {
 					$uri = substr($uri, 1);
 				}
 
-				$rewrites = Cache::fetch(function() use ($configFile) {
+				$rewrites = Cache::getInstance()->fetch(function() use ($configFile) {
 					return json_decode(@file_get_contents($configFile));
 				}, 'url_rewrites');
 

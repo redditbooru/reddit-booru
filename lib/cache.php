@@ -2,8 +2,7 @@
 
 namespace Lib {
 
-	use Memcache;
-	use Predis;
+	use Memcached;
 
 	define('CACHE_LONG', 3600);
 	define('CACHE_MEDIUM', 600);
@@ -13,56 +12,66 @@ namespace Lib {
 		define('DISABLE_CACHE', false);
 	}
 
-	if (!DISABLE_CACHE) {
-		Cache::Connect();
-	}
-
 	// memcache class
 	class Cache {
 
-		private static $_memcache;
-		private static $_redis;
-		private static $_disabled = false;
+		private $_memcache;
+		private $_disabled = false;
 
-		public static function Connect($host = 'localhost', $port = 11211) {
-			self::$_memcache = new Memcache();
-			if (!self::$_memcache->pconnect($host, $port)) {
-				self::$_memcache = null;
+		public static function getInstance() {
+			static $cache;
+			if (!$cache) {
+				$cache = new Cache();
 			}
+			return $cache;
+		}
 
-			// Since this is self-running, we don't yet have the benefit of the URL
-			// parser having run. Pluck this out of the query string.
-			if (isset($_SERVER['REQUEST_URI'])) {
-				$requestUri = explode('?', $_SERVER['REQUEST_URI']);
-				self::setDisabled(strpos(end($requestUri), 'flushCache') !== false);
+		public function __construct($host = 'localhost', $port = 11211) {
+			if (DISABLE_CACHE) {
+				$this->setDisabled(true);
 			} else {
-				// In a CLI environment, don't bother with cache
-				self::setDisabled(true);
+				$this->_memcache = new Memcached();
+				if (!$this->_memcache->addServer($host, $port)) {
+					$this->_memcache = null;
+				}
+
+				// Since this is self-running, we don't yet have the benefit of the URL
+				// parser having run. Pluck this out of the query string.
+				if (isset($_SERVER['REQUEST_URI'])) {
+					$requestUri = explode('?', $_SERVER['REQUEST_URI']);
+					$this->setDisabled(strpos(end($requestUri), 'flushCache') !== false);
+				} else {
+					// In a CLI environment, don't bother with cache
+					$this->setDisabled(true);
+				}
 			}
 		}
 
-		public static function Set($key, $val, $expiration = 600) {
+		public function set($key, $val, $expiration = 600) {
 			$retVal = false;
-			if (null != self::$_memcache && is_string($key)) {
+			if (null !== $this->_memcache && is_string($key)) {
 				// Hash the key to obfuscate and to avoid the cache-key size limit
-				$key = md5($key);
-				$retVal = self::$_memcache->set(CACHE_PREFIX . ':' . $key, $val, null, time() + $expiration);
+				$key = $this->_formatCacheKey($key);
+				$retVal = $this->_memcache->set($key, $val, time() + $expiration);
+				if (!$retVal) {
+					var_dump($this->_memcache->getResultCode());
+				}
 			}
 			return $retVal;
 		}
 
-		public static function Get($key, $forceCacheGet = false) {
+		public function get($key, $forceCacheGet = false) {
 			$retVal = false;
-			$fetchFromCache = null != self::$_memcache && is_string($key) && ($forceCacheGet || !self::$_disabled);
+			$fetchFromCache = null != $this->_memcache && is_string($key) && ($forceCacheGet || !$this->_disabled);
 			if ($fetchFromCache) {
-				$key = md5($key);
-				$retVal = self::$_memcache->get(CACHE_PREFIX . ':' . $key);
+				$formattedKey = $this->_formatCacheKey($key);
+				$retVal = $this->_memcache->get($formattedKey);
 			}
 			return $retVal;
 		}
 
-		public static function setDisabled($disabled) {
-			self::$_disabled = $disabled;
+		public function setDisabled($disabled) {
+			$this->_disabled = $disabled;
 		}
 
 		/**
@@ -83,13 +92,17 @@ namespace Lib {
 		/**
 		 * Attempts to get data from cache. On miss, executes the callback function, caches that value, and returns it
 		 */
-		public static function fetch($method, $cacheKey, $duration = CACHE_MEDIUM) {
-			$retVal = self::Get($cacheKey);
+		public function fetch($method, $cacheKey, $duration = CACHE_MEDIUM) {
+			$retVal = $this->get($cacheKey);
 			if ($retVal === false && is_callable($method)) {
 				$retVal = $method();
-				self::Set($cacheKey, $retVal, $duration);
+				$this->set($cacheKey, $retVal, $duration);
 			}
 			return $retVal;
+		}
+
+		private function _formatCacheKey($key) {
+			return CACHE_PREFIX . ':' . md5($key);
 		}
 
 	}

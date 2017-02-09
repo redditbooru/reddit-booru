@@ -158,7 +158,7 @@ namespace Controller {
         }
 
         private static function _multiplayerMoe() {
-            $row = Lib\Cache::Fetch(function() {
+            $row = Lib\Cache::getInstance()->fetch(function() {
                 $result = Lib\Db::Query('SELECT post_external_id FROM posts WHERE post_title LIKE "%multiplayer moe%" AND user_id = 8 ORDER BY post_date DESC LIMIT 1');
                 return $result && $result->count ? Lib\Db::Fetch($result) : null;
             }, 'MumblePage', CACHE_LONG);
