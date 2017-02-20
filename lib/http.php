@@ -71,12 +71,12 @@ namespace Lib {
          */
         public static function getActiveDownloads() {
             $cacheKey = self::_getCacheKey();
-            $urls = Cache::Get($cacheKey);
+            $urls = Cache::getInstance()->get($cacheKey);
             return $urls ?: [];
         }
 
-        private function _setActiveDownloads($urls) {
-            Cache::Set(self::_getCacheKey(), $urls, CACHE_SHORT);
+        private static function _setActiveDownloads($urls) {
+            Cache::getInstance()->set(self::_getCacheKey(), $urls, CACHE_SHORT);
         }
 
         /**
