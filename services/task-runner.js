@@ -1,6 +1,6 @@
 var _ = require('underscore'),
     child_process = require('child_process'),
-    http = require('http'),
+    request = require('request'),
     cmd = 'php cron/cron.php',
     CRON_DELAY = 2 * 60 * 1000,
     HEALTH_DELAY = 60 * 1000,
@@ -77,13 +77,10 @@ function taskComplete() {
 }
 
 function getActiveSources(callback) {
-    http.get('http://redditbooru.com/sources/', function(res) {
-        var json = '';
-        res.on('data', function(data) {
-            json += data;
-        }).on('end', function() {
+    request.get('https://redditbooru.com/sources/', function(err, res, body) {
+        if (!err) {
             try {
-                var sources = JSON.parse(json),
+                var sources = JSON.parse(body),
                     i = 0,
                     count = sources instanceof Array ? sources.length : 0;
                 SOURCES_TO_CHECK = [];
@@ -95,11 +92,11 @@ function getActiveSources(callback) {
                 console.log('Invalid JSON sources data, working off of old data');
                 callback();
             }
-        });
-    }).on('error', function() {
-        console.log('Error retrieving sources');
-        clearTimeout(cronTimer);
-        cronTimer = setTimeout(taskRunner, CRON_DELAY);
+        } else {
+            console.error('Error retrieving sources');
+            clearTimeout(cronTimer);
+            cronTimer = setTimeout(taskRunner, CRON_DELAY);
+        }
     });
 }
 

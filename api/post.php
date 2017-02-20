@@ -291,7 +291,7 @@ namespace Api {
             $retVal = null;
 
             if (preg_match('/^http[s]?:\/\/([\w\.]+)?redditbooru\.com\/gallery\/([\w]+)(\/[\w-]+)?/is', $url, $matches)) {
-                if (count($matches) === 4) {
+                if (count($matches) >= 3) {
                     $retVal = base_convert($matches[2], 36, 10);
                 } else {
                     $retVal = (int) $matches[2];

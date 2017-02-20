@@ -23,7 +23,7 @@ function mimicBrowserRequest(Api\Post $post) {
     $c = curl_init($post->link);
     curl_setopt($c, CURLOPT_USERAGENT, USER_AGENT);
     curl_setopt($c, CURLOPT_FOLLOWLOCATION, true);
-    curl_setopt($c, CURLOPT_REFERER, 'http://redd.it/' . $post->externalId);
+    curl_setopt($c, CURLOPT_REFERER, 'https://redd.it/' . $post->externalId);
     curl_setopt($c, CURLOPT_NOBODY, true);
     curl_setopt($c, CURLOPT_TIMEOUT, 60);
 
@@ -69,7 +69,7 @@ foreach ($sources as $source) {
             // Check for hotlinking first
             if (preg_match($BLACKLIST_REGEX, $post->link)) {
 
-                $message = 'It looks like you might be linking to a site that doesn\'t allow hotlinking. Please rehost with a service like [redditbooru](http://redditbooru.com) or [imgur](http://imgur.com) and then repost.';
+                $message = 'It looks like you might be linking to a site that doesn\'t allow hotlinking. Please rehost with a service like [redditbooru](https://redditbooru.com) or [imgur](https://imgur.com) and then repost.';
                 messageAndReport($bot, $post, $message);
 
             // Passing that, verify that the link actually loads
@@ -78,7 +78,7 @@ foreach ($sources as $source) {
                 if ($httpCode !== 200) {
                     $message = 'Uh oh! I wasn\'t able to load this link. Here\'s a few tips to help you out:' . PHP_EOL . PHP_EOL;
                     $message .= '- Make sure that your URL is correct' . PHP_EOL;
-                    $message .= '- If you are linking directly to an image, please rehost with a service like [redditbooru](http://redditbooru.com) or [imgur](http://imgur.com) and then repost.' . PHP_EOL . PHP_EOL;
+                    $message .= '- If you are linking directly to an image, please rehost with a service like [redditbooru](https://redditbooru.com) or [imgur](https://imgur.com) and then repost.' . PHP_EOL . PHP_EOL;
                     $message .= 'Response code: ' . $httpCode;
                     messageAndReport($bot, $post, $message);
                 }
@@ -129,9 +129,9 @@ foreach ($sources as $source) {
             if ($count > 0 && round($count > $post->imageCount / 2)) {
                 $message = 'Hi! It looks like ' . ($post->imageCount === 1 ? 'this image' : 'some of these images') . ' may have been posted recently: ' . PHP_EOL . PHP_EOL;
                 foreach ($post->reposts as $repost) {
-                    $message .= '- [' . $repost->title . '](http://redd.it/' . $repost->externalId . ') posted by /u/' . $repost->userName . ' ' . Lib\Util::relativeTime($repost->dateCreated) . ' ago' . PHP_EOL;
+                    $message .= '- [' . $repost->title . '](https://redd.it/' . $repost->externalId . ') posted by /u/' . $repost->userName . ' ' . Lib\Util::relativeTime($repost->dateCreated) . ' ago' . PHP_EOL;
                 }
-                $message .= PHP_EOL . 'Be sure to use [redditbooru](http://redditbooru.com/) before posting to check for similar images.';
+                $message .= PHP_EOL . 'Be sure to use [redditbooru](https://redditbooru.com/) before posting to check for similar images.';
                 messageAndReport($bot, $post, $message);
 
                 echo 'Message sent: ', PHP_EOL;

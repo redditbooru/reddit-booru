@@ -269,7 +269,7 @@ namespace Controller {
                 $post->title = htmlentities(Lib\Url::Post('albumTitle'), ENT_COMPAT | ENT_HTML5, 'UTF-8');
                 $post->setKeywordsFromTitle();
                 $post->dateCreated = time();
-                $post->link = 'http://' . $_SERVER['HTTP_HOST'];
+                $post->link = 'https://' . $_SERVER['HTTP_HOST'];
 
                 $user = Api\User::getCurrentUser();
                 if ($user) {
@@ -279,7 +279,7 @@ namespace Controller {
                 // TODO - come up with a way of doing all this without four round trips to the database. Stored proc, maybe?
                 if ($post->sync()) {
                     $path = Api\Post::createGalleryUrl($post->id, $post->title);
-                    $post->link = 'http://' . $_SERVER['HTTP_HOST'] . $path;
+                    $post->link = 'https://' . $_SERVER['HTTP_HOST'] . $path;
 
                     // Perform image assignment and data denormalization
                     if (Api\PostImages::assignImagesToPost($retVal->images, $post) && Api\PostData::updateDenormalizedPostData($post->id)) {

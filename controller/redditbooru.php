@@ -42,7 +42,7 @@ namespace Controller {
                     $domain = Api\Source::getBySubdomain([ 'domain' => $domain ]);
                     // If no sub was found, redirect to the main page
                     if (!$domain) {
-                        header('Location: http://redditbooru.com/');
+                        header('Location: https://redditbooru.com/');
                         exit;
                     } else {
                         self::$enabledSources = [ $domain->id ];

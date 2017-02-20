@@ -9,9 +9,6 @@ namespace Api {
 
     define('HISTOGRAM_BUCKETS', 4);
     define('HISTORGAM_GRANULARITY', 256 / HISTOGRAM_BUCKETS);
-    define('CDN_FOLDER', '');
-    define('CDN_URL_BASE', 'http://cdn.awwni.me/');
-    define('LOCAL_STORAGE', '/var/www/redditbooru-images');
 
     // Events
     define('IMGEVT_PROCESSING', 'IMGEVT_PROCESSING');

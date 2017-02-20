@@ -66,7 +66,7 @@ namespace Controller {
             $ogData = new stdClass;
             $ogData->title = $title;
             $ogData->image = $image;
-            $ogData->url = 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+            $ogData->url = 'https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
             Lib\Display::addKey('ogData', $ogData);
         }
 

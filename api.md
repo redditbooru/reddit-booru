@@ -23,7 +23,7 @@
 
 * ***Sample Call:***
 
-  `curl http://redditbooru.com/sources/`
+  `curl https://redditbooru.com/sources/`
 
 
 
@@ -84,11 +84,11 @@
 
 * ***Sample Call:***
 
-  `curl http://redditbooru.com/api/images/?sources=1&limit=5&user=chiefnoah&q=alice`
+  `curl https://redditbooru.com/api/images/?sources=1&limit=5&user=chiefnoah&q=alice`
 
 ### A Note About Sources
 Sources can be specified in a few ways with each having its own order of precedence, listed here from highest to lowest:
-- API call via source subdomain (eg: http://awwnime.redditbooru.com/images/)
+- API call via source subdomain (eg: https://awwnime.redditbooru.com/images/)
 - Query string (comma delimited list or -1 for all)
 - Cookies
 - Default: source ID 1

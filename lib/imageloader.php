@@ -229,7 +229,7 @@ namespace Lib {
             $id = Api\Post::getPostIdFromUrl($url);
             if ($id) {
                 $sub = strpos($url, 'beta.') !== false ? 'beta.' : '';
-                $data = Http::get('http://' . $sub . 'redditbooru.com/images/?postId=' . $id);
+                $data = Http::get('https://' . $sub . 'redditbooru.com/images/?postId=' . $id);
                 if ($data) {
                     $data = json_decode($data);
                     if (count($data) > 0) {
