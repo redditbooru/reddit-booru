@@ -137,6 +137,7 @@ namespace Api {
 				if (null != $result && $result->count > 0) {
 					$retVal = new Source(Lib\Db::Fetch($result));
 				}
+				return $retVal;
 			}, 'Source::getBySubdomain_' . $domain, 3600);
 		}
 
