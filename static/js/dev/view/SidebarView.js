@@ -12,14 +12,12 @@ export default Backbone.View.extend({
 
         // TODO - this should probably be event controlled
         App.views.images.calculateWindowColumns();
-        App.views.images.render();
     },
 
     dismiss: function() {
         this.$el.html('').removeClass('hasContent');
         // TODO - this should probably be event controlled
         App.views.images.calculateWindowColumns();
-        App.views.images.render();
     }
 
 });
