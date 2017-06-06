@@ -218,9 +218,9 @@ function checkPostRemovals($sourceId, $listing) {
             if (!$isGood) {
                 _log('[ ' . $post->externalId . ' ] Post no longer found in listing, marking as removed');
                 $post->visible = 0;
-                $postData = new Api\PostData();
-                $postData->postId = $post->id;
-                $postData->updateAll($post);
+                if ($post->sync()) {
+                    Api\PostData::updateDenormalizedPostData($post->id);
+                }
             }
         }
 
