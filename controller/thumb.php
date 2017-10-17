@@ -40,7 +40,18 @@ namespace Controller {
      * Encodes a URL for the cache filename
      */
     public static function createThumbFilename($url) {
-      return THUMBNAIL_PATH . str_replace([ '=', '/' ], [ '-', '_' ], base64_encode($url));
+      $thumbUrl = str_replace([ '=', '/' ], [ '-', '_' ], base64_encode($url));
+
+      // If the user is in the thumb server bucket and this is an external request,
+      // generate a URL to that. For now, cached uploads must still be handled
+      // on the RedditBooru instance
+      if (Lib\TestBucket::get('thumb_server') !== 'control' && strpos($url, 'http') === 0) {
+        $thumbUrl = THUMBNAIL_SERVER_URL . $thumbUrl;
+      } else {
+        $thumbUrl = THUMBNAIL_PATH . $thumbUrl;
+      }
+
+      return $thumbUrl;
     }
 
     /**

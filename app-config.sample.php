@@ -28,6 +28,9 @@ define('THUMBNAIL_PATH', '/cache/');
 // where THUMBNAIL_PATH points.
 define('THUMBNAIL_STORAGE', '/FULL/PATH/TO/THUMBNAILS');
 
+// If using an rbthumbs thumbnail server, the full URL to that
+define('THUMBNAIL_SERVER_URL', 'https://beta.thumb.awwni.me/');
+
 // Used to namespace this frontend in caching operations
 define('CACHE_PREFIX', 'RedditBooru');
 
