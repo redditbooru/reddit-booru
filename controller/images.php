@@ -159,7 +159,8 @@ namespace Controller {
             }
 
             if (self::$_showRedditControls) {
-                if ($retVal) {
+                $user = Api\User::getCurrentUser();
+                if ($retVal && $user instanceof Api\User) {
                     $retVal = Api\PostData::getVotesForPosts($retVal, Api\User::getCurrentUser());
                 }
             }
