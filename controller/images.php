@@ -18,9 +18,12 @@ namespace Controller {
 
         public static function initialize() {
             $user = Api\User::getCurrentUser();
+            $testSeed = null;
             if ($user instanceof Api\User) {
-                self::$_showRedditControls = Lib\TestBucket::get('showRedditControls', $user->id) === 'enabled';
+                $testSeed = $user->id;
             }
+            Lib\TestBucket::initialize($testSeed);
+            self::$_showRedditControls = Lib\TestBucket::get('showRedditControls') === 'enabled';
         }
 
         /**
