@@ -3,7 +3,7 @@
 .filters {
   padding: 20px;
   background: #fff;
-  width: 600px;
+  width: 800px;
   overflow: hidden;
   cursor: default;
   @include border-box();
@@ -72,7 +72,7 @@
   }
 
   li {
-    width: 33%;
+    width: 25%;
     float: left;
     padding-bottom: 4px;
     &.full-width {
