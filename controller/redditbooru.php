@@ -117,10 +117,10 @@ namespace Controller {
          * Renders a moesaic for the user
          */
         private static function _renderMoesaic() {
-            $user = str_replace('/', '', $_SERVER['REQUEST_URI']);
-            Lib\Display::addKey('USER', $user);
-            Lib\Display::addKey('TITLE', ($user ? $user . '\'s ' : '') . 'Moesaic');
-            Lib\Display::setTemplate('moesaic');
+            $user = Lib\Url::Get('u');
+            Lib\Display::addKey('user', $user);
+            Lib\Display::addKey('title', ($user ? $user . '\'s ' : '') . 'Moesaic');
+            Lib\Display::setLayout('moesaic');
             Lib\Display::render();
             exit;
         }
