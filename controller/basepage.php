@@ -76,7 +76,9 @@ namespace Controller {
 
         protected static function getPageSubdomain() {
             $retVal = false;
-            if (preg_match('/([\w]+)\.(redditbooru|awwni)\.[\w]{2,3}/is', $_SERVER['HTTP_HOST'], $matches)) {
+            if (isset($_GET['domain']) && preg_match('/[\w]+/i', $_GET['domain'])) {
+                $retVal = $_GET['domain'];
+            } else if (preg_match('/([\w]+)\.(redditbooru|awwni)\.[\w]{2,3}/is', $_SERVER['HTTP_HOST'], $matches)) {
                 $retVal = $matches[1];
             }
             return $retVal;
