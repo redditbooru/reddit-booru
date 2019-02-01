@@ -211,6 +211,8 @@ namespace Api {
 
             if (null !== $image) {
 
+                $startTime = microtime(true);
+
                 $retVal = new Image();
                 $retVal->width = imagesx($image);
                 $retVal->height = imagesy($image);
@@ -250,6 +252,12 @@ namespace Api {
                     $prop = 'histB' . ($i + 1);
                     $retVal->$prop = $blue[$i] / $total;
                 }
+
+                Tracking::trackEvent('process_image', [
+                    'width' => $retVal->width,
+                    'height' => $retVal->height,
+                    'loadTime' => microtime(true) - $startTime
+                ]);
 
             }
 
