@@ -257,6 +257,19 @@ CREATE TABLE IF NOT EXISTS `sources` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `tracking`
+--
+
+DROP TABLE IF EXISTS `tracking`;
+CREATE TABLE IF NOT EXISTS `tracking` (
+  `tracking_event` varchar(50) COLLATE utf8_unicode_ci NOT NULL,
+  `tracking_date` int(11) NOT NULL,
+  `tracking_data` text COLLATE utf8_unicode_ci NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `users`
 --
 

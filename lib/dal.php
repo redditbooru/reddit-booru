@@ -64,8 +64,10 @@ namespace Lib {
 				// Build and execute the query
 				$query = $method;
 				if ('INSERT' === $method) {
-					$query .= ' INTO `' . $this->_dbTable . '` (`' . implode('`,`', $this->_dbMap) . '`) VALUES (' . implode(',', $parameters) . ')';
-					$query = str_replace('`' . $this->_dbMap[$primaryKey] . '`,', '', $query);
+                    $query .= ' INTO `' . $this->_dbTable . '` (`' . implode('`,`', $this->_dbMap) . '`) VALUES (' . implode(',', $parameters) . ')';
+                    if ($primaryKey) {
+                        $query = str_replace('`' . $this->_dbMap[$primaryKey] . '`,', '', $query);
+                    }
 				} else {
 					$query .= ' `' . $this->_dbTable . '` SET ' . implode(',', $parameters) . ' WHERE `' . $this->_dbMap[$primaryKey] . '` = :' . $primaryKey;
 				}

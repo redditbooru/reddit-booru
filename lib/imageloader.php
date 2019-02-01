@@ -432,6 +432,8 @@ namespace Lib {
 
             $retVal = null;
 
+            $startTime = microtime(true);
+
             // Because SSL is handled at the load balancer level,
             // strip the SLL off of anything being fetched internally
             if (strpos($url, CDN_BASE_URL) === 0) {
@@ -454,6 +456,12 @@ namespace Lib {
             if (null !== $retVal) {
                 Events::fire(IMGEVT_DOWNLOAD_COMPLETE);
             }
+
+            // Track the download time
+            Api\Tracking::trackEvent('fetch_image', [
+                'loadTime' => microtime(true) - $startTime,
+                'imageUrl' => $url
+            ]);
 
             return $retVal;
 

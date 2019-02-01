@@ -62,6 +62,7 @@ namespace Controller {
          * Multi-table lookup for images and posts
          */
         public static function getByQuery($vars) {
+            $startTime = microtime(true);
 
             $sources = Lib\Url::Get('sources', [], $vars);
             $limit = Lib\Url::GetInt('limit', 30, $vars);
@@ -105,6 +106,7 @@ namespace Controller {
                 'keywords' ], $vars);
 
             $retVal = $cache->get($cacheKey);
+            $hasCache = !!$retVal;
 
             if (!$retVal) {
 
@@ -165,6 +167,11 @@ namespace Controller {
                 }
             }
 
+            $eventData = $vars;
+            $eventData['loadTime'] = microtime(true) - $startTime;
+            $eventData['cached'] = $hasCache;
+            Api\Tracking::trackEvent('get_by_query', $eventData);
+
             return $retVal;
         }
 
@@ -172,7 +179,7 @@ namespace Controller {
          * Performs a reverse image lookup
          */
         public static function getByImage($vars) {
-
+            $startTime = microtime(true);
             $retVal = new stdClass;
 
             $vars['sources'] = self::_processSources(isset($vars['sources']) ? $vars['sources'] : []);
@@ -211,6 +218,10 @@ namespace Controller {
                 }
 
             }
+
+            $eventData = $vars;
+            $eventData['loadTime'] = microtime(true) - $startTime;
+            Api\Tracking::trackEvent('get_by_image', $eventData);
 
             return $retVal;
         }
