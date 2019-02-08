@@ -19,6 +19,7 @@ namespace Controller {
             switch ($action) {
                 case 'login':
                     // Redirect to the reddit OAuth2 login endpoint
+                    header('Cache-Control: no-cache, must-revalidate');
                     header('Location: ' . Api\User::getLoginUrl());
                     exit;
                 case 'logout':
