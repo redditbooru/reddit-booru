@@ -5,6 +5,10 @@
   "repository": "https://github.com/dxprog/reddit-booru",
   "author": "Matt (dxprog) Hackmann",
   "license": "GPLv3",
+  "scripts": {
+    "build": "grunt",
+    "start": "grunt watch"
+  },
   "devDependencies": {
     "babelify": "^6.3.0",
     "backbone": "^1.2.3",
