@@ -5,7 +5,7 @@
                 {{#inTestBucket key="userDropDownMenu" value="control"}}Welcome, <a href="/user/{{user.name}}/" class="user-profile">{{user.name}}</a>!{{/inTestBucket}}
 
                 {{#inTestBucket key="userDropDownMenu" value="enabled"}}
-                {{user.name}}
+                <span class="nav-caret">{{user.name}}</span>
                 <ul class="secondary-nav user-actions">
                     <li>
                         <a href="/user/{{user.name}}/">View Profile</a>
@@ -38,8 +38,8 @@
             <a href="/screensaver/">Screensaver</a>
         </li>
         -->
-        <li class="has-secondary-nav">
-            Filters
+        <li class="has-secondary-nav full-width">
+            <span class="nav-caret">Filters</span>
             <div id="sources" class="secondary-nav source-list">
             {{>filters}}
             </div>

@@ -166,9 +166,7 @@ header {
     }
 
     .primary-nav {
-
         margin-left: 20px;
-        position: relative;
         top: 2px;
 
         > li {
@@ -197,12 +195,11 @@ header {
                 list-style: none;
                 display: none;
                 position: absolute;
-                left: -1px;
-                top: 37px;
+                left: -1px; 
+                top: 45px;
                 background: #fff;
-                border: 1px solid $GREY;
                 padding: 10px;
-                box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.5);
+                box-shadow: 1px 2px 4px rgba(#000, 0.5);
 
                 a {
                   color: #000;
@@ -210,16 +207,13 @@ header {
 
                 &.user-actions {
                     width: 150px;
+                    top: 39px;
                     li {
                         padding: 10px 0 0;
                         &:first-child {
                             padding-top: 0;
                         }
                     }
-                }
-
-                &.source-list {
-                    margin-left: -20px;
                 }
 
                 input,
@@ -230,48 +224,51 @@ header {
 
             }
 
+            &.full-width .secondary-nav {
+                left: 0;
+                right: 0;
+                box-shadow: 0;
+            }
+
 
             &.has-secondary-nav {
 
                 position: relative;
                 padding-right: 17px;
 
-                &:after {
+                &.full-width {
+                    position: static;
+                }
+
+                .nav-caret {
+                    position: relative;
+                    padding-right: 15px;
+                    display: block;
+                }
+
+                .nav-caret:after {
                     content: '';
                     display: block;
                     border: 5px solid transparent;
                     border-top-color: #fff;
                     position: absolute;
                     right: 0;
-                    top: 17px;
+                    top: calc(50% + 3px);
+                    transform: translateX(100%) translateX(-5px) translateY(-50%);
                 }
 
                 &:hover {
                     cursor: pointer;
                     color: #000;
-                    &:before {
-                        display: block;
-                        position: absolute;
-                        content: '';
-                        top: 0;
-                        left: -1px;
-                        bottom: 0;
-                        right: -10px;
-                        background: #fff;
-                        border: 1px solid $GREY;
-                        border-bottom: 0;
-                        clip: rect(0, 175px, 38px, -1px);
-                        box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.25);
-                        z-index: -1;
-                    }
+                    background: #fff;
 
-                    &:after {
+                    .nav-caret:after {
                         border-top-color: #000;
                     }
 
                     .secondary-nav {
-                        display: block;
-                        z-index: -2;
+                        display: block; 
+                        z-index: 10;
                     }
                 }
             }

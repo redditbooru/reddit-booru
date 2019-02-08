@@ -1,9 +1,10 @@
 @import "mixins";
 
 .filters {
+  max-width: 1280px;
+  margin: 0 auto;
   padding: 20px;
   background: #fff;
-  width: 800px;
   overflow: hidden;
   cursor: default;
   @include border-box();
@@ -12,8 +13,9 @@
     position: absolute;
     left: 0;
     right: 0;
-    margin: 0 auto;
-    top: 200px;
+    margin: 0 auto; 
+    top: 50%;
+    transform: translateY(-50%);
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
     z-index: 101;
   }
@@ -28,7 +30,6 @@
   }
 
   input[type="checkbox"] {
-
     position: absolute;
     left: -9999px;
     top: -9999px;
@@ -72,7 +73,7 @@
   }
 
   li {
-    width: 25%;
+    width: 200px;
     float: left;
     padding-bottom: 4px;
     &.full-width {
