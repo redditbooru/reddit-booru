@@ -1,13 +1,15 @@
 -- phpMyAdmin SQL Dump
--- version 3.5.7
--- http://www.phpmyadmin.net
+-- version 4.8.3
+-- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Aug 26, 2016 at 11:17 PM
--- Server version: 5.5.46-MariaDB-1~wheezy
--- PHP Version: 5.6.24-1~dotdeb+7.1
+-- Generation Time: Feb 13, 2019 at 05:36 AM
+-- Server version: 10.0.17-MariaDB-1~wheezy-log
+-- PHP Version: 7.0.33-1~dotdeb+8.1
 
-SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+SET AUTOCOMMIT = 0;
+START TRANSACTION;
 SET time_zone = "+00:00";
 
 --
@@ -19,8 +21,7 @@ DELIMITER $$
 -- Procedures
 --
 DROP PROCEDURE IF EXISTS `proc_GetLinkedPosts`$$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `proc_GetLinkedPosts`(IN postId INT)
-BEGIN
+CREATE PROCEDURE `proc_GetLinkedPosts` (IN `postId` INT)  BEGIN
 
     SELECT
         DISTINCT `post_id`,
@@ -53,56 +54,123 @@ BEGIN
 END$$
 
 DROP PROCEDURE IF EXISTS `proc_UpdateDenormalizedPostData`$$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `proc_UpdateDenormalizedPostData`(IN postId INT)
-BEGIN
+CREATE PROCEDURE `proc_UpdateDenormalizedPostData` (IN `postId` INT)  BEGIN
 
-    DECLARE imageId, postDataId INT;
-    DECLARE done INT DEFAULT FALSE;
+    DECLARE isInPostData INT;
+    SELECT
+        COUNT(1) INTO isInPostData
+    FROM
+        `post_data`
+    WHERE
+        `post_id` = postId;
 
-    DECLARE postData CURSOR FOR
-        SELECT
-            `pd_id`,
-            `image_id`
-        FROM
-            `post_data`
-        WHERE
-            `post_id` = postId;
+    IF isInPostData = 0 THEN
+        BEGIN
+            INSERT INTO
+                `post_data`
+            (
+                `post_id`,
+                `post_title`,
+                `post_keywords`,
+                `post_nsfw`,
+                `post_date`,
+                `post_external_id`,
+                `post_score`,
+                `post_visible`,
+                `image_id`,
+                `image_width`,
+                `image_height`,
+                `image_type`,
+                `image_caption`,
+                `image_source`,
+                `source_id`,
+                `source_name`,
+                `user_id`,
+                `user_name`
+            )
+            SELECT
+                p.`post_id`,
+                p.`post_title`,
+                p.`post_keywords`,
+                p.`post_nsfw`,
+                p.`post_date`,
+                p.`post_external_id`,
+                p.`post_score`,
+                p.`post_visible`,
+                i.`image_id`,
+                i.`image_width`,
+                i.`image_height`,
+                i.`image_type`,
+                i.`image_caption`,
+                i.`image_source`,
+                s.`source_id`,
+                s.`source_name`,
+                u.`user_id`,
+                u.`user_name`
+            FROM
+                `post_images` pi
+            INNER JOIN
+                `posts` p ON p.`post_id` = pi.`post_id`
+            INNER JOIN
+                `images` i ON i.`image_id` = pi.`image_id`
+            LEFT JOIN
+                `sources` s ON s.`source_id` = p.`source_id`
+            LEFT JOIN
+                `users` u ON u.`user_id` = p.`user_id`
+            WHERE
+                pi.`post_id` = postId;
+        END;
+    ELSE
+        BEGIN
 
-    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+            DECLARE imageId, postDataId INT;
+            DECLARE updateDone INT DEFAULT FALSE;
+            DECLARE postData CURSOR FOR
+                SELECT
+                    `pd_id`,
+                    `image_id`
+                FROM
+                    `post_data`
+                WHERE
+                    `post_id` = postId;
 
-    OPEN postData;
+            DECLARE CONTINUE HANDLER FOR NOT FOUND SET updateDone = TRUE;
 
-    WHILE done = FALSE DO
+            OPEN postData;
+            WHILE updateDone = FALSE DO
 
-        FETCH postData INTO postDataId, imageId;
+                FETCH postData INTO postDataId, imageId;
 
-        UPDATE
-            `post_data` pd
-        INNER JOIN
-            `posts` p ON p.`post_id` = postId
-        INNER JOIN
-            `images` i ON i.`image_id` = imageId
-        LEFT JOIN
-            `sources` s ON s.`source_id` = p.`source_id`
-        LEFT JOIN
-            `users` u ON u.`user_id` = p.`user_id`
-        SET
-            pd.`post_title` = p.`post_title`,
-            pd.`post_keywords` = p.`post_keywords`,
-            pd.`post_nsfw` = p.`post_nsfw`,
-            pd.`post_score` = p.`post_score`,
-            pd.`post_visible` = p.`post_visible`,
-            pd.`user_id` = u.`user_id`,
-            pd.`user_name` = u.`user_name`,
-            pd.`source_id` = s.`source_id`,
-            pd.`source_name` = s.`source_name`,
-            pd.`image_caption` = i.`image_caption`,
-            pd.`image_source` = i.`image_source`
-        WHERE
-            pd.`pd_id` = postDataId;
+                UPDATE
+                    `post_data` pd
+                INNER JOIN
+                    `posts` p ON p.`post_id` = postId
+                INNER JOIN
+                    `images` i ON i.`image_id` = imageId
+                LEFT JOIN
+                    `sources` s ON s.`source_id` = p.`source_id`
+                LEFT JOIN
+                    `users` u ON u.`user_id` = p.`user_id`
+                SET
+                    pd.`post_title` = p.`post_title`,
+                    pd.`post_keywords` = p.`post_keywords`,
+                    pd.`post_nsfw` = p.`post_nsfw`,
+                    pd.`post_score` = p.`post_score`,
+                    pd.`post_visible` = p.`post_visible`,
+                    pd.`user_id` = u.`user_id`,
+                    pd.`user_name` = u.`user_name`,
+                    pd.`source_id` = s.`source_id`,
+                    pd.`source_name` = s.`source_name`,
+                    pd.`image_caption` = i.`image_caption`,
+                    pd.`image_source` = i.`image_source`
+                WHERE
+                    pd.`pd_id` = postDataId;
 
 
-    END WHILE;
+            END WHILE;
+
+        END;
+    END IF;
 
 END$$
 
@@ -111,34 +179,12 @@ DELIMITER ;
 -- --------------------------------------------------------
 
 --
--- Table structure for table `bot_users`
---
-
-DROP TABLE IF EXISTS `bot_users`;
-CREATE TABLE IF NOT EXISTS `bot_users` (
-  `bot_id` int(10) NOT NULL AUTO_INCREMENT,
-  `bot_name` varchar(50) NOT NULL,
-  `bot_password` varchar(50) NOT NULL,
-  `bot_hash` varchar(255) DEFAULT NULL,
-  `bot_cookie` varchar(255) DEFAULT NULL,
-  `bot_data` text,
-  `bot_callback` varchar(30) NOT NULL,
-  `bot_updated` int(10) NOT NULL,
-  `bot_created` int(10) NOT NULL,
-  `bot_enabled` tinyint(4) NOT NULL,
-  PRIMARY KEY (`bot_id`),
-  UNIQUE KEY `bot_name` (`bot_name`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1;
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `images`
 --
 
 DROP TABLE IF EXISTS `images`;
-CREATE TABLE IF NOT EXISTS `images` (
-  `image_id` bigint(20) NOT NULL AUTO_INCREMENT,
+CREATE TABLE `images` (
+  `image_id` bigint(20) NOT NULL,
   `image_url` varchar(512) COLLATE utf8_unicode_ci NOT NULL,
   `image_caption` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   `image_source` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
@@ -154,14 +200,13 @@ CREATE TABLE IF NOT EXISTS `images` (
   `image_hist_b2` float NOT NULL,
   `image_hist_b3` float NOT NULL,
   `image_hist_b4` float NOT NULL,
-  `image_hashr` bigint(20) NOT NULL,
-  `image_hashg` bigint(20) NOT NULL,
-  `image_hashb` bigint(20) NOT NULL,
+  `image_dhashr` bigint(20) DEFAULT NULL,
+  `image_dhashg` bigint(20) DEFAULT NULL,
+  `image_dhashb` bigint(20) DEFAULT NULL,
   `image_height` int(11) DEFAULT NULL,
   `image_width` int(11) DEFAULT NULL,
-  `image_type` char(3) COLLATE utf8_unicode_ci NOT NULL,
-  PRIMARY KEY (`image_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+  `image_type` char(3) COLLATE utf8_unicode_ci NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -170,8 +215,8 @@ CREATE TABLE IF NOT EXISTS `images` (
 --
 
 DROP TABLE IF EXISTS `posts`;
-CREATE TABLE IF NOT EXISTS `posts` (
-  `post_id` int(11) NOT NULL AUTO_INCREMENT,
+CREATE TABLE `posts` (
+  `post_id` int(11) NOT NULL,
   `source_id` int(11) DEFAULT NULL,
   `user_id` int(11) DEFAULT NULL,
   `post_external_id` varchar(25) COLLATE utf8_unicode_ci DEFAULT NULL,
@@ -181,13 +226,9 @@ CREATE TABLE IF NOT EXISTS `posts` (
   `post_link` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   `post_keywords` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   `post_score` int(11) DEFAULT NULL,
-  `post_visible` bit(1) DEFAULT NULL,
-  `post_nsfw` tinyint(4) DEFAULT NULL,
-  PRIMARY KEY (`post_id`),
-  UNIQUE KEY `UC_source_id_post_external_id` (`source_id`,`post_external_id`),
-  KEY `FK_posts_source_id` (`source_id`),
-  KEY `post_external_id` (`post_external_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+  `post_visible` tinyint(4) DEFAULT NULL,
+  `post_nsfw` tinyint(4) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -196,8 +237,8 @@ CREATE TABLE IF NOT EXISTS `posts` (
 --
 
 DROP TABLE IF EXISTS `post_data`;
-CREATE TABLE IF NOT EXISTS `post_data` (
-  `pd_id` bigint(20) NOT NULL AUTO_INCREMENT,
+CREATE TABLE `post_data` (
+  `pd_id` bigint(20) NOT NULL,
   `post_id` int(11) NOT NULL,
   `image_id` int(11) NOT NULL,
   `image_width` int(11) NOT NULL,
@@ -215,10 +256,8 @@ CREATE TABLE IF NOT EXISTS `post_data` (
   `post_visible` tinyint(4) NOT NULL,
   `user_id` int(11) DEFAULT NULL,
   `user_name` varchar(25) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `image_type` varchar(4) COLLATE utf8_unicode_ci NOT NULL,
-  PRIMARY KEY (`pd_id`),
-  KEY `FK_post_data_post_id` (`post_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+  `image_type` varchar(4) COLLATE utf8_unicode_ci NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -227,11 +266,9 @@ CREATE TABLE IF NOT EXISTS `post_data` (
 --
 
 DROP TABLE IF EXISTS `post_images`;
-CREATE TABLE IF NOT EXISTS `post_images` (
+CREATE TABLE `post_images` (
   `image_id` bigint(20) NOT NULL,
-  `post_id` int(11) NOT NULL,
-  KEY `FK_post_images_post_id` (`post_id`),
-  KEY `FK_post_images_image_id` (`image_id`)
+  `post_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
@@ -241,8 +278,8 @@ CREATE TABLE IF NOT EXISTS `post_images` (
 --
 
 DROP TABLE IF EXISTS `sources`;
-CREATE TABLE IF NOT EXISTS `sources` (
-  `source_id` int(11) NOT NULL AUTO_INCREMENT,
+CREATE TABLE `sources` (
+  `source_id` int(11) NOT NULL,
   `source_name` varchar(50) COLLATE utf8_unicode_ci NOT NULL,
   `source_baseurl` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   `source_type` varchar(20) COLLATE utf8_unicode_ci NOT NULL,
@@ -250,9 +287,8 @@ CREATE TABLE IF NOT EXISTS `sources` (
   `source_subdomain` varchar(20) COLLATE utf8_unicode_ci DEFAULT NULL,
   `source_generate_report` bit(1) NOT NULL,
   `source_content_rating` smallint(1) NOT NULL,
-  `source_repost_check` int(11) DEFAULT NULL,
-  PRIMARY KEY (`source_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+  `source_repost_check` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -261,7 +297,7 @@ CREATE TABLE IF NOT EXISTS `sources` (
 --
 
 DROP TABLE IF EXISTS `tracking`;
-CREATE TABLE IF NOT EXISTS `tracking` (
+CREATE TABLE `tracking` (
   `tracking_event` varchar(50) COLLATE utf8_unicode_ci NOT NULL,
   `tracking_date` int(11) NOT NULL,
   `tracking_data` text COLLATE utf8_unicode_ci NOT NULL
@@ -274,18 +310,97 @@ CREATE TABLE IF NOT EXISTS `tracking` (
 --
 
 DROP TABLE IF EXISTS `users`;
-CREATE TABLE IF NOT EXISTS `users` (
-  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+CREATE TABLE `users` (
+  `user_id` int(11) NOT NULL,
   `user_name` varchar(20) COLLATE utf8_unicode_ci NOT NULL,
   `user_reddit_id` varchar(12) COLLATE utf8_unicode_ci DEFAULT NULL,
   `user_token` varchar(64) COLLATE utf8_unicode_ci DEFAULT NULL,
   `user_date_created` int(11) NOT NULL,
   `user_link_karma` int(11) NOT NULL,
   `user_comment_karma` int(11) NOT NULL,
-  `user_avatar` bit(1) DEFAULT NULL,
-  PRIMARY KEY (`user_id`),
-  UNIQUE KEY `user_name` (`user_name`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+  `user_avatar` bit(1) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+--
+-- Indexes for dumped tables
+--
+
+--
+-- Indexes for table `images`
+--
+ALTER TABLE `images`
+  ADD PRIMARY KEY (`image_id`);
+
+--
+-- Indexes for table `posts`
+--
+ALTER TABLE `posts`
+  ADD PRIMARY KEY (`post_id`),
+  ADD UNIQUE KEY `UC_source_id_post_external_id` (`source_id`,`post_external_id`),
+  ADD KEY `FK_posts_source_id` (`source_id`),
+  ADD KEY `post_external_id` (`post_external_id`);
+
+--
+-- Indexes for table `post_data`
+--
+ALTER TABLE `post_data`
+  ADD PRIMARY KEY (`pd_id`),
+  ADD KEY `FK_post_data_post_id` (`post_id`),
+  ADD KEY `FK_post_data_source_id` (`source_id`);
+
+--
+-- Indexes for table `post_images`
+--
+ALTER TABLE `post_images`
+  ADD KEY `FK_post_images_post_id` (`post_id`),
+  ADD KEY `FK_post_images_image_id` (`image_id`);
+
+--
+-- Indexes for table `sources`
+--
+ALTER TABLE `sources`
+  ADD PRIMARY KEY (`source_id`);
+
+--
+-- Indexes for table `users`
+--
+ALTER TABLE `users`
+  ADD PRIMARY KEY (`user_id`),
+  ADD UNIQUE KEY `user_name` (`user_name`);
+
+--
+-- AUTO_INCREMENT for dumped tables
+--
+
+--
+-- AUTO_INCREMENT for table `images`
+--
+ALTER TABLE `images`
+  MODIFY `image_id` bigint(20) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `posts`
+--
+ALTER TABLE `posts`
+  MODIFY `post_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `post_data`
+--
+ALTER TABLE `post_data`
+  MODIFY `pd_id` bigint(20) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `sources`
+--
+ALTER TABLE `sources`
+  MODIFY `source_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `users`
+--
+ALTER TABLE `users`
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- Constraints for dumped tables
@@ -301,7 +416,8 @@ ALTER TABLE `posts`
 -- Constraints for table `post_data`
 --
 ALTER TABLE `post_data`
-  ADD CONSTRAINT `FK_post_data_post_id` FOREIGN KEY (`post_id`) REFERENCES `post_images` (`post_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `FK_post_data_post_id` FOREIGN KEY (`post_id`) REFERENCES `post_images` (`post_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `FK_post_data_source_id` FOREIGN KEY (`source_id`) REFERENCES `sources` (`source_id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `post_images`
@@ -309,3 +425,4 @@ ALTER TABLE `post_data`
 ALTER TABLE `post_images`
   ADD CONSTRAINT `FK_post_images_image_id` FOREIGN KEY (`image_id`) REFERENCES `images` (`image_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `FK_post_images_post_id` FOREIGN KEY (`post_id`) REFERENCES `posts` (`post_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+COMMIT;
