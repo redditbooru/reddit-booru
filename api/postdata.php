@@ -241,68 +241,28 @@ namespace Api {
 
                 if (null !== $image) {
 
-                    $query = 'SELECT pd.`' . join('`, pd.`', array_values($post->_dbMap)) . '`';
-
-                    if ($getCount) {
-                        $query .= ', (SELECT COUNT(1) FROM images WHERE post_id = p.post_id) AS count';
-                    }
-
-                    if ($experimental) {
-                        // Do the dHash version
-                        $params = [ ':dHashR' => $image->dHashR, ':dHashG' => $image->dHashG, ':dHashB' => $image->dHashB ];
-                        $query .= ', BIT_COUNT(image_dhashr ^ :dHashR) + BIT_COUNT(image_dhashg ^ :dHashG) + BIT_COUNT(image_dhashb ^ :dHashB) AS distance';
-                    } else {
-                        $params = [];
-                        $query .= ', (';
-                        for ($i = 1; $i <= HISTOGRAM_BUCKETS; $i++) {
-                            $prop = 'histR' . $i;
-                            $params[':red' . $i] = $image->$prop;
-                            $prop = 'histG' . $i;
-                            $params[':green' . $i] = $image->$prop;
-                            $prop = 'histB' . $i;
-                            $params[':blue' . $i] = $image->$prop;
-                            $query .= 'ABS(image_hist_r' . $i . ' - :red' . $i . ') + ABS(image_hist_g' . $i . ' - :green' . $i . ') + ABS(image_hist_b' . $i . ' - :blue' . $i . ') + ';
-                        }
-                        $query .= ' + 0) AS distance';
-                    }
-
-                    $query .= ' FROM `' . $post->_dbTable . '` pd INNER JOIN `images` i ON i.`image_id` = pd.`image_id` ';
-
-                    $where = [];
-                    if ($experimental) {
-                        $where[] .= 'image_dhashr IS NOT NULL AND image_dhashg IS NOT NULL AND image_dhashb IS NOT NULL';
-                    }
-
                     if ($sources) {
                         $sources = !is_array($sources) ? explode(',', $sources) : $sources;
-                        $tmpList = [];
-                        $i = 0;
-                        foreach ($sources as $source) {
-                            $params[':source' . $i] = $source;
-                            $tmpList[] = ':source' . $i;
-                            $i++;
+                    }
+                    $matchingImages = ImageLookup::reverseLookup($image, $sources, $count);
+
+                    if ($matchingImages) {
+                        // Save the distance to an ID for redecoration later
+                        $imageDistances = [];
+                        $imageIds = [];
+                        foreach ($matchingImages as $imageMatch) {
+                            $imageDistances[$imageMatch->imageId] = $imageMatch->distance;
+                            $imageIds[] = $imageMatch->imageId;
                         }
-                        $where[] = 'source_id IN (' . implode(',', $tmpList) . ')';
-                    }
 
-                    if ($where) {
-                        $query .= 'WHERE ' . implode(' AND ', $where) . ' ';
-                    }
-
-                    $query .= 'ORDER BY distance LIMIT ' . ($count * 2);
-
-                    $result = Lib\Db::Query($query, $params);
-
-                    $time = time();
-                    if ($result && $result->count) {
-                        $retVal = [];
-                        while($row = Lib\Db::Fetch($result)) {
-                            $obj = new PostData($row);
-                            $obj->distance = (float) $row->distance;
-                            $retVal[] = $obj;
+                        $retVal = PostData::queryReturnAll([ 'imageId' => [ 'in' => $imageIds ] ], null);
+                        foreach ($retVal as $post) {
+                            $post->distance = $imageDistances[$post->imageId];
                         }
+                        usort($retVal, function ($a, $b) {
+                            return $a->distance < $b->distance ? -1 : 1;
+                        });
                     }
-
                 }
 
                 $cache->set($cacheKey, $retVal);

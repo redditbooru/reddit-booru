@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Feb 13, 2019 at 05:36 AM
+-- Generation Time: Feb 14, 2019 at 08:20 AM
 -- Server version: 10.0.17-MariaDB-1~wheezy-log
 -- PHP Version: 7.0.33-1~dotdeb+8.1
 
@@ -21,7 +21,7 @@ DELIMITER $$
 -- Procedures
 --
 DROP PROCEDURE IF EXISTS `proc_GetLinkedPosts`$$
-CREATE PROCEDURE `proc_GetLinkedPosts` (IN `postId` INT)  BEGIN
+CREATE DEFINER=`root`@`localhost` PROCEDURE `proc_GetLinkedPosts` (IN `postId` INT)  BEGIN
 
     SELECT
         DISTINCT `post_id`,
@@ -54,7 +54,7 @@ CREATE PROCEDURE `proc_GetLinkedPosts` (IN `postId` INT)  BEGIN
 END$$
 
 DROP PROCEDURE IF EXISTS `proc_UpdateDenormalizedPostData`$$
-CREATE PROCEDURE `proc_UpdateDenormalizedPostData` (IN `postId` INT)  BEGIN
+CREATE DEFINER=`root`@`localhost` PROCEDURE `proc_UpdateDenormalizedPostData` (IN `postId` INT)  BEGIN
 
     DECLARE isInPostData INT;
     SELECT
@@ -179,6 +179,26 @@ DELIMITER ;
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `bot_users`
+--
+
+DROP TABLE IF EXISTS `bot_users`;
+CREATE TABLE `bot_users` (
+  `bot_id` int(10) NOT NULL,
+  `bot_name` varchar(50) NOT NULL,
+  `bot_password` varchar(50) NOT NULL,
+  `bot_hash` varchar(255) DEFAULT NULL,
+  `bot_cookie` varchar(255) DEFAULT NULL,
+  `bot_data` text,
+  `bot_callback` varchar(30) NOT NULL,
+  `bot_updated` int(10) NOT NULL,
+  `bot_created` int(10) NOT NULL,
+  `bot_enabled` tinyint(4) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `images`
 --
 
@@ -206,6 +226,294 @@ CREATE TABLE `images` (
   `image_height` int(11) DEFAULT NULL,
   `image_width` int(11) DEFAULT NULL,
   `image_type` char(3) COLLATE utf8_unicode_ci NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `img_lookup_b1`
+--
+
+DROP TABLE IF EXISTS `img_lookup_b1`;
+CREATE TABLE `img_lookup_b1` (
+  `image_id` bigint(20) NOT NULL,
+  `source_id` int(14) NOT NULL,
+  `image_hist_r1` float NOT NULL,
+  `image_hist_r2` float NOT NULL,
+  `image_hist_r3` float NOT NULL,
+  `image_hist_r4` float NOT NULL,
+  `image_hist_g1` float NOT NULL,
+  `image_hist_g2` float NOT NULL,
+  `image_hist_g3` float NOT NULL,
+  `image_hist_g4` float NOT NULL,
+  `image_hist_b1` float NOT NULL,
+  `image_hist_b2` float NOT NULL,
+  `image_hist_b3` float NOT NULL,
+  `image_hist_b4` float NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `img_lookup_b2`
+--
+
+DROP TABLE IF EXISTS `img_lookup_b2`;
+CREATE TABLE `img_lookup_b2` (
+  `image_id` bigint(20) NOT NULL,
+  `source_id` int(14) NOT NULL,
+  `image_hist_r1` float NOT NULL,
+  `image_hist_r2` float NOT NULL,
+  `image_hist_r3` float NOT NULL,
+  `image_hist_r4` float NOT NULL,
+  `image_hist_g1` float NOT NULL,
+  `image_hist_g2` float NOT NULL,
+  `image_hist_g3` float NOT NULL,
+  `image_hist_g4` float NOT NULL,
+  `image_hist_b1` float NOT NULL,
+  `image_hist_b2` float NOT NULL,
+  `image_hist_b3` float NOT NULL,
+  `image_hist_b4` float NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `img_lookup_b3`
+--
+
+DROP TABLE IF EXISTS `img_lookup_b3`;
+CREATE TABLE `img_lookup_b3` (
+  `image_id` bigint(20) NOT NULL,
+  `source_id` int(14) NOT NULL,
+  `image_hist_r1` float NOT NULL,
+  `image_hist_r2` float NOT NULL,
+  `image_hist_r3` float NOT NULL,
+  `image_hist_r4` float NOT NULL,
+  `image_hist_g1` float NOT NULL,
+  `image_hist_g2` float NOT NULL,
+  `image_hist_g3` float NOT NULL,
+  `image_hist_g4` float NOT NULL,
+  `image_hist_b1` float NOT NULL,
+  `image_hist_b2` float NOT NULL,
+  `image_hist_b3` float NOT NULL,
+  `image_hist_b4` float NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `img_lookup_b4`
+--
+
+DROP TABLE IF EXISTS `img_lookup_b4`;
+CREATE TABLE `img_lookup_b4` (
+  `image_id` bigint(20) NOT NULL,
+  `source_id` int(14) NOT NULL,
+  `image_hist_r1` float NOT NULL,
+  `image_hist_r2` float NOT NULL,
+  `image_hist_r3` float NOT NULL,
+  `image_hist_r4` float NOT NULL,
+  `image_hist_g1` float NOT NULL,
+  `image_hist_g2` float NOT NULL,
+  `image_hist_g3` float NOT NULL,
+  `image_hist_g4` float NOT NULL,
+  `image_hist_b1` float NOT NULL,
+  `image_hist_b2` float NOT NULL,
+  `image_hist_b3` float NOT NULL,
+  `image_hist_b4` float NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `img_lookup_g1`
+--
+
+DROP TABLE IF EXISTS `img_lookup_g1`;
+CREATE TABLE `img_lookup_g1` (
+  `image_id` bigint(20) NOT NULL,
+  `source_id` int(14) NOT NULL,
+  `image_hist_r1` float NOT NULL,
+  `image_hist_r2` float NOT NULL,
+  `image_hist_r3` float NOT NULL,
+  `image_hist_r4` float NOT NULL,
+  `image_hist_g1` float NOT NULL,
+  `image_hist_g2` float NOT NULL,
+  `image_hist_g3` float NOT NULL,
+  `image_hist_g4` float NOT NULL,
+  `image_hist_b1` float NOT NULL,
+  `image_hist_b2` float NOT NULL,
+  `image_hist_b3` float NOT NULL,
+  `image_hist_b4` float NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `img_lookup_g2`
+--
+
+DROP TABLE IF EXISTS `img_lookup_g2`;
+CREATE TABLE `img_lookup_g2` (
+  `image_id` bigint(20) NOT NULL,
+  `source_id` int(14) NOT NULL,
+  `image_hist_r1` float NOT NULL,
+  `image_hist_r2` float NOT NULL,
+  `image_hist_r3` float NOT NULL,
+  `image_hist_r4` float NOT NULL,
+  `image_hist_g1` float NOT NULL,
+  `image_hist_g2` float NOT NULL,
+  `image_hist_g3` float NOT NULL,
+  `image_hist_g4` float NOT NULL,
+  `image_hist_b1` float NOT NULL,
+  `image_hist_b2` float NOT NULL,
+  `image_hist_b3` float NOT NULL,
+  `image_hist_b4` float NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `img_lookup_g3`
+--
+
+DROP TABLE IF EXISTS `img_lookup_g3`;
+CREATE TABLE `img_lookup_g3` (
+  `image_id` bigint(20) NOT NULL,
+  `source_id` int(14) NOT NULL,
+  `image_hist_r1` float NOT NULL,
+  `image_hist_r2` float NOT NULL,
+  `image_hist_r3` float NOT NULL,
+  `image_hist_r4` float NOT NULL,
+  `image_hist_g1` float NOT NULL,
+  `image_hist_g2` float NOT NULL,
+  `image_hist_g3` float NOT NULL,
+  `image_hist_g4` float NOT NULL,
+  `image_hist_b1` float NOT NULL,
+  `image_hist_b2` float NOT NULL,
+  `image_hist_b3` float NOT NULL,
+  `image_hist_b4` float NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `img_lookup_g4`
+--
+
+DROP TABLE IF EXISTS `img_lookup_g4`;
+CREATE TABLE `img_lookup_g4` (
+  `image_id` bigint(20) NOT NULL,
+  `source_id` int(14) NOT NULL,
+  `image_hist_r1` float NOT NULL,
+  `image_hist_r2` float NOT NULL,
+  `image_hist_r3` float NOT NULL,
+  `image_hist_r4` float NOT NULL,
+  `image_hist_g1` float NOT NULL,
+  `image_hist_g2` float NOT NULL,
+  `image_hist_g3` float NOT NULL,
+  `image_hist_g4` float NOT NULL,
+  `image_hist_b1` float NOT NULL,
+  `image_hist_b2` float NOT NULL,
+  `image_hist_b3` float NOT NULL,
+  `image_hist_b4` float NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `img_lookup_r1`
+--
+
+DROP TABLE IF EXISTS `img_lookup_r1`;
+CREATE TABLE `img_lookup_r1` (
+  `image_id` bigint(20) NOT NULL,
+  `source_id` int(14) NOT NULL,
+  `image_hist_r1` float NOT NULL,
+  `image_hist_r2` float NOT NULL,
+  `image_hist_r3` float NOT NULL,
+  `image_hist_r4` float NOT NULL,
+  `image_hist_g1` float NOT NULL,
+  `image_hist_g2` float NOT NULL,
+  `image_hist_g3` float NOT NULL,
+  `image_hist_g4` float NOT NULL,
+  `image_hist_b1` float NOT NULL,
+  `image_hist_b2` float NOT NULL,
+  `image_hist_b3` float NOT NULL,
+  `image_hist_b4` float NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `img_lookup_r2`
+--
+
+DROP TABLE IF EXISTS `img_lookup_r2`;
+CREATE TABLE `img_lookup_r2` (
+  `image_id` bigint(20) NOT NULL,
+  `source_id` int(14) NOT NULL,
+  `image_hist_r1` float NOT NULL,
+  `image_hist_r2` float NOT NULL,
+  `image_hist_r3` float NOT NULL,
+  `image_hist_r4` float NOT NULL,
+  `image_hist_g1` float NOT NULL,
+  `image_hist_g2` float NOT NULL,
+  `image_hist_g3` float NOT NULL,
+  `image_hist_g4` float NOT NULL,
+  `image_hist_b1` float NOT NULL,
+  `image_hist_b2` float NOT NULL,
+  `image_hist_b3` float NOT NULL,
+  `image_hist_b4` float NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `img_lookup_r3`
+--
+
+DROP TABLE IF EXISTS `img_lookup_r3`;
+CREATE TABLE `img_lookup_r3` (
+  `image_id` bigint(20) NOT NULL,
+  `source_id` int(14) NOT NULL,
+  `image_hist_r1` float NOT NULL,
+  `image_hist_r2` float NOT NULL,
+  `image_hist_r3` float NOT NULL,
+  `image_hist_r4` float NOT NULL,
+  `image_hist_g1` float NOT NULL,
+  `image_hist_g2` float NOT NULL,
+  `image_hist_g3` float NOT NULL,
+  `image_hist_g4` float NOT NULL,
+  `image_hist_b1` float NOT NULL,
+  `image_hist_b2` float NOT NULL,
+  `image_hist_b3` float NOT NULL,
+  `image_hist_b4` float NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `img_lookup_r4`
+--
+
+DROP TABLE IF EXISTS `img_lookup_r4`;
+CREATE TABLE `img_lookup_r4` (
+  `image_id` bigint(20) NOT NULL,
+  `source_id` int(14) NOT NULL,
+  `image_hist_r1` float NOT NULL,
+  `image_hist_r2` float NOT NULL,
+  `image_hist_r3` float NOT NULL,
+  `image_hist_r4` float NOT NULL,
+  `image_hist_g1` float NOT NULL,
+  `image_hist_g2` float NOT NULL,
+  `image_hist_g3` float NOT NULL,
+  `image_hist_g4` float NOT NULL,
+  `image_hist_b1` float NOT NULL,
+  `image_hist_b2` float NOT NULL,
+  `image_hist_b3` float NOT NULL,
+  `image_hist_b4` float NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- --------------------------------------------------------
@@ -326,10 +634,101 @@ CREATE TABLE `users` (
 --
 
 --
+-- Indexes for table `bot_users`
+--
+ALTER TABLE `bot_users`
+  ADD PRIMARY KEY (`bot_id`),
+  ADD UNIQUE KEY `bot_name` (`bot_name`);
+
+--
 -- Indexes for table `images`
 --
 ALTER TABLE `images`
   ADD PRIMARY KEY (`image_id`);
+
+--
+-- Indexes for table `img_lookup_b1`
+--
+ALTER TABLE `img_lookup_b1`
+  ADD KEY `FK_img_lookup_b1_image_id` (`image_id`),
+  ADD KEY `FK_img_lookup_b1_source_id` (`source_id`);
+
+--
+-- Indexes for table `img_lookup_b2`
+--
+ALTER TABLE `img_lookup_b2`
+  ADD KEY `FK_img_lookup_b2_image_id` (`image_id`),
+  ADD KEY `FK_img_lookup_b2_source_id` (`source_id`);
+
+--
+-- Indexes for table `img_lookup_b3`
+--
+ALTER TABLE `img_lookup_b3`
+  ADD KEY `FK_img_lookup_b3_image_id` (`image_id`),
+  ADD KEY `FK_img_lookup_b3_source_id` (`source_id`);
+
+--
+-- Indexes for table `img_lookup_b4`
+--
+ALTER TABLE `img_lookup_b4`
+  ADD KEY `FK_img_lookup_b4_image_id` (`image_id`),
+  ADD KEY `FK_img_lookup_b4_source_id` (`source_id`);
+
+--
+-- Indexes for table `img_lookup_g1`
+--
+ALTER TABLE `img_lookup_g1`
+  ADD KEY `FK_img_lookup_g1_image_id` (`image_id`),
+  ADD KEY `FK_img_lookup_g1_source_id` (`source_id`);
+
+--
+-- Indexes for table `img_lookup_g2`
+--
+ALTER TABLE `img_lookup_g2`
+  ADD KEY `FK_img_lookup_g2_image_id` (`image_id`),
+  ADD KEY `FK_img_lookup_g2_source_id` (`source_id`);
+
+--
+-- Indexes for table `img_lookup_g3`
+--
+ALTER TABLE `img_lookup_g3`
+  ADD KEY `FK_img_lookup_g3_image_id` (`image_id`),
+  ADD KEY `FK_img_lookup_g3_source_id` (`source_id`);
+
+--
+-- Indexes for table `img_lookup_g4`
+--
+ALTER TABLE `img_lookup_g4`
+  ADD KEY `FK_img_lookup_g4_image_id` (`image_id`),
+  ADD KEY `FK_img_lookup_g4_source_id` (`source_id`);
+
+--
+-- Indexes for table `img_lookup_r1`
+--
+ALTER TABLE `img_lookup_r1`
+  ADD KEY `FK_img_lookup_r1_image_id` (`image_id`),
+  ADD KEY `FK_img_lookup_r1_source_id` (`source_id`);
+
+--
+-- Indexes for table `img_lookup_r2`
+--
+ALTER TABLE `img_lookup_r2`
+  ADD KEY `FK_img_lookup_r2_image_id` (`image_id`),
+  ADD KEY `FK_img_lookup_r2_source_id` (`source_id`);
+
+--
+-- Indexes for table `img_lookup_r3`
+--
+ALTER TABLE `img_lookup_r3`
+  ADD KEY `FK_img_lookup_r3_image_id` (`image_id`),
+  ADD KEY `FK_img_lookup_r3_source_id` (`source_id`);
+
+--
+-- Indexes for table `img_lookup_r4`
+--
+ALTER TABLE `img_lookup_r4`
+  ADD KEY `FK_img_lookup_r4_image_id` (`image_id`),
+  ADD KEY `FK_img_lookup_r4_source_id` (`source_id`);
 
 --
 -- Indexes for table `posts`
@@ -373,6 +772,12 @@ ALTER TABLE `users`
 --
 
 --
+-- AUTO_INCREMENT for table `bot_users`
+--
+ALTER TABLE `bot_users`
+  MODIFY `bot_id` int(10) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `images`
 --
 ALTER TABLE `images`
@@ -405,6 +810,90 @@ ALTER TABLE `users`
 --
 -- Constraints for dumped tables
 --
+
+--
+-- Constraints for table `img_lookup_b1`
+--
+ALTER TABLE `img_lookup_b1`
+  ADD CONSTRAINT `FK_img_lookup_b1_image_id` FOREIGN KEY (`image_id`) REFERENCES `images` (`image_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `FK_img_lookup_b1_source_id` FOREIGN KEY (`source_id`) REFERENCES `sources` (`source_id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `img_lookup_b2`
+--
+ALTER TABLE `img_lookup_b2`
+  ADD CONSTRAINT `FK_img_lookup_b2_image_id` FOREIGN KEY (`image_id`) REFERENCES `images` (`image_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `FK_img_lookup_b2_source_id` FOREIGN KEY (`source_id`) REFERENCES `sources` (`source_id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `img_lookup_b3`
+--
+ALTER TABLE `img_lookup_b3`
+  ADD CONSTRAINT `FK_img_lookup_b3_image_id` FOREIGN KEY (`image_id`) REFERENCES `images` (`image_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `FK_img_lookup_b3_source_id` FOREIGN KEY (`source_id`) REFERENCES `sources` (`source_id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `img_lookup_b4`
+--
+ALTER TABLE `img_lookup_b4`
+  ADD CONSTRAINT `FK_img_lookup_b4_image_id` FOREIGN KEY (`image_id`) REFERENCES `images` (`image_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `FK_img_lookup_b4_source_id` FOREIGN KEY (`source_id`) REFERENCES `sources` (`source_id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `img_lookup_g1`
+--
+ALTER TABLE `img_lookup_g1`
+  ADD CONSTRAINT `FK_img_lookup_g1_image_id` FOREIGN KEY (`image_id`) REFERENCES `images` (`image_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `FK_img_lookup_g1_source_id` FOREIGN KEY (`source_id`) REFERENCES `sources` (`source_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `img_lookup_g2`
+--
+ALTER TABLE `img_lookup_g2`
+  ADD CONSTRAINT `FK_img_lookup_g2_image_id` FOREIGN KEY (`image_id`) REFERENCES `images` (`image_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `FK_img_lookup_g2_source_id` FOREIGN KEY (`source_id`) REFERENCES `sources` (`source_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `img_lookup_g3`
+--
+ALTER TABLE `img_lookup_g3`
+  ADD CONSTRAINT `FK_img_lookup_g3_image_id` FOREIGN KEY (`image_id`) REFERENCES `images` (`image_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `FK_img_lookup_g3_source_id` FOREIGN KEY (`source_id`) REFERENCES `sources` (`source_id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `img_lookup_g4`
+--
+ALTER TABLE `img_lookup_g4`
+  ADD CONSTRAINT `FK_img_lookup_g4_image_id` FOREIGN KEY (`image_id`) REFERENCES `images` (`image_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `FK_img_lookup_g4_source_id` FOREIGN KEY (`source_id`) REFERENCES `sources` (`source_id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `img_lookup_r1`
+--
+ALTER TABLE `img_lookup_r1`
+  ADD CONSTRAINT `FK_img_lookup_r1_image_id` FOREIGN KEY (`image_id`) REFERENCES `images` (`image_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `FK_img_lookup_r1_source_id` FOREIGN KEY (`source_id`) REFERENCES `sources` (`source_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `img_lookup_r2`
+--
+ALTER TABLE `img_lookup_r2`
+  ADD CONSTRAINT `FK_img_lookup_r2_image_id` FOREIGN KEY (`image_id`) REFERENCES `images` (`image_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `FK_img_lookup_r2_source_id` FOREIGN KEY (`source_id`) REFERENCES `sources` (`source_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `img_lookup_r3`
+--
+ALTER TABLE `img_lookup_r3`
+  ADD CONSTRAINT `FK_img_lookup_r3_image_id` FOREIGN KEY (`image_id`) REFERENCES `images` (`image_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `FK_img_lookup_r3_source_id` FOREIGN KEY (`source_id`) REFERENCES `sources` (`source_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `img_lookup_r4`
+--
+ALTER TABLE `img_lookup_r4`
+  ADD CONSTRAINT `FK_img_lookup_r4_image_id` FOREIGN KEY (`image_id`) REFERENCES `images` (`image_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `FK_img_lookup_r4_source_id` FOREIGN KEY (`source_id`) REFERENCES `sources` (`source_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `posts`
