@@ -84,6 +84,11 @@ namespace Lib {
 						break;
 					case 'insert':
 						$retVal = $conn->lastInsertId();
+
+						// Rows without a primary key won't return an ID, so fallback to the query success
+						if (!$retVal) {
+							$retVal = $success;
+						}
 						break;
 					case 'update':
 					case 'delete':

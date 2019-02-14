@@ -75,7 +75,7 @@ namespace Lib {
         $retVal = Db::Query($query, $params);
 
         // Save the ID for insert
-        if ($retVal > 0 && 'INSERT' === $method) {
+        if ($primaryKey && $retVal > 0 && 'INSERT' === $method) {
           $this->$primaryKey = $retVal;
         }
 
