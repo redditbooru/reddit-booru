@@ -49,7 +49,8 @@ namespace Lib {
             }
 
             if ($seed || !self::$_seed) {
-                self::$_seed = $seed ?: (int) str_replace('.', '', $_SERVER['REMOTE_ADDR']);
+                $defaultSeed = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : time();
+                self::$_seed = $seed ?: (int) str_replace('.', '', $defaultSeed);
             }
 
         }
