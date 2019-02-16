@@ -843,15 +843,15 @@ ALTER TABLE `img_lookup_b4`
 -- Constraints for table `img_lookup_g1`
 --
 ALTER TABLE `img_lookup_g1`
-  ADD CONSTRAINT `FK_img_lookup_g1_image_id` FOREIGN KEY (`image_id`) REFERENCES `images` (`image_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `FK_img_lookup_g1_source_id` FOREIGN KEY (`source_id`) REFERENCES `sources` (`source_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `FK_img_lookup_g1_image_id` FOREIGN KEY (`image_id`) REFERENCES `images` (`image_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `FK_img_lookup_g1_source_id` FOREIGN KEY (`source_id`) REFERENCES `sources` (`source_id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `img_lookup_g2`
 --
 ALTER TABLE `img_lookup_g2`
-  ADD CONSTRAINT `FK_img_lookup_g2_image_id` FOREIGN KEY (`image_id`) REFERENCES `images` (`image_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `FK_img_lookup_g2_source_id` FOREIGN KEY (`source_id`) REFERENCES `sources` (`source_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `FK_img_lookup_g2_image_id` FOREIGN KEY (`image_id`) REFERENCES `images` (`image_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `FK_img_lookup_g2_source_id` FOREIGN KEY (`source_id`) REFERENCES `sources` (`source_id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `img_lookup_g3`
@@ -871,29 +871,29 @@ ALTER TABLE `img_lookup_g4`
 -- Constraints for table `img_lookup_r1`
 --
 ALTER TABLE `img_lookup_r1`
-  ADD CONSTRAINT `FK_img_lookup_r1_image_id` FOREIGN KEY (`image_id`) REFERENCES `images` (`image_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `FK_img_lookup_r1_source_id` FOREIGN KEY (`source_id`) REFERENCES `sources` (`source_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `FK_img_lookup_r1_image_id` FOREIGN KEY (`image_id`) REFERENCES `images` (`image_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `FK_img_lookup_r1_source_id` FOREIGN KEY (`source_id`) REFERENCES `sources` (`source_id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `img_lookup_r2`
 --
 ALTER TABLE `img_lookup_r2`
-  ADD CONSTRAINT `FK_img_lookup_r2_image_id` FOREIGN KEY (`image_id`) REFERENCES `images` (`image_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `FK_img_lookup_r2_source_id` FOREIGN KEY (`source_id`) REFERENCES `sources` (`source_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `FK_img_lookup_r2_image_id` FOREIGN KEY (`image_id`) REFERENCES `images` (`image_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `FK_img_lookup_r2_source_id` FOREIGN KEY (`source_id`) REFERENCES `sources` (`source_id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `img_lookup_r3`
 --
 ALTER TABLE `img_lookup_r3`
-  ADD CONSTRAINT `FK_img_lookup_r3_image_id` FOREIGN KEY (`image_id`) REFERENCES `images` (`image_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `FK_img_lookup_r3_source_id` FOREIGN KEY (`source_id`) REFERENCES `sources` (`source_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `FK_img_lookup_r3_image_id` FOREIGN KEY (`image_id`) REFERENCES `images` (`image_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `FK_img_lookup_r3_source_id` FOREIGN KEY (`source_id`) REFERENCES `sources` (`source_id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `img_lookup_r4`
 --
 ALTER TABLE `img_lookup_r4`
-  ADD CONSTRAINT `FK_img_lookup_r4_image_id` FOREIGN KEY (`image_id`) REFERENCES `images` (`image_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `FK_img_lookup_r4_source_id` FOREIGN KEY (`source_id`) REFERENCES `sources` (`source_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `FK_img_lookup_r4_image_id` FOREIGN KEY (`image_id`) REFERENCES `images` (`image_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `FK_img_lookup_r4_source_id` FOREIGN KEY (`source_id`) REFERENCES `sources` (`source_id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `posts`
