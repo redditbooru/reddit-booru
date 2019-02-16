@@ -39,7 +39,7 @@ function parseArgs($argv, $argc) {
 /**
  * Downloads, processes, and saves image information and returns the row ID
  */
-function processImage($url) {
+function processImage($url, Api\Source $source) {
 
     $retVal = null;
 
@@ -50,6 +50,9 @@ function processImage($url) {
     if (null !== $result && $result->count) {
         _log($logHead . 'Found in database');
         $retVal = new Api\Image(Lib\Db::Fetch($result));
+
+        // Save a lookup entry
+        Api\ImageLookup::syncLookupEntry($retVal, $source);
     } else {
 
         // If the image is hosted on the CDN, attempt to grab the original from the database
@@ -77,6 +80,8 @@ function processImage($url) {
 
                     // Save to the database
                     if ($image->sync()) {
+                        // Create a lookup entry
+                        Api\ImageLookup::syncLookupEntry($image, $source);
 
                         // Save all the various copies of the image
                         $retVal = $image;
@@ -120,7 +125,7 @@ function updatePost(Api\Post $post, Api\Post $dbPost) {
 
 }
 
-function addPost(Api\Post $post) {
+function addPost(Api\Post $post, Api\Source $source) {
 
     $logHead = '[ ' . $post->externalId . ' ] ';
 
@@ -133,7 +138,7 @@ function addPost(Api\Post $post) {
         $imgObjs = [];
         foreach ($images as $image) {
             _log($logHead . 'Processing image ' . $image);
-            $imgObj = processImage($image);
+            $imgObj = processImage($image, $source);
             if ($imgObj) {
                 $imgObjs[] = $imgObj;
             }
@@ -235,7 +240,7 @@ function processSubreddit($id, $page, $pageCount = 1) {
 
     // Get the source information
     $source = Api\Source::getById($id);
-    if (null !== $source && $source->enabled) {
+    if (null !== $source) {
 
         // Get the reddit page listing
         $reddit = new Api\reddit();
@@ -271,7 +276,7 @@ function processSubreddit($id, $page, $pageCount = 1) {
                     if (count($dbPost) > 0) {
                         updatePost($post, current($dbPost));
                     } else {
-                        addPost($post);
+                        addPost($post, $source);
                     }
 
                 }
