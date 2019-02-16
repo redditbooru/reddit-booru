@@ -185,7 +185,12 @@ namespace Controller {
             $vars['sources'] = self::_processSources(isset($vars['sources']) ? $vars['sources'] : []);
             self::_saveSources($vars['sources']);
 
-            $retVal->results = Api\PostData::reverseImageSearch($vars);
+            $searchMethod = Lib\TestBucket::get('reverseSearchMethod');
+            if ($searchMethod === 'control') {
+                $retVal->results = Api\PostData::reverseImageSearchLegacy($vars);
+            } else {
+                $retVal->results = Api\PostData::reverseImageSearch($vars);
+            }
             $retVal->original = $vars['imageUri'];
             $retVal->preview = Thumb::createThumbFilename($retVal->original);
             $retVal->view = 'search';

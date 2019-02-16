@@ -274,6 +274,118 @@ namespace Api {
         }
 
         /**
+         * Searches for posts by image
+         */
+        public static function reverseImageSearchLegacy($vars) {
+
+            $image = Lib\Url::Get('image', null, $vars);
+            $file = Lib\Url::Get('imageUri', null, $vars);
+            $count = Lib\Url::GetInt('count', 5, $vars);
+            $sources = Lib\Url::Get('sources', null, $vars);
+            $getCount = Lib\Url::GetBool('getCount', $vars);
+            $maxRating = Lib\Url::Get('maxRating', 0, $vars);
+            $experimental = Lib\Url::GetBool('experimental', $vars);
+
+            // If an image object was passed in, serialize and hash it for the cache key
+            if ($image instanceof Image) {
+                $vars['image'] = md5(json_encode($image));
+            }
+
+            $cache = Lib\Cache::getInstance();
+            $cacheKey = Lib\Cache::createCacheKey('Api::PostData::reverseImageSearchLegacy', [
+                'image', 
+                'imageUri', 
+                'count', 
+                'sources', 
+                'getCount', 
+                'maxRating', 
+                'experimental' 
+            ], $vars);
+            $retVal = $cache->get($cacheKey);
+
+            if ((null != $file || $image instanceof Image) && false === $retVal) {
+
+                $post = new PostData();
+
+                if (!($image instanceof Image)) {
+                    $image = Image::createFromUrl($file, false);
+                }
+
+                if (null !== $image) {
+
+                    $query = 'SELECT pd.`' . join('`, pd.`', array_values($post->_dbMap)) . '`';
+
+                    if ($getCount) {
+                        $query .= ', (SELECT COUNT(1) FROM images WHERE post_id = p.post_id) AS count';
+                    }
+
+                    if ($experimental) {
+                        // Do the dHash version
+                        $params = [ ':dHashR' => $image->dHashR, ':dHashG' => $image->dHashG, ':dHashB' => $image->dHashB ];
+                        $query .= ', BIT_COUNT(image_dhashr ^ :dHashR) + BIT_COUNT(image_dhashg ^ :dHashG) + BIT_COUNT(image_dhashb ^ :dHashB) AS distance';
+                    } else {
+                        $params = [];
+                        $query .= ', (';
+                        for ($i = 1; $i <= HISTOGRAM_BUCKETS; $i++) {
+                            $prop = 'histR' . $i;
+                            $params[':red' . $i] = $image->$prop;
+                            $prop = 'histG' . $i;
+                            $params[':green' . $i] = $image->$prop;
+                            $prop = 'histB' . $i;
+                            $params[':blue' . $i] = $image->$prop;
+                            $query .= 'ABS(image_hist_r' . $i . ' - :red' . $i . ') + ABS(image_hist_g' . $i . ' - :green' . $i . ') + ABS(image_hist_b' . $i . ' - :blue' . $i . ') + ';
+                        }
+                        $query .= ' + 0) AS distance';
+                    }
+
+                    $query .= ' FROM `' . $post->_dbTable . '` pd INNER JOIN `images` i ON i.`image_id` = pd.`image_id` ';
+
+                    $where = [];
+                    if ($experimental) {
+                        $where[] .= 'image_dhashr IS NOT NULL AND image_dhashg IS NOT NULL AND image_dhashb IS NOT NULL';
+                    }
+
+                    if ($sources) {
+                        $sources = !is_array($sources) ? explode(',', $sources) : $sources;
+                        $tmpList = [];
+                        $i = 0;
+                        foreach ($sources as $source) {
+                            $params[':source' . $i] = $source;
+                            $tmpList[] = ':source' . $i;
+                            $i++;
+                        }
+                        $where[] = 'source_id IN (' . implode(',', $tmpList) . ')';
+                    }
+
+                    if ($where) {
+                        $query .= 'WHERE ' . implode(' AND ', $where) . ' ';
+                    }
+
+                    $query .= 'ORDER BY distance LIMIT ' . ($count * 2);
+
+                    $result = Lib\Db::Query($query, $params);
+
+                    $time = time();
+                    if ($result && $result->count) {
+                        $retVal = [];
+                        while($row = Lib\Db::Fetch($result)) {
+                            $obj = new PostData($row);
+                            $obj->distance = (float) $row->distance;
+                            $retVal[] = $obj;
+                        }
+                    }
+
+                }
+
+                $cache->set($cacheKey, $retVal);
+
+            }
+
+            return $retVal;
+
+        }
+
+        /**
          * Returns the generated profile information for the user
          */
         public static function getUserProfile($user) {
