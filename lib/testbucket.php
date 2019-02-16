@@ -65,6 +65,12 @@ namespace Lib {
             $seed = $seed ?: self::$_seed;
             $cacheKey = 'test_' . $key . '_' . $seed;
 
+            // Check for a query string override
+            $override = Url::Get('tb.' . $key, null);
+            if ($override) {
+                return $override;
+            }
+
             return Cache::getInstance()->fetch(function() use ($key, $seed) {
                 $retVal = DEFAULT_TEST_VALUE;
                 $found = false;
