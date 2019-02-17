@@ -50,6 +50,9 @@ function processImage($url, Api\Source $source) {
     if (null !== $result && $result->count) {
         _log($logHead . 'Found in database');
         $retVal = new Api\Image(Lib\Db::Fetch($result));
+
+        // Save a lookup entry tied to this source
+        Api\ImageLookup::syncLookupEntry($retVal, $source);
     } else {
 
         // If the image is hosted on the CDN, attempt to grab the original from the database
