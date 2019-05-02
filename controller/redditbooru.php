@@ -100,6 +100,7 @@ namespace Controller {
             Lib\Display::addKey('filters', $filters);
 
             Lib\Display::addKey('use_min_js', USE_MIN_JS);
+            Lib\Display::addKey('asset_path', ASSET_PATH);
             Lib\Display::addKey('js_version', JS_VERSION);
 
             Lib\Display::renderAndAddKey('body', 'index', self::$renderKeys);
