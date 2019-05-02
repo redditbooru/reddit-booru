@@ -6,7 +6,7 @@
   "author": "Matt (dxprog) Hackmann",
   "license": "GPLv3",
   "scripts": {
-    "build": "webpack",
+    "build": "webpack --config webpack.prod.js",
     "start": "webpack --watch"
   },
   "devDependencies": {
@@ -27,6 +27,7 @@
     "webpack-cli": "^3.3.1"
   },
   "dependencies": {
+    "acorn": "^6.1.1",
     "request": "^2.72.0"
   }
 }
