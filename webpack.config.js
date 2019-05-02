@@ -1,4 +1,5 @@
 const path = require('path');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 module.exports = {
   entry: './static/js/App.js',
@@ -13,6 +14,10 @@ module.exports = {
       {
         test: /\.hbs$/,
         use: 'handlebars-loader'
+      },
+      {
+        test: /\.scss$/,
+        use: [ MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader' ]
       }
     ]
   },
@@ -25,5 +30,10 @@ module.exports = {
   output: {
     filename: 'RedditBooru.js',
     path: path.resolve(__dirname, 'dist')
-  }
+  },
+  plugins: [
+    new MiniCssExtractPlugin({
+      filename: 'styles.css'
+    })
+  ]
 }
