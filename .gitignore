@@ -25,7 +25,6 @@ app-config.php
 # build/redditbooru specific stuff
 static/fonts/
 static/images/
-static/js/*.js
 static/scss/*.css
 experiments/
 cache/

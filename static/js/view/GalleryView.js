@@ -2,7 +2,7 @@ import Backbone from 'backbone';
 import $ from 'jquery';
 
 import App from '../App';
-import gallery from '../../../../views/gallery.hbs';
+import gallery from '@views/gallery.hbs';
 
 const RESIZE_BUTTON_ID = 'resizeGalleryImages';
 const GALLERY = 'gallery';

@@ -6,7 +6,7 @@ import track from '../controls/GaTracker';
 import ImageCollection from '../model/ImageCollection';
 import { initOverlay, showOverlay, hideOverlay } from '../controls/overlay';
 
-import imageView from '../../../../views/imageView.hbs';
+import imageView from '@views/imageView.hbs';
 
 const SCREENSAVER = 'screensaver';
 const OPEN_CLASS = 'open';
