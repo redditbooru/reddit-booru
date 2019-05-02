@@ -43,3 +43,6 @@ define('JS_VERSION', 1);
 
 // The timezone that all timestamps will be generated from
 date_default_timezone_set('America/Chicago');
+
+// Path to static assets
+define('ASSET_PATH', '/static');

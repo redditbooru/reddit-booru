@@ -4,8 +4,8 @@ import $ from 'jquery';
 
 import ImageCollection from '../model/ImageCollection';
 
-import imagesRow from '../../../../views/imagesRow.hbs';
-import moreRow from '../../../../views/moreRow.hbs';
+import imagesRow from '@views/imagesRow.hbs';
+import moreRow from '@views/moreRow.hbs';
 
 const $window = $(window);
 

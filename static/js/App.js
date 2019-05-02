@@ -17,6 +17,10 @@ import MyGalleriesView from './view/MyGalleriesView';
 import ImageViewer from './view/ImageViewer';
 import NavView from './view/NavView';
 
+// Import stylesheets for bundling
+import '../scss/styles.scss';
+import '../scss/mobile.scss';
+
 // Amount of time to wait on user to stop making changes before firing off requests
 const UPDATE_DELAY = 1000;
 const HAS_CONTENT = 'hasContent';

@@ -18,6 +18,8 @@ composer.lock
 npm-debug.log
 testem.log
 *.sublime*
+/.vscode
+*.log
 
 config.php
 app-config.php
@@ -25,7 +27,6 @@ app-config.php
 # build/redditbooru specific stuff
 static/fonts/
 static/images/
-static/js/*.js
 static/scss/*.css
 experiments/
 cache/

@@ -7,9 +7,9 @@ import ProgressCircle from '../controls/ProgressCircle';
 import Uploader from '../controls/Uploader';
 import { initOverlay, showOverlay, hideOverlay } from '../controls/overlay';
 
-import uploadImageInfo from '../../../../views/uploadImageInfo.hbs';
-import uploadRepost from '../../../../views/uploadRepost.hbs';
-import uploading from '../../../../views/uploading.hbs';
+import uploadImageInfo from '@views/uploadImageInfo.hbs';
+import uploadRepost from '@views/uploadRepost.hbs';
+import uploading from '@views/uploading.hbs';
 
 const SAVE_KEY = 'RB_Uploads';
 const SAVE_DELAY = 500;
