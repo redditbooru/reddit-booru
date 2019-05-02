@@ -18,6 +18,8 @@ composer.lock
 npm-debug.log
 testem.log
 *.sublime*
+/.vscode
+*.log
 
 config.php
 app-config.php
