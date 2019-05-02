@@ -1,232 +1,233 @@
 @import "mixins";
 
-// mobile styles
-$HEADER_BG: #2c2c2c;
+@media screen and (max-width: 568px) {
+    $HEADER_BG: #2c2c2c;
 
-body {
-    padding-top: 50px;
-}
-
-header {
-    background: $HEADER_BG;
-    padding: 10px;
-    border-bottom-color: #000;
-    border-right: 0;
-
-    h1 {
-        font-size: 24px;
-        position: static;
-
-        @include transition(100ms);
-
-        a {
-            color: #fff;
-        }
+    body {
+        padding-top: 50px;
     }
 
-    nav {
-        @include fullscreen();
-        @include transition(100ms);
-        left: 100%;
+    header {
         background: $HEADER_BG;
         padding: 10px;
-        color: #fff;
-        overflow: hidden;
-        overflow-y: scroll;
+        border-bottom-color: #000;
+        border-right: 0;
 
-        .primary-nav {
-            margin: 0;
-            & > li {
-                display: block;
-                padding: 5px;
-                &.my-galleries {
-                    border-bottom: 1px solid #666;
-                    padding-bottom: 10px;
-                    margin-bottom: 5px;
-                    &:after {
-                        display: none;
+        h1 {
+            font-size: 24px;
+            position: static;
+
+            @include transition(100ms);
+
+            a {
+                color: #fff;
+            }
+        }
+
+        nav {
+            @include fullscreen();
+            @include transition(100ms);
+            left: 100%;
+            background: $HEADER_BG;
+            padding: 10px;
+            color: #fff;
+            overflow: hidden;
+            overflow-y: scroll;
+
+            .primary-nav {
+                margin: 0;
+                & > li {
+                    display: block;
+                    padding: 5px;
+                    &.my-galleries {
+                        border-bottom: 1px solid #666;
+                        padding-bottom: 10px;
+                        margin-bottom: 5px;
+                        &:after {
+                            display: none;
+                        }
                     }
                 }
-            }
 
-            h3,
-            label,
-            a {
-                color: #fff !important;
-            }
-
-            .nav-login,
-            .nav-upload,
-            .nav-screensaver {
-                display: none;
-            }
-
-            .has-secondary-nav {
-                border: 0;
-
-                &:hover {
-                    color: #fff;
-                    background: transparent;
+                h3,
+                label,
+                a {
+                    color: #fff !important;
                 }
 
-                &:before,
-                &:after {
-                    content: none !important;
-                    display: none !important;
+                .nav-login,
+                .nav-upload,
+                .nav-screensaver {
+                    display: none;
                 }
 
-                .secondary-nav {
-                    display: block;
-                    position: static;
-                    box-shadow: none;
+                .has-secondary-nav {
                     border: 0;
-                    padding: 10px 0 0;
-                    width: auto !important;
-                    background: none;
+
+                    &:hover {
+                        color: #fff;
+                        background: transparent;
+                    }
+
+                    &:before,
+                    &:after {
+                        content: none !important;
+                        display: none !important;
+                    }
+
+                    .secondary-nav {
+                        display: block;
+                        position: static;
+                        box-shadow: none;
+                        border: 0;
+                        padding: 10px 0 0;
+                        width: auto !important;
+                        background: none;
+                    }
+
                 }
 
             }
-
         }
-    }
 
-    .open-menu {
-        display: block;
-        position: absolute;
-        padding: 10px;
-        right: 0;
-        top: 4px;
-        border: 0;
-        border-radius: 0;
-        background: none;
-
-        @include transition(100ms);
-
-        .hamburger {
+        .open-menu {
             display: block;
-            height: 0;
-            border-top: 3px solid #fff;
-            border-bottom: 3px solid #fff;
-            width: 24px;
-            padding: 11px 0 0;
-            overflow: hidden;
+            position: absolute;
+            padding: 10px;
+            right: 0;
+            top: 4px;
+            border: 0;
+            border-radius: 0;
+            background: none;
 
-            &:before {
-                content: '';
+            @include transition(100ms);
+
+            .hamburger {
                 display: block;
-                width: 100%;
-                height: 3px;
-                background: #fff;
-                position: relative;
-                top: -7px;
+                height: 0;
+                border-top: 3px solid #fff;
+                border-bottom: 3px solid #fff;
+                width: 24px;
+                padding: 11px 0 0;
+                overflow: hidden;
+
+                &:before {
+                    content: '';
+                    display: block;
+                    width: 100%;
+                    height: 3px;
+                    background: #fff;
+                    position: relative;
+                    top: -7px;
+                }
             }
+
         }
 
-    }
-
-    .search {
-        display: none;
-    }
-}
-
-#content {
-    @include transition(100ms);
-    position: relative;
-    left: 0;
-    opacity: 1;
-}
-
-body.menu-open {
-    h1 {
-        margin-left: -200px;
-    }
-
-    nav {
-        left: 44px;
-    }
-
-    .open-menu {
-        right: 100%;
-        margin-right: -44px;
+        .search {
+            display: none;
+        }
     }
 
     #content {
-        left: -75%;
-        opacity: 0.25;
-    }
-
-}
-
-#viewer {
-    padding: 10px;
-    .post-image {
-        width: 100%;
-        float: none;
-        padding: 0;
-    }
-    .post-content {
-        position: absolute;
+        @include transition(100ms);
+        position: relative;
         left: 0;
-        right: 0;
-        bottom: 0;
-        width: 100%;
-        float: none;
-        padding: 10px;
-    }
-}
-
-#upload {
-    @include fullscreen();
-
-    h2 {
-        padding: 10px;
-        background: $HEADER_BG;
-        font-size: 24px;
+        opacity: 1;
     }
 
-    .close {
-        right: 5px;
-        top: 5px;
-        background: none;
-        border: 0;
-        color: #fff;
-    }
+    body.menu-open {
+        h1 {
+            margin-left: -200px;
+        }
 
-    #imageUrl,
-    #imageFile {
-        width: 50%;
-        @include border-box();
-        float: left;
-    }
+        nav {
+            left: 44px;
+        }
 
-    .uploadInput {
-        overflow: hidden;
-    }
+        .open-menu {
+            right: 100%;
+            margin-right: -44px;
+        }
 
-}
-
-.filters {
-    background: transparent;
-    width: auto;
-    padding: 0 0 0 20px;
-
-    h3 {
-        display: none;
-    }
-
-    li {
-        width: 100%;
-    }
-
-    .filters-foot {
-        position: static;
-        float: none;
-
-        button {
-            display: block;
-            margin: 10px 0 0;
+        #content {
+            left: -75%;
+            opacity: 0.25;
         }
 
     }
 
+    #viewer {
+        padding: 10px;
+        .post-image {
+            width: 100%;
+            float: none;
+            padding: 0;
+        }
+        .post-content {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: 100%;
+            float: none;
+            padding: 10px;
+        }
+    }
+
+    #upload {
+        @include fullscreen();
+
+        h2 {
+            padding: 10px;
+            background: $HEADER_BG;
+            font-size: 24px;
+        }
+
+        .close {
+            right: 5px;
+            top: 5px;
+            background: none;
+            border: 0;
+            color: #fff;
+        }
+
+        #imageUrl,
+        #imageFile {
+            width: 50%;
+            @include border-box();
+            float: left;
+        }
+
+        .uploadInput {
+            overflow: hidden;
+        }
+
+    }
+
+    .filters {
+        background: transparent;
+        width: auto;
+        padding: 0 0 0 20px;
+
+        h3 {
+            display: none;
+        }
+
+        li {
+            width: 100%;
+        }
+
+        .filters-foot {
+            position: static;
+            float: none;
+
+            button {
+                display: block;
+                margin: 10px 0 0;
+            }
+
+        }
+
+    }
 }
