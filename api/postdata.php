@@ -255,7 +255,7 @@ namespace Api {
                             $imageIds[] = $imageMatch->imageId;
                         }
 
-                        $retVal = PostData::queryReturnAll([ 'imageId' => [ 'in' => $imageIds ] ], null);
+                        $retVal = PostData::queryReturnAll([ 'imageId' => [ 'in' => $imageIds ], 'sourceId' => [ 'in' => $sources ] ], null);
                         foreach ($retVal as $post) {
                             $post->distance = $imageDistances[$post->imageId];
                         }
@@ -293,13 +293,13 @@ namespace Api {
 
             $cache = Lib\Cache::getInstance();
             $cacheKey = Lib\Cache::createCacheKey('Api::PostData::reverseImageSearchLegacy', [
-                'image', 
-                'imageUri', 
-                'count', 
-                'sources', 
-                'getCount', 
-                'maxRating', 
-                'experimental' 
+                'image',
+                'imageUri',
+                'count',
+                'sources',
+                'getCount',
+                'maxRating',
+                'experimental'
             ], $vars);
             $retVal = $cache->get($cacheKey);
 
