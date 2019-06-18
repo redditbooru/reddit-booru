@@ -1,10 +1,24 @@
 @import "mixins";
 
+$filters-bg: rgba(#fff, 0.95);
+
+@media screen and (min-width: 568px) {
+  #sources {
+    background: $filters-bg;
+    cursor: default;
+    position: fixed;
+    top: 45px;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    overflow-y: scroll;
+  }
+}
+
 .filters {
   max-width: 1280px;
   margin: 0 auto;
   padding: 20px;
-  background: #fff;
   overflow: hidden;
   cursor: default;
   position: relative;
@@ -15,6 +29,7 @@
     left: 0;
     right: 0;
     margin: 0 auto;
+    background: #fff;
     top: 50%;
     transform: translateY(-50%);
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
