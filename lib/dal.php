@@ -197,7 +197,7 @@ namespace Lib {
         foreach($this->_dbMap as $property => $column) {
           if (property_exists($obj, $column) && property_exists($this, $property)) {
             $this->$property = $obj->$column;
-            if ($column === $this->_dbPrimaryKey) {
+            if (isset($this->_dbPrimaryKey) && $column === $this->_dbPrimaryKey) {
               $this->$property = (int) $this->$property;
             }
           }
@@ -256,7 +256,7 @@ namespace Lib {
      */
     private static function _verifyProperties($obj = null) {
       $obj = null === $obj ? self::_instantiateThisObject() : $obj;
-      return property_exists($obj, '_dbTable') && property_exists($obj, '_dbMap') && property_exists($obj, '_dbPrimaryKey');
+      return property_exists($obj, '_dbTable') && property_exists($obj, '_dbMap');
     }
 
     /**
