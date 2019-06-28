@@ -19,4 +19,6 @@ export interface IPostData {
   visible: boolean;
   userId: number;
   userName: string;
+  cdnUrl: string;
+  thumb: string;
 }

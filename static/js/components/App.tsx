@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import { Thumb } from '../components/Thumb';
 import { IPostData } from '../interfaces/api';
 
 export interface IApp {
@@ -11,7 +12,7 @@ export class App extends React.Component<IApp> {
     return (
       <ul>
         {this.props.startUp.map(post => (
-          <li>{post.title}</li>
+          <li><Thumb imageUrl={post.thumb} width={300} height={300} title={post.title} /></li>
         ))}
       </ul>
     );
