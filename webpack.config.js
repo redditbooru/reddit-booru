@@ -3,14 +3,13 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 module.exports = {
   mode: 'development',
-  entry: './static/js/App.js',
+  entry: './static/js/index.tsx',
   devtool: 'inline-source-map',
   module: {
     rules: [
       {
-        test: /\.ts$/,
-        use: 'ts-loader',
-        exclude: /node_modules/
+        test: /\.ts|\.tsx$/,
+        use: 'ts-loader'
       },
       {
         test: /\.hbs$/,
@@ -23,7 +22,7 @@ module.exports = {
     ]
   },
   resolve: {
-    extensions: [ '.ts', '.js' ],
+    extensions: [ '.ts', '.tsx', '.js' ],
     alias: {
       '@views': path.resolve(__dirname, 'views')
     }

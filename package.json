@@ -10,13 +10,17 @@
     "start": "webpack --watch"
   },
   "devDependencies": {
+    "@types/react": "^16.8.22",
+    "@types/react-dom": "^16.8.4",
     "backbone": "^1.2.3",
     "css-loader": "^2.1.1",
-    "handlebars": "^4.0.3",
+    "handlebars": "^4.1.2",
     "handlebars-loader": "^1.7.1",
     "jquery": "^3.4.1",
     "mini-css-extract-plugin": "^0.6.0",
     "node-sass": "^4.12.0",
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6",
     "sass": "1.19.0",
     "sass-loader": "^7.1.0",
     "style-loader": "^0.23.1",

@@ -5,6 +5,9 @@
     "noImplicitAny": true,
     "module": "es6",
     "target": "es5",
-    "allowJs": true
+    "lib": [ "es6", "dom" ],
+    "allowJs": true,
+    "jsx": "react",
+    "moduleResolution": "node"
   }
 }
