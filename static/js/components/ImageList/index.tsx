@@ -90,8 +90,6 @@ export class ImageList extends React.Component<IImageListProps> {
           return widthRatio + adjustedImageRatio;
         }, 0);
 
-        console.log(this.gutterPercent);
-
         rows.push(row.map((image, index) => {
           const ratio = imageRatios[index];
           return {
