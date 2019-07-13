@@ -1,9 +1,12 @@
 .image-list {
   overflow: hidden;
+  list-style: none;
 
   &__item {
     float: left;
     margin: 0 0 20px 20px;
+    height: 250px;
+    box-shadow: 0 2px 4px rgba(#000, 0.25);
 
     &--first {
       clear: left;

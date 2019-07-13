@@ -7,6 +7,7 @@ import './styles.scss';
 
 const AVERAGE_COLUMN_WIDTH = 300;
 const MIN_WIDTH_HEIGHT_RATIO = 0.9;
+const IMAGE_GUTTER = 20;
 
 interface IImageListItem {
   image: IPostData;
@@ -37,6 +38,14 @@ export class ImageList extends React.Component<IImageListProps> {
   }
 
   /**
+   * The percent of each row that's taken up by horizontal image spacing
+   */
+  get gutterPercent(): number {
+    const gutterWidths = this.columnCount * IMAGE_GUTTER;
+    return Math.round(IMAGE_GUTTER / (this.elWidth - gutterWidths) * 10000) / 100;
+  }
+
+  /**
    * Waits until the element has been rendered, gets the element's
    * width, and the force re-renders the whole component.
    *
@@ -45,7 +54,8 @@ export class ImageList extends React.Component<IImageListProps> {
   calculateElementWidth(): React.ReactNode {
     // Introduce some async so that the element can be rendered
     setTimeout(() => {
-      this.elWidth = this.elRef.current.clientWidth;
+      const dimensions = this.elRef.current.getBoundingClientRect();
+      this.elWidth = dimensions.width;
 
       // Force a re-render
       this.forceUpdate();
@@ -62,30 +72,38 @@ export class ImageList extends React.Component<IImageListProps> {
   renderRows(): Array<React.ReactNode> {
     const rows: Array<IImageListRow> = [];
     let row: Array<IPostData> = [];
-    let count = 0;
 
     const columnCount = this.columnCount;
     this.props.images.forEach(image => {
-      if (count === columnCount) {
-        // Calculate the widths for each image in this row
+
+      // If we've filled up the row, start calculating element sizes
+      if (row.length === columnCount) {
+        const imageRatios: Array<number> = [];
         const widthRatioSum = row.reduce((widthRatio, image) => {
           const ratio = image.width / image.height;
-          return widthRatio + (ratio < MIN_WIDTH_HEIGHT_RATIO ? MIN_WIDTH_HEIGHT_RATIO : ratio);
+
+          // If this image is below the width/height ratio, use the default then cache that
+          // value for later use in width calculation
+          const adjustedImageRatio = ratio < MIN_WIDTH_HEIGHT_RATIO ? MIN_WIDTH_HEIGHT_RATIO : ratio;
+          imageRatios.push(adjustedImageRatio);
+
+          return widthRatio + adjustedImageRatio;
         }, 0);
 
-        rows.push(row.map(image => {
-          const ratio = image.width / image.height;
+        console.log(this.gutterPercent);
+
+        rows.push(row.map((image, index) => {
+          const ratio = imageRatios[index];
           return {
-            width: Math.round(ratio / widthRatioSum * 10000) / 100,
+            width: Math.round(ratio / widthRatioSum * 10000) / 100 - (index > 0 ? this.gutterPercent : 0),
             image
           };
         }));
 
         row = [];
-        count = 0;
       }
+
       row.push(image);
-      count++;
     });
 
     return rows.map(row => row.map((imageContainer, index) => {
@@ -96,7 +114,7 @@ export class ImageList extends React.Component<IImageListProps> {
           imageUrl={image.thumb}
           thumbWidth={300}
           thumbHeight={300}
-          displayWidth  ={`${imageContainer.width}%`}
+          displayWidth={`${imageContainer.width}%`}
           title={image.title}
           className={[ 'image-list__item', index === 0 ? 'image-list__item--first' : '' ]}
         />

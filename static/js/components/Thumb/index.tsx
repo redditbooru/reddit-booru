@@ -16,8 +16,7 @@ export class Thumb extends React.Component<IThumb> {
   render() {
     const style = {
       backgroundImage: `url(${this.props.imageUrl}_${this.props.thumbWidth}_${this.props.thumbHeight}.jpg)`,
-      width: `${this.props.displayWidth}`,
-      height: '300px'
+      width: `${this.props.displayWidth}`
     };
 
     return (
