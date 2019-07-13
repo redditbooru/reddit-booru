@@ -1,13 +1,15 @@
 import * as React from 'react';
 import * as classnames from 'classnames';
 
+import './styles.scss';
+
 export interface IThumb {
   imageUrl: string;
   thumbWidth: number;
   thumbHeight: number;
   displayWidth: string;
   title: string;
-  className?: string;
+  className?: string | Array<string>;
 }
 
 export class Thumb extends React.Component<IThumb> {
@@ -17,6 +19,7 @@ export class Thumb extends React.Component<IThumb> {
       width: `${this.props.displayWidth}`,
       height: '300px'
     };
+
     return (
       <li style={style} className={classnames('thumb', this.props.className)} />
     );

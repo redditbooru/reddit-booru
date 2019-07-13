@@ -8,6 +8,10 @@
     "lib": [ "es6", "dom" ],
     "allowJs": true,
     "jsx": "react",
-    "moduleResolution": "node"
+    "moduleResolution": "node",
+    "baseUrl": ".",
+    "paths": {
+      "@src/*": [ "static/js/*" ]
+    }
   }
 }

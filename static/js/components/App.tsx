@@ -1,7 +1,8 @@
 import * as React from 'react';
 
-import { ImageList } from '../components/ImageList';
-import { IPostData } from '../interfaces/api';
+import { IPostData } from '@src/interfaces/api';
+
+import { ImageList } from './ImageList';
 
 export interface IApp {
   startUp: Array<IPostData>;

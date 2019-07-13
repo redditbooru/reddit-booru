@@ -1,7 +1,9 @@
 import * as React from 'react';
 
-import { Thumb } from './Thumb';
-import { IPostData } from '../interfaces/api';
+import { IPostData } from '@src/interfaces/api';
+import { Thumb } from '@src/components/Thumb';
+
+import './styles.scss';
 
 const AVERAGE_COLUMN_WIDTH = 300;
 const MIN_WIDTH_HEIGHT_RATIO = 0.9;
@@ -80,7 +82,7 @@ export class ImageList extends React.Component<IImageListProps> {
         }));
 
         row = [];
-        count = -1;
+        count = 0;
       }
       row.push(image);
       count++;
@@ -96,7 +98,7 @@ export class ImageList extends React.Component<IImageListProps> {
           thumbHeight={300}
           displayWidth  ={`${imageContainer.width}%`}
           title={image.title}
-          className={'image-list__item'}
+          className={[ 'image-list__item', index === 0 ? 'image-list__item--first' : '' ]}
         />
       );
     }));
