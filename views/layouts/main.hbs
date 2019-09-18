@@ -16,30 +16,8 @@
         <meta name="viewport" content="initial-scale=1.0, width=device-width, height=device-height, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     </head>
     <body class="{{#unless showNsfw}}hideNsfw{{/unless}}{{#if user}} logged-in{{/if}}">
-        <header>
-            <h1><a href="/">RedditBooru</a></h1>
-            {{>search}}
-            {{>nav this}}
-        </header>
-        <aside id="supporting" {{#if supporting}}class="hasContent"{{/if}}>{{{supporting}}}</aside>
-        <section id="content">
-            <div class="contentTitle">
-                <h2 id="title"{{#unless title}} class="hidden"{{/unless}}>{{title}}</h2>
-                <div class="search-controls">
-                    <button class="show-filters search-button">Change Filters</button>
-                    <button class="clear-search search-button primary">Cancel Search</button>
-                </div>
-            </div>
-            <section id="images"{{#if imagesDisplay}} class="{{imagesDisplay}}"{{/if}}>
-                {{{body}}}
-            </section>
-        </section>
-
-        {{>dragdrop}}
-        {{>upload}}
-        {{>globalUploader}}
-        {{>imageViewer}}
-
+        <div id="app"></div>
+        {{{body}}}
         <script>
             var RB = {};
             window.sources = {{{jsonBlob sources}}};

@@ -1,0 +1,23 @@
+.image-list__item {
+  float: left;
+  margin: 0 0 20px 20px;
+  height: 250px;
+  box-shadow: 0 2px 4px rgba(#000, 0.25);
+  position: relative;
+  background-size: cover;
+
+  &--first {
+    clear: left;
+    margin-left: 0;
+  }
+}
+
+.image-list__link {
+  text-decoration: none;
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+}

@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { IPostData } from '@src/interfaces/api';
-import { Thumb } from '@src/components/Thumb';
+import { ImageListItem } from '@src/components/ImageListItem';
 
 import './styles.scss';
 
@@ -9,12 +9,12 @@ const AVERAGE_COLUMN_WIDTH = 300;
 const MIN_WIDTH_HEIGHT_RATIO = 0.9;
 const IMAGE_GUTTER = 20;
 
-interface IImageListItem {
+interface IImageRowItem {
   image: IPostData;
   width: number;
 }
 
-type IImageListRow = Array<IImageListItem>;
+type IImageListRow = Array<IImageRowItem>;
 
 export interface IImageListProps {
   images: Array<IPostData>;
@@ -107,14 +107,11 @@ export class ImageList extends React.Component<IImageListProps> {
     return rows.map(row => row.map((imageContainer, index) => {
       const { image } = imageContainer;
       return (
-        <Thumb
+        <ImageListItem
           key={image.id}
-          imageUrl={image.thumb}
-          thumbWidth={300}
-          thumbHeight={300}
-          displayWidth={`${imageContainer.width}%`}
-          title={image.title}
-          className={[ 'image-list__item', index === 0 ? 'image-list__item--first' : '' ]}
+          displayWidth={imageContainer.width}
+          post={image}
+          isFirst={index === 0}
         />
       );
     }));

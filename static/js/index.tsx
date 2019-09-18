@@ -16,5 +16,5 @@ declare global {
 
 ReactDOM.render(
   <App startUp={window.startUp} />,
-  document.getElementById('images')
+  document.getElementById('app')
 );
