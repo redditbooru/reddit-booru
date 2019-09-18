@@ -30,6 +30,10 @@ export class ImageListItem extends React.Component<IImageListItem> {
     return (
       <li style={style} className={className}>
         <a href={`https://redd.it/${post.externalId}`} target="_blank" className="image-list__link">
+          <p className="item-info">
+            <span className="item-info__source">{post.sourceName}</span>
+            <span className="item-info__score">{post.score}</span>
+          </p>
         </a>
       </li>
     );

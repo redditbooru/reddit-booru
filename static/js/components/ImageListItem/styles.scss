@@ -21,3 +21,40 @@
   bottom: 0;
   right: 0;
 }
+
+.item-info {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(#000, .75);
+  color: #fff;
+  overflow: hidden;
+  font: 14px/1 'MG Thin';
+
+  &:hover {
+    text-decoration: none;
+  }
+}
+
+.item-info__source {
+  float: left;
+  padding: 5px 10px;
+}
+
+.item-info__score {
+  float: right;
+  padding: 5px 10px;
+  position: relative;
+
+  &:before {
+    content: '';
+    position: absolute;
+    left: -6px;
+    top: 3px;
+    display: block;
+    width: 16px;
+    height: 16px;
+    background: url('/static/images/upvote.svg') no-repeat;
+  }
+}
