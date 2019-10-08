@@ -33,7 +33,6 @@
     "webpack-cli": "^3.3.9"
   },
   "dependencies": {
-    "acorn": "^6.3.0",
     "request": "^2.72.0"
   }
 }
