@@ -22,13 +22,13 @@ RedditBooru is never finished! Here are some ideas that are being worked on/in t
 - Leaderboards
 
 ## I'd like to help. What can I do?
-If you're here, you know the code is completely open for anybody to hack on. Found a bug or have a great idea? Open a ticket and we'll see what can happen. Want to write that code yourself? Make a pull request! Obviously, I can't guarantee that all requests will make it to the site (gotta make sure all works and that features won't bring the server to their knees), but I'm very much open to people contributing. For help setting up your development environment, checkout the next section.
+If you're here, you know the code is completely open for anybody to hack on. Found a bug or have a great idea? Open a ticket and we'll see what can happen. Want to write that code yourself? Make a pull request! Obviously, I can't guarantee that all requests will make it to the site (gotta make sure all works, and that features won't bring the server to its knees), but I'm very much open to people contributing. For help setting up your development environment, check out the next section.
 
 ## Development Setup
 
 If you want to get RedditBooru up and running for yourself, follow these steps.
 
-**NOTE** - As RedditBooru prepares to move towards a more modular, microservice structure, this is all highly subject to change. Currently it's a mess and it needs to be made not a mess.
+**NOTE** - As RedditBooru prepares to move towards a more modular, microservice structure, this is all highly subject to change. Currently it's a mess, and it needs to be made not a mess.
 
 ### Pre-requisites
 
@@ -79,7 +79,7 @@ grunt
 
 ### Configuration
 
-RedditBooru can be setup to run multiple frontends with a single backend (though, some work still needed). Given that, there are two configuration files:
+RedditBooru can be setup to run multiple frontends with a single backend (though some work is still needed). Given that, there are two configuration files:
 
 - `config.php`: This is the backend config which configures "global" things like database, AWS/S3 credentials, etc. Checkout `config.sample.php` for more info.
 - `app-config.php`: The configuration file for a frontend, things like images URL, image storage location, etc. Checkout `app-config.sample.php` for more info.
