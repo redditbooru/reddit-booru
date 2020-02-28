@@ -54,6 +54,11 @@ namespace Controller {
             }
 
             if (is_numeric($id)) {
+                $post = Api\Post::getById($id);
+                if ($post->id != $id || !$post->visible) {
+                    header('HTTP/1.0 404 Not Found');
+                    exit;
+                }
                 $retVal = Api\PostData::getGallery($id, $from === 'reddit');
             }
 
