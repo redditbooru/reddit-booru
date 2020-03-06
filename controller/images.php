@@ -170,6 +170,13 @@ namespace Controller {
             $eventData = $vars;
             $eventData['loadTime'] = microtime(true) - $startTime;
             $eventData['cached'] = $hasCache;
+
+            Lib\Ga::sendEvent(
+                'query',
+                'get',
+                $hasCache ? 'cached' : 'not_cached',
+                round((microtime(true) - $startTime) * 1000)
+            );
             Api\Tracking::trackEvent('get_by_query', $eventData);
 
             return $retVal;

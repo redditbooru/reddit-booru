@@ -36,3 +36,6 @@ define('IMGUR_CLIENT_ID', 'REGISTERED_APP_ID');
 
 // Reddit username of the bot (if enabled)
 define('RB_BOT', 'ai-tan');
+
+// Googla Analytics account ID
+define('GA_ID', 'UA-XXXXX-XX');
