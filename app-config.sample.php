@@ -46,3 +46,6 @@ date_default_timezone_set('America/Chicago');
 
 // Path to static assets
 define('ASSET_PATH', '/static');
+
+// Googla Analytics account ID
+define('GA_ID', 'UA-XXXXX-XX');
