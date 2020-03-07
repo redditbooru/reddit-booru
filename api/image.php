@@ -253,12 +253,17 @@ namespace Api {
                     $retVal->$prop = $blue[$i] / $total;
                 }
 
-                Lib\Ga::sendEvent('image', 'process', null, round((microtime(true) - $startTime) * 1000));
-
+                $loadTime = microtime(true) - $startTime;
+                Lib\Ga::sendEvent(
+                    'image',
+                    'process',
+                    null,
+                    round($loadTime * 1000)
+                );
                 Tracking::trackEvent('process_image', [
                     'width' => $retVal->width,
                     'height' => $retVal->height,
-                    'loadTime' => microtime(true) - $startTime
+                    'loadTime' => $loadTime
                 ]);
 
             }

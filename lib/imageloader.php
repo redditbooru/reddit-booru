@@ -458,8 +458,15 @@ namespace Lib {
             }
 
             // Track the download time
+            $loadTime = microtime(true) - $startTime;
+            Ga::sendEvent(
+                'image',
+                'fetch',
+                null,
+                $loadTime
+            );
             Api\Tracking::trackEvent('fetch_image', [
-                'loadTime' => microtime(true) - $startTime,
+                'loadTime' => $loadTime,
                 'imageUrl' => $url
             ]);
 

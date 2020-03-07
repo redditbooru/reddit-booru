@@ -233,6 +233,12 @@ namespace Controller {
 
             $eventData = $vars;
             $eventData['loadTime'] = microtime(true) - $startTime;
+            Lib\Ga::sendEvent(
+                'query',
+                'image',
+                null,
+                round($eventData['loadTime'] * 1000)
+            );
             Api\Tracking::trackEvent('get_by_image', $eventData);
 
             return $retVal;
