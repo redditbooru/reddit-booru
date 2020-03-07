@@ -13,8 +13,8 @@ namespace Lib {
      * Fires a singular GA event
      */
     public static function sendEvent(
-      string $category,
-      string $action,
+      $category,
+      $action,
       $label = null,
       $value = null
     ) {
@@ -42,8 +42,8 @@ namespace Lib {
      * Creates a GA event object from passed parameters
      */
     public static function createEventObj(
-      string $category,
-      string $action,
+      $category,
+      $action,
       $label = null,
       $value = null
     ) {
@@ -75,7 +75,7 @@ namespace Lib {
     /**
      * Sends an array of event objects to GA via the selected endpoint
      */
-    private static function _sendEvents(string $method, array $events) {
+    private static function _sendEvents($method, array $events) {
       $c = curl_init('https://www.google-analytics.com/collect');
 
       $events = array_map(function($event) {
