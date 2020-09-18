@@ -19,6 +19,12 @@ namespace Lib {
 
     class ImageLoader {
 
+        private static $REDDIT_IMAGE_MIME_TO_EXT = [
+            'image/jpg' => 'jpg',
+            'image/gif' => 'gif',
+            'image/png' => 'png'
+        ];
+
         /**
          * Based on the incoming URL, resolves against various services and provides back and array of image URLs
          */
@@ -64,8 +70,11 @@ namespace Lib {
                 $retVal[] = self::getGfycatImage($url);
 
             // Twitter
-            } else if ($domain === 'twitter.com' && strpos($path, '/status/')) {
+            } else if ($domain === 'twitter.com' && strpos($path, '/status/') !== false) {
                 $retVal[] = self::getTwitterImage($url);
+
+            } else if ($domain === 'reddit.com' && strpos($path, '/gallery/') !== false) {
+                $retVal = self::getRedditGallery($url);
 
             // Everything else
             } else {
@@ -275,6 +284,39 @@ namespace Lib {
             if ($data && preg_match('/data-image-url=\"([^\"]+)\"/', $data, $matches)) {
                 $retVal = $matches[1];
             }
+            return $retVal;
+        }
+
+        /**
+         * Fetches an array of image URLs from a reddit gallery
+         */
+        public static function getRedditGallery($url) {
+            $retVal = [ $url ];
+            preg_match('/\/gallery\/([\w]+)/is', $url, $matches);
+            if ($matches) {
+                $id = $matches[1];
+
+                $response = @file_get_contents('https://www.reddit.com/api/info/.json?id=t3_' . $id);
+                $data = json_decode($response);
+
+                // ...ugh. the API for galleries is seemingly non-existent right now, so here we are
+                if (
+                    $data &&
+                    $data->data &&
+                    is_array($data->data->children) &&
+                    $data->data->children[0]->data->gallery_data &&
+                    $data->data->children[0]->data->media_metadata
+                ) {
+                    $retVal = [];
+                    foreach ($data->data->children[0]->data->media_metadata as $imageId => $image) {
+                        if ($image->status === 'valid') {
+                            $retVal[] = 'https://i.redd.it/' . $imageId . '.' . self::$REDDIT_IMAGE_MIME_TO_EXT[$image->m];
+
+                        }
+                    }
+                }
+            }
+
             return $retVal;
         }
 
