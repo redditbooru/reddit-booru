@@ -53,7 +53,7 @@
 
  *  `postId` -- Returns all images for a specific post ID. _Default: null_
 
- *  `exteranlId` -- Returns all images for a specific reddit post ID. _Default: null_
+ *  `externalId` -- Returns all images for a specific reddit post ID. _Default: null_
 
  *  `afterDate` -- Return only images posted after a specific unix timestamp. _Default: null_
 
